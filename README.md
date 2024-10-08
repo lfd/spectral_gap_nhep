@@ -18,5 +18,5 @@ Extract the data into a `dataset` folder, such that the structure is as follows:
 \dataset\event*-particles.csv
 \dataset\event*-truth.csv
 ```
-
+Head over to the [TrackML Library Repo](https://github.com/stroblme/trackml-library) for more details.
 
