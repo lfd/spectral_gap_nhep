@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "fromhopetoheuristics"
+version = "0.1.0"
+description = ""
+authors = ["lc3267 <lc3267@kit.edu>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+qiskit = "^1.2.4"
+qiskit-algorithms = "^0.3.0"
+networkx = "^3.3"
+scipy = "1.13.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
