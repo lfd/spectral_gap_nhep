@@ -1,3 +1,29 @@
+[project]
+name = "fromhopetoheuristics"
+readme = "README.md"
+dynamic = [ "dependencies", "version",]
+
+[project.scripts]
+fromhopetoheuristics = "fromhopetoheuristics.__main__:main"
+
+[tool.kedro]
+package_name = "fromhopetoheuristics"
+project_name = "FromHopeToHeuristics"
+kedro_init_version = "0.19.8"
+tools = [ "Testing", "Data Structure", "Kedro Viz",]
+example_pipeline = "False"
+source_dir = "src"
+
+[project.entry-points."kedro.hooks"]
+
+[tool.pytest.ini_options]
+addopts = "--cov-report term-missing --cov src/fromhopetoheuristics -ra"
+
+[tool.coverage.report]
+fail_under = 0
+show_missing = true
+exclude_lines = [ "pragma: no cover", "raise NotImplementedError",]
+
 [tool.poetry]
 name = "fromhopetoheuristics"
 version = "0.1.0"
@@ -13,6 +39,7 @@ qiskit-algorithms = "^0.3.0"
 networkx = "^3.3"
 scipy = "1.13.0"
 trackml = { path = "./trackml-library" }
+kedro = "^0.19.8"
 
 [build-system]
 requires = ["poetry-core"]
