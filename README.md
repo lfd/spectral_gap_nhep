@@ -19,4 +19,22 @@ Extract the data into a `dataset` folder, such that the structure is as follows:
 \dataset\event*-truth.csv
 ```
 
+## Approach
 
+For the QUBO formulation we build on the [HEPQPR.Qallse](https://github.com/derlin/hepqpr-qallse) project.
+
+TODO: add description
+
+To work with smaller sized QUBOs, we only focus on hit-triplets present in a specified angle, similar to the approach presented by [Schwägerl et al.](https://arxiv.org/pdf/2303.13249).
+
+## Minimum working example
+
+no spectral gap, yet, just:
+- generating partial dataset from event
+- building the QUBO
+- optimising with simulated annealing
+
+```
+export PYTHONPATH=$PATHONPATH:src/
+python src/qallse_wrapper/main.py
+```
