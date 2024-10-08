@@ -1,3 +1,6 @@
 [submodule "trackml-library"]
 	path = trackml-library
 	url = git@github.com:stroblme/trackml-library.git
+[submodule "hepqpr-qallse"]
+	path = hepqpr-qallse
+	url = git@github.com:lfd/hepqpr-qallse.git
