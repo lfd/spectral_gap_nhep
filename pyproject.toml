@@ -39,6 +39,7 @@ qiskit-algorithms = "^0.3.0"
 networkx = "^3.3"
 scipy = "1.13.0"
 trackml = { path = "./trackml-library" }
+qallse = { path = "./hepqpr-qallse" }
 kedro = "^0.19.8"
 
 [build-system]
