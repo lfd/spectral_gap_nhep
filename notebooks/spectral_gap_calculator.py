@@ -7,7 +7,7 @@ import csv
 from qiskit.quantum_info import SparsePauliOp, Pauli
 from qiskit_algorithms.eigensolvers import NumPyEigensolver
 
-from qaoa_utils import provide_random_maxcut_QUBO, hamiltonian_from_qubo
+from notebooks.qaoa_utils import provide_random_maxcut_QUBO, hamiltonian_from_qubo
 
 
 def save_to_csv(data, path, filename):
@@ -76,7 +76,7 @@ def build_hamiltonian(qubo, fraction, num_qubits):
 
 
 # Derives the spectral gap for the given problem hamiltonian at the given fraction s
-def calculate_spectral_gap(fraction: float, qubo: np.ndarray, num_dec_pos: int=4):
+def calculate_spectral_gap(fraction: float, qubo: np.ndarray, num_dec_pos: int = 4):
     num_qubits = len(qubo)
     H = build_hamiltonian(qubo, fraction, num_qubits)
     counter = 0
@@ -97,9 +97,7 @@ def calculate_spectral_gap(fraction: float, qubo: np.ndarray, num_dec_pos: int=4
     return eigenvalues[0], eigenvalues[1], spectral_gap
 
 
-def main(
-    num_qubits, density, seed, fraction, result_path_prefix, include_header=True
-):
+def main(num_qubits, density, seed, fraction, result_path_prefix, include_header=True):
     csv_data_list = []
     if include_header:
         csv_data_list.append(
