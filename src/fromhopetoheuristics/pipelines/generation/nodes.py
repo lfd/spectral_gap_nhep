@@ -5,9 +5,12 @@ import logging
 
 log = logging.getLogger(__name__)
 
+# TODO: currently we're loading data using the the external trackml-library
+# However, we should switch to the kedro internal dataloader and catalog
 
-def load_event_data(sample) -> dict:
-    hits, cells, particles, truth = load_event(f"dataset/{sample}")
+
+def load_event_data(event) -> dict:
+    hits, cells, particles, truth = load_event(f"dataset/{event}")
 
     return {
         "hits": hits,
