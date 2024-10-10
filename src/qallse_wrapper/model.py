@@ -1,15 +1,15 @@
 from hepqpr.qallse.qallse_d0 import QallseD0, D0Config
+import numpy as np
 
 from qallse_wrapper.data_structures import ExtendedDoublet, ExtendedTriplet
 
 class SplitConfig(D0Config):
-    num_triplets = 500
+    xy_angle_parts = 64
+    geometric_index = 0
 
 
 class QallseSplit(QallseD0):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.config = SplitConfig()
+    config = SplitConfig()
 
     def _create_doublets(self, initial_doublets):
         # Generate Doublet structures from the initial doublets, calling _is_invalid_doublet to apply early cuts
@@ -36,8 +36,20 @@ class QallseSplit(QallseD0):
                     d2.inner.append(t)
                     triplets.append(t)
         self.logger.info(f'created {len(triplets)} triplets.')
+        self.triplets = triplets
 
-        triplets.sort(key=lambda t: t.xy_angle)
+    def _is_invalid_triplet(self, triplet: ExtendedTriplet):
+        if super()._is_invalid_triplet(triplet):
+            return True
 
-        self.triplets = triplets[:self.config.num_triplets]
+        angle_part_size = 2 * np.pi / self.config.xy_angle_parts
+        angle_min = - np.pi + self.config.geometric_index * angle_part_size
+        angle_max = - np.pi + (self.config.geometric_index + 1) * angle_part_size
 
+        if triplet.xy_angle < angle_min or triplet.xy_angle >= angle_max:
+            return True
+
+        return False
+
+    def _get_base_config(self):
+        return SplitConfig()

@@ -1,4 +1,3 @@
-import math
 import numpy as np
 
 from hepqpr.qallse.data_structures import Triplet, Doublet, Hit

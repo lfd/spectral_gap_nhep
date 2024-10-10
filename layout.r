@@ -1,7 +1,9 @@
-BASE.SIZE <- 25
-HEIGHT = 14
-WIDTH = 28
+BASE.SIZE <- 8
+INCH.PER.CM <- 1/2.54
+WIDTH <- 13.998*INCH.PER.CM
+HEIGHT <- 7.28972*INCH.PER.CM*0.95
 OUTDIR_PDF <- "img-pdf/"
+OUTDIR_TIKZ <- "img-tikz/"
 COLOURS.LIST <- c("black", "#E69F00", "#999999", "#009371")
 
 theme_paper_base <- function() {
