@@ -30,12 +30,11 @@ To work with smaller sized QUBOs, we only focus on hit-triplets present in a spe
 
 ## Minimum working example
 
-no spectral gap, yet, just:
 - generating partial dataset from event
 - building the QUBO
-- optimising with simulated annealing
+- computing spectral gaps for QUBOs with less than 19 variables
 
 ```
 export PYTHONPATH=$PATHONPATH:src/
-python src/qallse_wrapper/main.py
+python main.py t
 ```
