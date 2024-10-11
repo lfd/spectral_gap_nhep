@@ -1,29 +1,42 @@
-import networkx as nx
 import numpy as np
-from typing import Tuple, Optional
+from typing import Dict, Tuple, Optional
 from qiskit.quantum_info import SparsePauliOp
 
 # Global variable to store generated problems
 # Prevents re-generation, when a problem was already generated
 problems = dict()
 
-def hamiltonian_from_qubo(qubo: np.ndarray) -> Tuple[any, float]:
-    J, h, o = pure_QUBO_to_ising(qubo)
-    return hamiltonian_from_ising(J, h, o)
 
-def hamiltonian_from_ising(J: np.ndarray, h: np.ndarray, o: float) -> Tuple[any, float]:
+def hamiltonian_from_qubo(qubo: np.ndarray) -> Tuple[SparsePauliOp, float]:
     """
-    Creates qiskit hamiltonian based on the Ising matrix and linear terms
+    Creates Qiskit Hamiltonian based on the QUBO matrix
 
     :param J: np.ndarray: Ising matrix
     :param h: np.ndarray: linear Ising terms
     :param o: np.ndarray: offset
 
-    :return: tbd
+    :return: SparsePauliOp: Hamiltonian
+    :return: float: Offset
+    """
+    J, h, o = pure_QUBO_to_ising(qubo)
+    return hamiltonian_from_ising(J, h, o)
+
+
+def hamiltonian_from_ising(
+    J: np.ndarray, h: np.ndarray, o: float
+) -> Tuple[SparsePauliOp, float]:
+    """
+    Creates Qiskit Hamiltonian based on the Ising matrix and linear terms
+
+    :param J: np.ndarray: Ising matrix
+    :param h: np.ndarray: linear Ising terms
+    :param o: np.ndarray: offset
+
+    :return: SparsePauliOp: Hamiltonian
+    :return: float: Offset
     """
 
     # Initialize empty Hamiltonian
-    coefficients, op_list = [], []
     terms = []
 
     # Linear Terms
@@ -35,11 +48,10 @@ def hamiltonian_from_ising(J: np.ndarray, h: np.ndarray, o: float) -> Tuple[any,
                 t = "".join(term)
                 terms.append((t, angle))
 
-
     # Quadratic Terms (Assuming a Ising matrix with zero diagonal elements)
     n = J.shape[0]
     for i in range(n):
-        for j in range(i+1, n):
+        for j in range(i + 1, n):
             term = ["I"] * len(J)
             if J[i][j] > 0 or J[j][i] > 0:
                 term[i] = "Z"
@@ -54,7 +66,7 @@ def hamiltonian_from_ising(J: np.ndarray, h: np.ndarray, o: float) -> Tuple[any,
 
 def pure_ising_to_QUBO(J: np.ndarray) -> Tuple[np.ndarray, float]:
     """
-    Calculate Qubo Matrix Q and offset E0 from J, such that
+    Calculate QUBO Matrix Q and offset E0 from J, such that
     s^T J s equals x^T Q x + E0
     with x in {0,1}^n and s in {+- 1}^n,
     n = number of variables
@@ -66,7 +78,7 @@ def pure_ising_to_QUBO(J: np.ndarray) -> Tuple[np.ndarray, float]:
     :return: float: Offset
     """
     n = J.shape[0]
-    qubo = 4*(J - np.diag(np.ones(n).T @ J))
+    qubo = 4 * (J - np.diag(np.ones(n).T @ J))
     return qubo, np.sum(J)
 
 
@@ -84,50 +96,15 @@ def pure_QUBO_to_ising(Q: np.ndarray) -> Tuple[np.ndarray, np.ndarray, float]:
     :return: np.ndarray: Linear terms
     :return: float: Offset
     """
-    J = 0.25*Q
-    np.fill_diagonal(J, 0.)
+    J = 0.25 * Q
+    np.fill_diagonal(J, 0.0)
 
     h = 0.5 * np.sum(Q, axis=1)
     o = 0.25 * (np.sum(Q) + np.trace(Q))
     return J, h, o
 
 
-def maxcut_graph_to_ising(G: nx.Graph) -> Tuple[np.ndarray, float]:
-    """
-    Calculates Ising model from MAXCUT graph
-
-    :param G: nx.Graph: MAXCUT graph
-
-    :return: np.ndarray: Ising matrix
-    :return: Ising offset
-    """
-    adjacency_matrix = nx.adjacency_matrix(G).todense()
-
-    m_ising = 0.25 * adjacency_matrix
-    offset = - 0.25 * np.sum(adjacency_matrix)
-
-    return m_ising, offset
-
-
-def maxcut_graph_to_qubo(G: nx.Graph) -> np.ndarray:
-    """
-    Calculates QUBO matrix from MAXCUT graph
-
-    :param G: nx.Graph: MAXCUT graph
-
-    :return: np.ndarray: QUBO matrix
-    """
-
-    adjacency_matrix = nx.adjacency_matrix(G).todense()
-    n = adjacency_matrix.shape[0]
-
-    qubo = adjacency_matrix - np.diag(np.ones(n).T @ adjacency_matrix)
-
-    return qubo
-
-
-def provide_random_QUBO(nqubits: int, problem_seed: int = 777) \
-        -> np.ndarray:
+def provide_random_QUBO(nqubits: int, problem_seed: int = 777) -> np.ndarray:
     """
     Generates a randomly created QUBO from uniform distribution
 
@@ -144,67 +121,17 @@ def provide_random_QUBO(nqubits: int, problem_seed: int = 777) \
 
     a = np.random.default_rng(seed=problem_seed).random((nqubits, nqubits))
     qubo = np.tril(a) + np.tril(a, -1).T
-    qubo = (qubo-0.5)*2
+    qubo = (qubo - 0.5) * 2
     problems[prob_key] = qubo
     return qubo
 
 
-def provide_random_maxcut_ising(nqubits: int, p: float, problem_seed: int = 777) \
-        -> Tuple[np.ndarray, float]:
-    """
-    Generates random MaxCut Instances from Erdos-Renyi-Graphs
-    The resulting graph gets mapped to a Ising matrix and offset.
-
-    :param nqubits: int: Number of nodes (and number of qubits)
-    :param p: float: Probability of randomly added edges
-    :param problem_seed: int=777: Random seed for networkx graph creation
-
-    :return: np.ndarray: Quadratic Ising matrix
-    :return: float: Offset
-    """
-    global problems
-
-    prob_key = f"ising_MC_{nqubits}_{p}_{problem_seed}"
-    if prob_key in problems:
-        return problems[prob_key]
-
-    g = nx.generators.erdos_renyi_graph(nqubits, p, seed=problem_seed)
-    m_ising, offset = maxcut_graph_to_ising(g)
-
-    problems[prob_key] = (m_ising, offset)
-    return m_ising, offset
-
-
-def provide_random_maxcut_QUBO(nqubits: int, p: float, problem_seed: int = 777) \
-        -> np.ndarray:
-    """
-    Generates random MaxCut Instances from Erdos-Renyi-Graphs
-    The resulting graph gets mapped to a QUBO.
-
-    :param nqubits: int: Number of nodes (and number of qubits)
-    :param p: float: Probability of randomly added edges
-    :param problem_seed: int=777: Random seed for networkx graph creation
-
-    :return: np.ndarray: QUBO Matrix
-    """
-    global problems
-
-    prob_key = f"qubo_MC_{nqubits}_{p}_{problem_seed}"
-    if prob_key in problems:
-        return problems[prob_key]
-
-    g = nx.generators.erdos_renyi_graph(nqubits, p, seed=problem_seed)
-    qubo = maxcut_graph_to_qubo(g)
-
-    problems[prob_key] = qubo
-    return qubo
-
-def cost_function(J: np.ndarray,
-                  x: np.ndarray,
-                  h: Optional[np.ndarray] = None,
-                  offset: Optional[np.ndarray] = None,
-                  ) \
-        -> np.ndarray:
+def cost_function(
+    J: np.ndarray,
+    x: np.ndarray,
+    h: Optional[np.ndarray] = None,
+    offset: Optional[np.ndarray] = None,
+) -> np.ndarray:
     """
     Computes x^T * J * x + hT * x + o for a given batch
 
@@ -227,3 +154,27 @@ def cost_function(J: np.ndarray,
 
     return cost
 
+
+def dict_QUBO_to_matrix(dict_qubo: Dict[Tuple[str, str], float]) -> np.ndarray:
+    """
+    Transforms QUBO in dictinary form to matrix
+
+    :param dict_qubo: QUBO dict
+    :type dict_qubo: Dict[Tuple[str, str], float]
+    :return: QUBO matrix
+    :rtype: np.ndarray
+    """
+    # get unique set of variable names
+    names = []
+    for k in dict_qubo.keys():
+        names.append(k[0])
+        names.append(k[1])
+    names = list(set(names))
+    n_vars = len(names)
+
+    qubo_matrix = np.zeros((n_vars, n_vars))
+
+    for k, v in dict_qubo.items():
+        qubo_matrix[names.index(k[0])][names.index(k[1])] = v
+
+    return qubo_matrix
