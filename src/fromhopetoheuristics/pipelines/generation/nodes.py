@@ -1,6 +1,7 @@
 from trackml.dataset import load_event, load_dataset
 import pandas as pd
-from typing import List
+from qallse.dsmaker import create_dataset
+
 import logging
 
 log = logging.getLogger(__name__)
@@ -37,3 +38,13 @@ def load_dataset_data() -> dict:
         )
 
     return {"dataset": dataset}
+
+
+def create_dataset(output_path, prefix, seed):
+    metadata, path = create_dataset(
+        density=0.1,
+        output_path=output_path,
+        prefix=prefix,
+        gen_doublets=True,
+        random_seed=seed,
+    )
