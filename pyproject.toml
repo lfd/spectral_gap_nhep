@@ -41,7 +41,11 @@ scipy = "1.13.0"
 trackml = { path = "./trackml-library" }
 qallse = { path = "./hepqpr-qallse" }
 kedro = "^0.19.8"
+kedro-viz = "^10.0.0"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.kedro_telemetry]
+project_id = "02bc8c61d7e64f47b985e83579e35049"

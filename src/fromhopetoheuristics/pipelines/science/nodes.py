@@ -24,6 +24,8 @@ def build_qubo(event_path, output_path, prefix):
     qubo_path = os.path.join(output_path, prefix + "qubo.pickle")
     print("Wrote qubo to", qubo_path)
 
+    return {"qubo_path": qubo_path}
+
 
 def solve_qubo(event_path, qubo_path, output_path, prefix, seed):
     dw = DataWrapper.from_path(event_path)
@@ -37,3 +39,5 @@ def solve_qubo(event_path, qubo_path, output_path, prefix, seed):
     with open(oname, "wb") as f:
         pickle.dump(response, f)
     print(f"Wrote response to {oname}")
+
+    return {"response": response}

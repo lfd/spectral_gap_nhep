@@ -40,11 +40,16 @@ def load_dataset_data() -> dict:
     return {"dataset": dataset}
 
 
-def create_dataset(output_path, prefix, seed):
-    metadata, path = create_dataset(
+def create_metadata(output_path, prefix, seed):
+    metadata, event_path = create_dataset(
         density=0.1,
         output_path=output_path,
         prefix=prefix,
         gen_doublets=True,
         random_seed=seed,
     )
+
+    return {
+        "metadata": metadata,
+        "event_path": event_path,
+    }
