@@ -1,8 +1,9 @@
 from kedro.pipeline import Pipeline, node, pipeline
 
 from .nodes import (
-    build_qubo,
-    solve_qubo,
+    build_qubos,
+    load_qubos,
+    solve_qubos,
     run_maxcut_annealing,
     run_maxcut_qaoa,
     run_track_reconstruction_annealing,
@@ -14,25 +15,29 @@ def create_pipeline() -> Pipeline:
     return pipeline(
         [
             node(
-                build_qubo,
+                build_qubos,
                 {
+                    "data_wrapper": "data_wrapper",
                     "event_path": "event_path",
-                    "output_path": "params:output_path",
-                    "prefix": "params:prefix",
+                    "num_angle_parts": "params:num_angle_parts",
                 },
-                {"qubo_path": "qubo_path"},
+                {"qubo_paths": "qubo_paths"},
             ),
             node(
-                solve_qubo,
+                load_qubos,
+                {"qubo_paths": "qubo_paths"},
+                {"qubos": "qubos"},
+            ),
+            node(
+                solve_qubos,
                 {
-                    "event_path": "event_path",
-                    "qubo_path": "qubo_path",
-                    "output_path": "params:output_path",
-                    "prefix": "params:prefix",
+                    "data_wrapper": "data_wrapper",
+                    "qubos": "qubos",
+                    "result_path_prefix": "params:output_path",
                     "seed": "params:seed",
                 },
                 {
-                    "response": "response",
+                    "responses": "responses",
                 },
             ),
             node(
@@ -52,7 +57,7 @@ def create_pipeline() -> Pipeline:
             node(
                 run_track_reconstruction_annealing,
                 {
-                    "metadata": "metadata",
+                    "qubos": "qubos",
                     "event_path": "event_path",
                     "seed": "params:seed",
                 },
@@ -61,9 +66,10 @@ def create_pipeline() -> Pipeline:
             node(
                 run_track_reconstruction_qaoa,
                 {
-                    "metadata": "metadata",
+                    "qubos": "qubos",
                     "event_path": "event_path",
                     "seed": "params:seed",
+                    "max_p": "params:max_p",
                 },
                 {},
             ),

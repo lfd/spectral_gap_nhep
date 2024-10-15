@@ -1,5 +1,10 @@
 from trackml.dataset import load_event, load_dataset
 import pandas as pd
+from typing import Tuple
+import os
+from datetime import datetime
+
+from qallse.data_wrapper import DataWrapper
 from qallse.dsmaker import create_dataset
 
 import logging
@@ -40,9 +45,31 @@ def load_dataset_data() -> dict:
     return {"dataset": dataset}
 
 
-def create_metadata(output_path, prefix, seed):
+def create_metadata(
+    result_path_prefix: str, seed: int, f: float = 0.1
+) -> Tuple[dict, str]:
+    """
+    Creates/filters and stores TrackML event data for a given fraction of data.
+    Uses Qallse to filter the data.
+
+    :param result_path_prefix: Where to store the data
+    :type result_path_prefix: str
+    :param seed: seed for randomised data filtering, defaults to 12345
+    :type seed: int, optional
+    :param f: fraction of the data, which is to be used, defaults to 0.1
+    :type f: float, optional
+
+    :return: Qallse event metadata
+    :rtype: dict
+    :return: Path, where the filtered data is stored
+    :rtype: str
+    """
+    time_stamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+    output_path = os.path.join(result_path_prefix, time_stamp, "qallse_data")
+    prefix = f"data_frac{int(f*100)}_seed{seed}"
+
     metadata, event_path = create_dataset(
-        density=0.1,
+        density=f,
         output_path=output_path,
         prefix=prefix,
         gen_doublets=True,
@@ -53,3 +80,16 @@ def create_metadata(output_path, prefix, seed):
         "metadata": metadata,
         "event_path": event_path,
     }
+
+
+def create_qallse_datawrapper(event_path: str) -> DataWrapper:
+    """
+    Creates a qallse data wrapper form a given event path
+
+    :param event_path: The event path
+    :type event_path: str
+    :return: Qallse data wrapper
+    :rtype: DataWrapper
+    """
+    dw = DataWrapper.from_path(event_path)
+    return {"data_wrapper": dw}

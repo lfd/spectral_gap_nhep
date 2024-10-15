@@ -1,6 +1,6 @@
 from kedro.pipeline import Pipeline, node, pipeline
 
-from .nodes import create_metadata
+from .nodes import create_metadata, create_qallse_datawrapper
 
 
 def create_pipeline() -> Pipeline:
@@ -9,14 +9,22 @@ def create_pipeline() -> Pipeline:
             node(
                 create_metadata,
                 {
-                    "output_path": "params:output_path",
-                    "prefix": "params:prefix",
+                    "result_path_prefix": "params:output_path",
                     "seed": "params:seed",
                 },
                 {
                     "metadata": "metadata",
                     "event_path": "event_path",
                 },
-            )
+            ),
+            node(
+                create_qallse_datawrapper,
+                {
+                    "event_path": "event_path",
+                },
+                {
+                    "data_wrapper": "data_wrapper",
+                },
+            ),
         ]
     )
