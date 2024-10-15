@@ -1,7 +1,8 @@
 from qallse.qallse_d0 import QallseD0, D0Config
 import numpy as np
 
-from qallse_wrapper.data_structures import ExtendedDoublet, ExtendedTriplet
+from fromhopetoheuristics.utils.data_structures import ExtendedDoublet, ExtendedTriplet
+
 
 class SplitConfig(D0Config):
     xy_angle_parts = 64
@@ -14,7 +15,7 @@ class QallseSplit(QallseD0):
     def _create_doublets(self, initial_doublets):
         # Generate Doublet structures from the initial doublets, calling _is_invalid_doublet to apply early cuts
         doublets = []
-        for (start_id, end_id) in initial_doublets:
+        for start_id, end_id in initial_doublets:
             start, end = self.hits[start_id], self.hits[end_id]
             d = ExtendedDoublet(start, end)
             if not self._is_invalid_doublet(d):
@@ -22,7 +23,7 @@ class QallseSplit(QallseD0):
                 end.inner.append(d)
                 doublets.append(d)
 
-        self.logger.info(f'created {len(doublets)} doublets.')
+        self.logger.info(f"created {len(doublets)} doublets.")
         self.doublets = doublets
 
     def _create_triplets(self):
@@ -35,7 +36,7 @@ class QallseSplit(QallseD0):
                     d1.outer.append(t)
                     d2.inner.append(t)
                     triplets.append(t)
-        self.logger.info(f'created {len(triplets)} triplets.')
+        self.logger.info(f"created {len(triplets)} triplets.")
         self.triplets = triplets
 
     def _is_invalid_triplet(self, triplet: ExtendedTriplet):
@@ -43,8 +44,8 @@ class QallseSplit(QallseD0):
             return True
 
         angle_part_size = 2 * np.pi / self.config.xy_angle_parts
-        angle_min = - np.pi + self.config.geometric_index * angle_part_size
-        angle_max = - np.pi + (self.config.geometric_index + 1) * angle_part_size
+        angle_min = -np.pi + self.config.geometric_index * angle_part_size
+        angle_max = -np.pi + (self.config.geometric_index + 1) * angle_part_size
 
         if triplet.xy_angle < angle_min or triplet.xy_angle >= angle_max:
             return True
