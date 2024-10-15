@@ -404,7 +404,9 @@ def annealing_schedule_from_QAOA_params(
         # ensure that time is increasing monotonically, if not, skip
         if times[i] < last_added_time:
             continue
-        anneal_fraction = np.abs(gammas[i]) / (np.abs(gammas[i]) + np.abs(betas[i]))
+        anneal_fraction = np.abs(gammas[i]) / (
+            np.abs(gammas[i]) + np.abs(betas[i])
+        )
         anneal_schedule.append((times[i], anneal_fraction))
         last_added_time = times[i]
 

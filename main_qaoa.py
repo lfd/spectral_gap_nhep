@@ -3,12 +3,12 @@ import numpy as np
 from datetime import datetime
 import sys
 
-from hepqpr.qallse.data_wrapper import DataWrapper
+from qallse.data_wrapper import DataWrapper
 
-from data_utils import create_dataset_track_reconstruction, save_to_csv
-from maxcut_utils import provide_random_maxcut_QUBO
-from track_reconstruction_utils import provide_track_reconstruction_QUBO
-from qaoa_utils import compute_min_energy_solution, solve_QUBO_with_QAOA
+from fromhopetoheuristics.utils.data_utils import create_dataset_track_reconstruction, save_to_csv
+from fromhopetoheuristics.utils.maxcut_utils import provide_random_maxcut_QUBO
+from fromhopetoheuristics.utils.track_reconstruction_utils import provide_track_reconstruction_QUBO
+from fromhopetoheuristics.utils.qaoa_utils import annealing_schedule_from_QAOA_params, compute_min_energy_solution, solve_QUBO_with_QAOA
 import logging
 
 logging.basicConfig()
@@ -68,6 +68,8 @@ def track_reconstruction_QAOA(
                 initial_params=init_params,
                 random_param_init=True,
             )
+            schedule = annealing_schedule_from_QAOA_params(beta, gamma)
+            print("Annealing schedule", schedule)
             if q == -1:
                 init_params = np.concatenate([beta, gamma])
             else:
@@ -124,11 +126,11 @@ def maxcut(
 
     min_energy, opt_var_assignment = compute_min_energy_solution(qubo)
 
-    for q in range(-1, 6):
+    for q in range(-1, 0):
         if q == 0:
             continue
         init_params = None
-        for p in range(1, 6):
+        for p in range(1, max_p):
             if q > p:
                 this_q = p
             else:
