@@ -48,15 +48,19 @@ def build_qubos(
     :rtype: List[str]
     """
     qubo_paths = []
+    qubo_base_path = os.path.join(os.path.dirname(event_path), "QUBO")
     for i in range(num_angle_parts):
-        extra_config = {
-            "geometric_index": i,
-            "xy_angle_parts ": num_angle_parts,
-        }
-        model = QallseSplit(data_wrapper, **extra_config)
-        build_model(event_path, model, False)
+        qubo_prefix = f"angle_index{i:02d}_"
+        qubo_path = os.path.join(qubo_base_path, f"{qubo_prefix}qubo.pickle")
+        if not os.path.exists(qubo_path):
+            extra_config = {
+                "geometric_index": i,
+                "xy_angle_parts ": num_angle_parts,
+            }
+            model = QallseSplit(data_wrapper, **extra_config)
+            build_model(event_path, model, False)
 
-        qubo_path = store_qubo(event_path, model, i)
+            qubo_path = store_qubo(event_path, model, qubo_prefix=qubo_prefix)
         qubo_paths.append(qubo_path)
 
     return {"qubo_paths": qubo_paths}
@@ -90,7 +94,8 @@ def solve_qubos(
     responses = []
     for i, qubo in enumerate(qubos):
         if qubo is None:
-            return {"response": None}
+            responses.append(None)
+            continue
         prefix = f"cl_solver{i:02d}"
 
         response = solve_neal(qubo, seed=seed)
@@ -368,10 +373,11 @@ def run_maxcut_qaoa(seed):
     return {}  # FIXME
 
 
-def run_track_reconstruction_qaoa(qubos: List[Optional[np.ndarray]], event_path: str, seed: int, max_p: int):
+def run_track_reconstruction_qaoa(
+    qubos: List[Optional[np.ndarray]], event_path: str, seed: int, max_p: int
+):
     time_stamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-
-    result_path_prefix = os.path.join(event_path, "QAOA")
+    result_path_prefix = os.path.join(os.path.dirname(event_path), "QAOA", time_stamp)
     first = True
 
     for i, qubo in enumerate(qubos):
@@ -384,7 +390,7 @@ def run_track_reconstruction_qaoa(qubos: List[Optional[np.ndarray]], event_path:
             include_header=first,  # FIXME
         )
         first = False
-        break # for now, just do this for the first QUBO
+        break  # for now, just do this for the first QUBO
 
     return {}  # FIXME
 
@@ -410,10 +416,16 @@ def run_maxcut_annealing(seed):
     return {}  # FIXME
 
 
-def run_track_reconstruction_annealing(qubos: List[Optional[np.ndarray]], event_path: str, seed: int):
+def run_track_reconstruction_annealing(
+    qubos: List[Optional[np.ndarray]], event_path: str, seed: int
+):
+    time_stamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
+    result_path_prefix = f"results/MAXCUT_QAOA/{time_stamp}"
     fractions = np.linspace(0, 1, num=11, endpoint=True)
-    result_path_prefix = os.path.join(event_path, "spectral_gap")
+    result_path_prefix = os.path.join(
+        os.path.dirname(event_path), "spectral_gap", time_stamp,
+    )
     first = True
 
     for i, qubo in enumerate(qubos):

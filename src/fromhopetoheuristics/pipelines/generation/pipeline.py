@@ -10,6 +10,7 @@ def create_pipeline() -> Pipeline:
                 create_metadata,
                 {
                     "result_path_prefix": "params:output_path",
+                    "trackml_input_path": "params:trackml_input_path",
                     "seed": "params:seed",
                 },
                 {

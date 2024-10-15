@@ -32,7 +32,7 @@ def save_to_csv(data: list, path: str, filename: str) -> None:
         writer.writerow(data)
 
 
-def store_qubo(data_path: str, model: QallseSplit, geometric_index: int) -> str:
+def store_qubo(data_path: str, model: QallseSplit, qubo_prefix: str) -> str:
     """
     Stores a qubo in dict form using Qallse
 
@@ -40,15 +40,13 @@ def store_qubo(data_path: str, model: QallseSplit, geometric_index: int) -> str:
     :type data_path: str
     :param model: The Qallse model, from which the QUBO is generated
     :type model: QallseSplit
-    :param geometric_index: The index of the angle segment in the detector, for
-        which the QUBO is built
-    :type geometric_index: int
+    :param qubo_prefix: Path, where to store the QUBO
+    :type qubo_prefix: str
     :return: Path to QUBO in dict form
     :rtype: str
     """
     qubo_path = os.path.join(os.path.dirname(data_path), "QUBO")
     os.makedirs(qubo_path, exist_ok=True)
-    qubo_prefix = f"angle_index{geometric_index:02d}_"
     dumper.dump_model(
         model,
         qubo_path,
