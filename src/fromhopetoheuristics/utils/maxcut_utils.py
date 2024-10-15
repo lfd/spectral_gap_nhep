@@ -6,6 +6,7 @@ from typing import Tuple
 # Prevents re-generation, when a problem was already generated
 problems = dict()
 
+
 def maxcut_graph_to_ising(G: nx.Graph) -> Tuple[np.ndarray, float]:
     """
     Calculates Ising model from MAXCUT graph

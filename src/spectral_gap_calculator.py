@@ -51,9 +51,7 @@ def build_hamiltonian_ising(J, h, fraction, num_qubits):
 
 
 # Derives the spectral gap for the given problem hamiltonian at the given fraction s
-def calculate_spectral_gap(
-    fraction: float, qubo: np.ndarray, num_dec_pos: int = 4
-):
+def calculate_spectral_gap(fraction: float, qubo: np.ndarray, num_dec_pos: int = 4):
     num_qubits = len(qubo)
     H = build_hamiltonian(qubo, fraction, num_qubits)
     counter = 0
@@ -95,5 +93,3 @@ def calculate_spectral_gap_ising(
     eigenvalues = np.real(np.unique(eigenvalues))
     spectral_gap = np.around(np.abs(eigenvalues[0] - eigenvalues[1]), 4)
     return eigenvalues[0], eigenvalues[1], spectral_gap
-
-

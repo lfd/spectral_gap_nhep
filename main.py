@@ -148,9 +148,7 @@ if __name__ == "__main__":
         seed = 12345
         result_path_prefix = f"results/TR/{time_stamp}"
 
-        dw, data_path = create_dataset_track_reconstruction(
-            result_path_prefix, seed
-        )
+        dw, data_path = create_dataset_track_reconstruction(result_path_prefix, seed)
 
         for i in range(64):
             track_reconstruction(
@@ -159,7 +157,7 @@ if __name__ == "__main__":
                 fractions,
                 result_path_prefix,
                 data_path,
-                geometric_index = i,
+                geometric_index=i,
                 include_header=first,
             )
             first = False
