@@ -23,7 +23,7 @@ jobs:
       run: poetry install --with dev
     - name: Lint with flake8
       run: |
-        poetry run flake8 qml_essentials
+        poetry run flake8 src
         poetry run flake8 tests
     - name: Running license check
       run: poetry run licensecheck --zero --license mit
