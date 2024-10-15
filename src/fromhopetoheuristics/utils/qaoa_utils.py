@@ -201,8 +201,7 @@ def compute_min_energy_solution(qubo: np.ndarray) -> Tuple[float, np.ndarray]:
     eigensolver_result = eigensolver.compute_eigenvalues(H)
 
     min_eigenvalue = np.real(eigensolver_result.eigenvalues[0])
-    eigenvector = np.real(eigensolver_result.eigenstates[0])
-    eigenvector = eigenvector.astype(np.bool)
+    eigenvector = eigensolver_result.eigenstates[0]
     sv = Statevector(eigenvector)
     solution = sv.sample_counts(1).popitem()[0]
 
