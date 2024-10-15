@@ -1,6 +1,13 @@
 from kedro.pipeline import Pipeline, node, pipeline
 
-from .nodes import build_qubo, solve_qubo, run_maxcut, run_track_reconstruction
+from .nodes import (
+    build_qubo,
+    solve_qubo,
+    run_maxcut_annealing,
+    run_maxcut_qaoa,
+    run_track_reconstruction_annealing,
+    run_track_reconstruction_qaoa,
+)
 
 
 def create_pipeline() -> Pipeline:
@@ -29,7 +36,21 @@ def create_pipeline() -> Pipeline:
                 },
             ),
             node(
-                run_maxcut,
+                run_maxcut_annealing,
+                {
+                    "seed": "params:seed",
+                },
+                {},
+            ),
+            node(
+                run_maxcut_qaoa,
+                {
+                    "seed": "params:seed",
+                },
+                {},
+            ),
+            node(
+                run_track_reconstruction_annealing,
                 {
                     "metadata": "metadata",
                     "event_path": "event_path",
@@ -38,7 +59,7 @@ def create_pipeline() -> Pipeline:
                 {},
             ),
             node(
-                run_track_reconstruction,
+                run_track_reconstruction_qaoa,
                 {
                     "metadata": "metadata",
                     "event_path": "event_path",

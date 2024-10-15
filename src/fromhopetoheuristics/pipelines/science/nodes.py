@@ -12,6 +12,7 @@ from fromhopetoheuristics.utils.data_utils import (
     save_to_csv,
 )
 from fromhopetoheuristics.utils.maxcut_utils import provide_random_maxcut_QUBO
+from fromhopetoheuristics.utils.spectral_gap_calculator import calculate_spectral_gap
 from fromhopetoheuristics.utils.track_reconstruction_utils import (
     provide_track_reconstruction_QUBO,
 )
@@ -20,10 +21,11 @@ from fromhopetoheuristics.utils.qaoa_utils import (
     solve_QUBO_with_QAOA,
 )
 import numpy as np
+from typing import Iterable
 
 import os
 import sys
-import datetime
+from datetime import datetime
 import logging
 
 log = logging.getLogger(__name__)
@@ -59,7 +61,7 @@ def solve_qubo(event_path, qubo_path, output_path, prefix, seed):
     return {"response": response}
 
 
-def track_reconstruction_QAOA(
+def track_reconstruction_qaoa(
     dw: DataWrapper,
     seed: int,
     result_path_prefix: str,
@@ -137,7 +139,7 @@ def track_reconstruction_QAOA(
             save_to_csv(row_content, result_path_prefix, "solution.csv")
 
 
-def maxcut(
+def maxcut_qaoa(
     num_qubits: int,
     density: float,
     seed: int,
@@ -211,24 +213,111 @@ def maxcut(
             save_to_csv(row_content, result_path_prefix, "solution.csv")
 
 
-def run_maxcut(metadata, event_path, seed):
-    problem = ""
-    if len(sys.argv) > 2:
-        exit("Usage: python main_qaoa.py [m|t] (m=maxcut, t=track reconstruction)")
-    elif len(sys.argv) == 1:
-        problem = "m"
-    elif sys.argv[1] not in ["m", "t"]:
-        exit(
-            f"Invalid option {sys.argv[1]} \n"
-            "Usage: python main_qaoa.py [m|t] (m=maxcut, t=track reconstruction)"
+def maxcut_annealing(
+    num_qubits: int,
+    density: float,
+    seed: int,
+    fractions: Iterable[float],
+    result_path_prefix: str,
+    include_header: bool = True,
+):
+    csv_data_list = []
+    if include_header:
+        csv_data_list.append(
+            [
+                "problem",
+                "num_qubits",
+                "density",
+                "seed",
+                "fraction",
+                "gs",
+                "fes",
+                "gap",
+            ]
         )
 
+    qubo = provide_random_maxcut_QUBO(num_qubits, density, seed)
+
+    for fraction in fractions:
+        gs_energy, fes_energy, gap = calculate_spectral_gap(fraction, qubo)
+        csv_data_list.append(
+            [
+                "maxcut",
+                num_qubits,
+                density,
+                seed,
+                np.round(fraction, 2),
+                gs_energy,
+                fes_energy,
+                gap,
+            ]
+        )
+
+    for csv_data in csv_data_list:
+        save_to_csv(
+            csv_data,
+            result_path_prefix,
+            "spectral_gap_evolution.csv",
+        )
+
+
+def track_reconstruction_annealing(
+    dw: DataWrapper,
+    seed: int,
+    fractions: Iterable[float],
+    result_path_prefix: str,
+    data_path: str,
+    geometric_index: int = 0,
+    include_header: bool = True,
+):
+    csv_data_list = []
+    if include_header:
+        csv_data_list.append(
+            [
+                "problem",
+                "num_qubits",
+                "geometric_index",
+                "seed",
+                "fraction",
+                "gs",
+                "fes",
+                "gap",
+            ]
+        )
+    qubo = provide_track_reconstruction_QUBO(dw, data_path, geometric_index)
+
+    if qubo is None:
+        return
+
+    for fraction in fractions:
+        gs_energy, fes_energy, gap = calculate_spectral_gap(
+            fraction,
+            qubo,
+        )
+        csv_data_list.append(
+            [
+                "track reconstruction",
+                len(qubo),
+                geometric_index,
+                seed,
+                np.round(fraction, 2),
+                gs_energy,
+                fes_energy,
+                gap,
+            ]
+        )
+
+    for csv_data in csv_data_list:
+        save_to_csv(csv_data, result_path_prefix, "spectral_gap_evolution.csv")
+
+
+def run_maxcut_qaoa(seed):
     time_stamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
     result_path_prefix = f"results/MAXCUT_QAOA/{time_stamp}"
     n = 5
     density = 0.7
-    maxcut(
+    maxcut_qaoa(
         n,
         density,
         seed,
@@ -236,8 +325,10 @@ def run_maxcut(metadata, event_path, seed):
         include_header=True,  # FIXME
     )
 
+    return {}  # FIXME
 
-def run_track_reconstruction(metadata, event_path, seed):
+
+def run_track_reconstruction_qaoa(metadata, event_path, seed):
     time_stamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
     result_path_prefix = f"results/TR_QAOA/{time_stamp}"
@@ -245,7 +336,7 @@ def run_track_reconstruction(metadata, event_path, seed):
     metadata, event_path = create_dataset_track_reconstruction(result_path_prefix, seed)
 
     i = 1
-    track_reconstruction_QAOA(
+    track_reconstruction_qaoa(
         metadata,
         seed,
         result_path_prefix,
@@ -253,3 +344,45 @@ def run_track_reconstruction(metadata, event_path, seed):
         geometric_index=i,
         include_header=True,  # FIXME
     )
+
+    return {}  # FIXME
+
+
+def run_maxcut_annealing(seed):
+    time_stamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+
+    fractions = np.linspace(0, 1, num=11, endpoint=True)
+    result_path_prefix = f"results/MAXCUT/{time_stamp}"
+    for n in range(4, 11):
+        for density in np.linspace(0.5, 1, num=6, endpoint=True):
+            maxcut_annealing(
+                n,
+                density,
+                seed,
+                fractions,
+                result_path_prefix,
+                include_header=True,  # FIXME
+            )
+
+    return {}  # FIXME
+
+
+def run_track_reconstruction_annealing(metadata, event_path, seed):
+    time_stamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+
+    fractions = np.linspace(0, 1, num=11, endpoint=True)
+    result_path_prefix = f"results/TR/{time_stamp}"
+
+    for i in range(64):
+        track_reconstruction_annealing(
+            metadata,
+            seed,
+            fractions,
+            result_path_prefix,
+            event_path,
+            geometric_index=i,
+            include_header=first,
+        )
+        first = False
+
+    return {}  # FIXME
