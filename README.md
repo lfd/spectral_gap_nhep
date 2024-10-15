@@ -63,3 +63,7 @@ The following list gives a brief explanation of the most important locations in 
 Besides that, we make use of two submodules:
 - `hepqpr-qallse`: Currently, all the data loading and QUBO formulation is done using this submodule
 - `trackml-library`: Not in use currently
+
+## 🚧 Contributing
+
+Contributions are highly welcome! Take a look at our [Contribution Guidelines](https://github.com/cirKITers/qml-essentials/blob/main/CONTRIBUTING.md).
