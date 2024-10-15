@@ -372,6 +372,7 @@ def run_track_reconstruction_annealing(metadata, event_path, seed):
 
     fractions = np.linspace(0, 1, num=11, endpoint=True)
     result_path_prefix = f"results/TR/{time_stamp}"
+    first = True
 
     for i in range(64):
         track_reconstruction_annealing(
