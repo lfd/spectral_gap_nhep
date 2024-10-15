@@ -9,14 +9,12 @@ def create_pipeline() -> Pipeline:
             node(
                 visualize,
                 {
-                    "response": "response",
+                    "responses": "responses",
+                    "data_wrapper": "data_wrapper",
                     "event_path": "event_path",
-                    "output_path": "params:output_path",
-                    "prefix": "params:prefix",
                 },
                 {
-                    "plot_doublets": "plot_doublets",
-                    "plot_triplets": "plot_triplets",
+                    "figures": "figures",
                 },
             )
         ]

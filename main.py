@@ -3,12 +3,12 @@ import numpy as np
 import sys
 from datetime import datetime
 
-from hepqpr.qallse.data_wrapper import DataWrapper
+from qallse.data_wrapper import DataWrapper
 
-from spectral_gap_calculator import calculate_spectral_gap
-from data_utils import create_dataset_track_reconstruction, save_to_csv
-from maxcut_utils import provide_random_maxcut_QUBO
-from track_reconstruction_utils import provide_track_reconstruction_QUBO
+from fromhopetoheuristics.utils.spectral_gap_calculator import calculate_spectral_gap
+from fromhopetoheuristics.utils.maxcut_utils import provide_random_maxcut_QUBO
+from fromhopetoheuristics.utils.track_reconstruction_utils import provide_track_reconstruction_QUBO
+from fromhopetoheuristics.utils.data_utils import create_dataset_track_reconstruction, save_to_csv
 import logging
 
 logging.basicConfig()
