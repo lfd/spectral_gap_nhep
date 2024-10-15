@@ -1,5 +1,7 @@
 data/fixme
 .viz/
+results
+session_store.db
 ##########################
 # KEDRO PROJECT
 

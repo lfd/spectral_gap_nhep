@@ -26,6 +26,6 @@ def register_pipelines() -> Dict[str, Pipeline]:
     pipelines["__default__"] = (
         create_generation_pipeline()
         + create_science_pipeline()
-        + create_visualization_pipeline()
+        # + create_visualization_pipeline() # FIXME
     )
     return pipelines
