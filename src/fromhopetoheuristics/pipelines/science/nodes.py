@@ -137,9 +137,6 @@ def track_reconstruction_qaoa(
 
         save_to_csv(header_content, result_path_prefix, "solution.csv")
 
-    if qubo is None:
-        return
-
     min_energy, opt_var_assignment = compute_min_energy_solution(qubo)
 
     for q in range(-1, max_p):
@@ -331,9 +328,6 @@ def track_reconstruction_annealing(
             ]
         )
 
-    if qubo is None:
-        return
-
     for fraction in fractions:
         gs_energy, fes_energy, gap = calculate_spectral_gap(
             fraction,
@@ -381,16 +375,17 @@ def run_track_reconstruction_qaoa(
     first = True
 
     for i, qubo in enumerate(qubos):
-        track_reconstruction_qaoa(
-            qubo,
-            seed,
-            result_path_prefix,
-            geometric_index=i,
-            max_p=max_p,
-            include_header=first,  # FIXME
-        )
-        first = False
-        break  # for now, just do this for the first QUBO
+        if qubo is not None:
+            track_reconstruction_qaoa(
+                qubo,
+                seed,
+                result_path_prefix,
+                geometric_index=i,
+                max_p=max_p,
+                include_header=first,  # FIXME
+            )
+            first = False
+            break  # for now, just do this for the first QUBO
 
     return {}  # FIXME
 
@@ -429,14 +424,15 @@ def run_track_reconstruction_annealing(
     first = True
 
     for i, qubo in enumerate(qubos):
-        track_reconstruction_annealing(
-            qubo,
-            seed,
-            fractions,
-            result_path_prefix,
-            geometric_index=i,
-            include_header=first,  # FIXME
-        )
-        first = False
+        if qubo is not None:
+            track_reconstruction_annealing(
+                qubo,
+                seed,
+                fractions,
+                result_path_prefix,
+                geometric_index=i,
+                include_header=first,  # FIXME
+            )
+            first = False
 
     return {}  # FIXME
