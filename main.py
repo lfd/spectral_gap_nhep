@@ -3,7 +3,7 @@ import numpy as np
 import sys
 from datetime import datetime
 
-from hepqpr.qallse.data_wrapper import DataWrapper
+from qallse.data_wrapper import DataWrapper
 
 from spectral_gap_calculator import calculate_spectral_gap
 from data_utils import create_dataset_track_reconstruction, save_to_csv

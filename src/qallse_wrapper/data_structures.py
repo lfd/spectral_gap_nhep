@@ -1,6 +1,6 @@
 import numpy as np
 
-from hepqpr.qallse.data_structures import Triplet, Doublet, Hit
+from qallse.data_structures import Triplet, Doublet, Hit
 
 class ExtendedDoublet(Doublet):
     """Same as the Qallse doublet, but with additional information on the angle

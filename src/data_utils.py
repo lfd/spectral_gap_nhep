@@ -3,9 +3,9 @@ import csv
 from typing import Tuple, Dict
 import pickle
 
-from hepqpr.qallse.dsmaker import create_dataset
-from hepqpr.qallse.data_wrapper import DataWrapper
-from hepqpr.qallse import dumper
+from qallse.dsmaker import create_dataset
+from qallse.data_wrapper import DataWrapper
+from qallse import dumper
 
 from qallse_wrapper.model import QallseSplit
 

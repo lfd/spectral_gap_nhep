@@ -1,4 +1,4 @@
-from hepqpr.qallse.qallse_d0 import QallseD0, D0Config
+from qallse.qallse_d0 import QallseD0, D0Config
 import numpy as np
 
 from qallse_wrapper.data_structures import ExtendedDoublet, ExtendedTriplet

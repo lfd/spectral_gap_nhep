@@ -1,8 +1,8 @@
 from typing import Optional
 import numpy as np
 
-from hepqpr.qallse.cli.func import build_model
-from hepqpr.qallse.data_wrapper import DataWrapper
+from qallse.cli.func import build_model
+from qallse.data_wrapper import DataWrapper
 
 from qallse_wrapper.model import QallseSplit
 from qaoa_utils import dict_QUBO_to_matrix
