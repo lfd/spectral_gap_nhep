@@ -13,7 +13,8 @@ class QallseSplit(QallseD0):
     config = SplitConfig()
 
     def _create_doublets(self, initial_doublets):
-        # Generate Doublet structures from the initial doublets, calling _is_invalid_doublet to apply early cuts
+        # Generate Doublet structures from the initial doublets,
+        # calling _is_invalid_doublet to apply early cuts
         doublets = []
         for start_id, end_id in initial_doublets:
             start, end = self.hits[start_id], self.hits[end_id]
@@ -27,7 +28,8 @@ class QallseSplit(QallseD0):
         self.doublets = doublets
 
     def _create_triplets(self):
-        # Generate Triplet structures from Doublets, calling _is_invalid_triplet to apply early cuts
+        # Generate Triplet structures from Doublets,
+        # calling _is_invalid_triplet to apply early cuts
         triplets = []
         for d1 in self.doublets:
             for d2 in d1.h2.outer:
