@@ -238,8 +238,8 @@ def initialise_QAOA_parameters(
         n_prev = len(initial_params) // 2
         prev_betas = initial_params[:n_prev]
         prev_gammas = initial_params[n_prev:]
-        remaining_betas = np.repeat(0., p - n_prev)
-        remaining_gammas = np.repeat(0., p - n_prev)
+        remaining_betas = np.repeat(0.0, p - n_prev)
+        remaining_gammas = np.repeat(0.0, p - n_prev)
         beta_init = np.concatenate([prev_betas, remaining_betas])
         gamma_init = np.concatenate([prev_gammas, remaining_gammas])
     elif random_init:
@@ -356,3 +356,60 @@ def solve_QUBO_with_QAOA(
 
     energy = min_result.fun + o
     return energy, betas, gammas, u_params, v_params
+
+
+def times_from_QAOA_params(betas: np.ndarray, gammas: np.ndarray) -> np.ndarray:
+    """
+    Derive midpoints of each time_interval (gamma_i + beta_i)
+
+    :param betas: Beta parameters
+    :type betas: np.ndarray
+    :param gammas: Gamma parameters
+    :type gammas: np.ndarray
+    :return: Array of times
+    :rtype: np.ndarray
+    """
+    p = len(betas)
+    time = 0.0
+    time_midpoints = np.zeros(p + 1)
+    for i in range(p):
+        time_segment = np.abs(gammas[i]) + np.abs(betas[i])
+        time += time_segment
+        time_midpoints[i] = time - 0.5 * time_segment
+
+    time_midpoints[p] = time # Add total annealing time
+    return time_midpoints
+
+
+def annealing_schedule_from_QAOA_params(
+    betas: np.ndarray, gammas: np.ndarray
+) -> List[Tuple[float, float]]:
+    """
+    Derive Annealing schedule from QAOA parameters according to Zhou et al.
+    (https://journals.aps.org/prx/pdf/10.1103/PhysRevX.10.021067, Sec. VB)
+
+    :param betas: Beta parameters
+    :type betas: np.ndarray
+    :param gammas: Gamma parameters
+    :type gammas: np.ndarray
+    :return: Annealing schedule (e.g. for Dwave), contains a list of tuples of
+        the form (anneal_time, anneal_fraction).
+    :rtype: List[Tuple[float, float]]
+    """
+    p = len(betas)
+    times = times_from_QAOA_params(betas, gammas)
+    anneal_schedule = [(0.0, 0.0)]
+    last_added_time = 0.0
+    for i in range(p):
+        # ensure that time is increasing monotonically, if not, skip
+        if times[i] < last_added_time:
+            continue
+        anneal_fraction = np.abs(gammas[i]) / (
+            np.abs(gammas[i]) + np.abs(betas[i])
+        )
+        anneal_schedule.append((times[i], anneal_fraction))
+        last_added_time = times[i]
+
+    # at the end of the anneal schedule, the annealing fraction is 1
+    anneal_schedule.append((times[p], 1.))
+    return anneal_schedule
