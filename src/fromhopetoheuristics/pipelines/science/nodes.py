@@ -416,7 +416,6 @@ def run_track_reconstruction_annealing(
 ):
     time_stamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
-    result_path_prefix = f"results/MAXCUT_QAOA/{time_stamp}"
     fractions = np.linspace(0, 1, num=11, endpoint=True)
     result_path_prefix = os.path.join(
         os.path.dirname(event_path), "spectral_gap", time_stamp,
