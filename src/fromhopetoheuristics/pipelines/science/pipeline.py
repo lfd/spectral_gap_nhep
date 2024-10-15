@@ -32,7 +32,7 @@ def create_pipeline() -> Pipeline:
                 solve_qubos,
                 {
                     "data_wrapper": "data_wrapper",
-                    "qubos": "qubos",
+                    "qubo_paths": "qubo_paths",
                     "result_path_prefix": "params:output_path",
                     "seed": "params:seed",
                 },

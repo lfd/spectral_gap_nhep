@@ -87,19 +87,18 @@ def load_qubos(qubo_paths: List[str]):
 
 def solve_qubos(
     data_wrapper: DataWrapper,
-    qubos: List[Optional[np.ndarray]],
+    qubo_paths: List[str],
     result_path_prefix: str,
     seed: int,
 ):
     responses = []
-    for i, qubo in enumerate(qubos):
-        if qubo is None:
-            responses.append(None)
-            continue
+    for i, qubo_path in enumerate(qubo_paths):
+        with open(qubo_path, "rb") as f:
+            qubo = pickle.load(f)
         prefix = f"cl_solver{i:02d}"
 
         response = solve_neal(qubo, seed=seed)
-        print_stats(data_wrapper, response, qubo)
+        # print_stats(data_wrapper, response, qubo) # FIXME: solve no track found case
         oname = os.path.join(
             result_path_prefix, prefix + "neal_response.pickle"
         )
