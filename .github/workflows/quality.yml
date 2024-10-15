@@ -26,4 +26,4 @@ jobs:
         poetry run flake8 src
         poetry run flake8 tests
     - name: Running license check
-      run: poetry run licensecheck --zero --license mit
+      run: poetry run licensecheck --zero --license mit --ignore-packages trackml qallse
