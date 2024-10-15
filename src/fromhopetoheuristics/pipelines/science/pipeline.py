@@ -44,6 +44,7 @@ def create_pipeline() -> Pipeline:
                 run_maxcut_annealing,
                 {
                     "seed": "params:seed",
+                    "num_anneal_fractions": "params:num_anneal_fractions",
                 },
                 {},
             ),
@@ -60,6 +61,7 @@ def create_pipeline() -> Pipeline:
                     "qubos": "qubos",
                     "event_path": "event_path",
                     "seed": "params:seed",
+                    "num_anneal_fractions": "params:num_anneal_fractions",
                 },
                 {},
             ),

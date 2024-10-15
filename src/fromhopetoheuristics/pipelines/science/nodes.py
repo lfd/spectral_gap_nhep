@@ -371,7 +371,9 @@ def run_track_reconstruction_qaoa(
     qubos: List[Optional[np.ndarray]], event_path: str, seed: int, max_p: int
 ):
     time_stamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-    result_path_prefix = os.path.join(os.path.dirname(event_path), "QAOA", time_stamp)
+    result_path_prefix = os.path.join(
+        os.path.dirname(event_path), "QAOA", time_stamp
+    )
     first = True
 
     for i, qubo in enumerate(qubos):
@@ -390,10 +392,10 @@ def run_track_reconstruction_qaoa(
     return {}  # FIXME
 
 
-def run_maxcut_annealing(seed):
+def run_maxcut_annealing(seed, num_anneal_fractions):
     time_stamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
-    fractions = np.linspace(0, 1, num=11, endpoint=True)
+    fractions = np.linspace(0, 1, num=num_anneal_fractions, endpoint=True)
     result_path_prefix = f"results/MAXCUT/{time_stamp}"
     first = True
     for n in range(4, 11):
@@ -412,13 +414,18 @@ def run_maxcut_annealing(seed):
 
 
 def run_track_reconstruction_annealing(
-    qubos: List[Optional[np.ndarray]], event_path: str, seed: int
+    qubos: List[Optional[np.ndarray]],
+    event_path: str,
+    seed: int,
+    num_anneal_fractions: int,
 ):
     time_stamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
-    fractions = np.linspace(0, 1, num=11, endpoint=True)
+    fractions = np.linspace(0, 1, num=num_anneal_fractions, endpoint=True)
     result_path_prefix = os.path.join(
-        os.path.dirname(event_path), "spectral_gap", time_stamp,
+        os.path.dirname(event_path),
+        "spectral_gap",
+        time_stamp,
     )
     first = True
 
