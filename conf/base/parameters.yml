@@ -1,7 +1,13 @@
 output_path: "results"
 trackml_input_path: "hepqpr-qallse/qallse/dsmaker/data/event000001000"
+data_fraction: 0.1
 num_angle_parts: 64
+
 seed: 1000
-max_p: 2
+
+max_p: 20
+q: -1
+
 num_anneal_fractions: 11
 
+maxcut_max_qubits: 10
