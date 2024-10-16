@@ -17,7 +17,7 @@ def create_pipeline() -> Pipeline:
                     "max_p": "params:max_p",
                     "q": "params:q",
                 },
-                {},
+                {"qaoa_solution_path": "params:qaoa_result_file"},
             ),
         ]
     )

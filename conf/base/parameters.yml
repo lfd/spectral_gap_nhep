@@ -11,3 +11,5 @@ q: -1
 num_anneal_fractions: 11
 
 maxcut_max_qubits: 10
+
+qaoa_result_file: ""

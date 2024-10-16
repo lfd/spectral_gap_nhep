@@ -1,7 +1,8 @@
 import os
 import csv
-from typing import Tuple, Dict
-import pickle
+from typing import Tuple, Optional
+import pandas as pd
+import numpy as np
 
 from qallse import dumper
 
@@ -57,3 +58,41 @@ def store_qubo(data_path: str, model: QallseSplit, qubo_prefix: str) -> str:
     logger.info("Wrote qubo to", qubo_path)
 
     return qubo_path
+
+
+def load_params_from_csv(
+    file_path: str, **filter_args
+) -> Tuple[Optional[np.ndarray], Optional[np.ndarray]]:
+    """
+    Loads result tuples from CSV file
+
+    :param file_path: The csv file path
+    :type file_path: str
+    :return: The beta and gamma parameters for the QAOA execution
+    :rtype: Tuple[Optional[np.ndarray], Optional[np.ndarray]]
+    """
+    df = pd.read_csv(file_path)
+    query_str = " and ".join([f"{k} == {v}" for k, v in filter_args.items()])
+    df = df.query(query_str)
+    if len(df.index) == 0:
+        logger.warning(f"No data for filter_args: {filter_args}")
+        return None, None
+    assert len(df.index) == 1, (
+        "In the filtered QAOA dataframe only one row should be present, got "
+        f"{len(df.index)}. Maybe you need to adapt your filter args?"
+    )
+
+    beta_colnames = [cn for cn in df.columns if cn[:4] == "beta"]
+    gamma_colnames = [cn for cn in df.columns if cn[:5] == "gamma"]
+    beta_colnames.sort()
+    gamma_colnames.sort()
+    p = len(beta_colnames)
+    betas = np.ndarray(p)
+    gammas = np.ndarray(p)
+
+    for i, row in df.iterrows():
+        for c in range(len(beta_colnames)):
+            betas[c] = row[beta_colnames[c]]
+            gammas[c] = row[gamma_colnames[c]]
+
+    return betas, gammas

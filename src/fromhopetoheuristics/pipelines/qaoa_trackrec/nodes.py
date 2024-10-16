@@ -113,4 +113,6 @@ def run_track_reconstruction_qaoa(
             )
             first = False
 
-    return {}  # FIXME
+    return {
+        "qaoa_solution_path": os.path.join(result_path_prefix, "solution.csv")
+    }  # FIXME

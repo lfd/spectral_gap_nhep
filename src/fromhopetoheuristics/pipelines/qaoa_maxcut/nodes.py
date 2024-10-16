@@ -100,7 +100,6 @@ def run_maxcut_qaoa(
     result_path_prefix = os.path.join(
         result_path_prefix, "MAXCUT/QAOA", time_stamp
     )
-    time_stamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
     first = True
     for n in range(4, maxcut_max_qubits + 1):
@@ -118,4 +117,6 @@ def run_maxcut_qaoa(
             )
             first = False
 
-    return {}  # FIXME
+    return {
+        "qaoa_solution_path": os.path.join(result_path_prefix, "solution.csv")
+    }  # FIXME
