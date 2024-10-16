@@ -263,7 +263,7 @@ def get_FOURIER_params(
 ) -> Tuple[np.ndarray, np.ndarray]:
     if q == -1:
         assert len(v_params) == len(u_params) == p, (
-            f"Length of the parameter vector without FOURIER stragety should",
+            "Length of the parameter vector without FOURIER stragety should",
             f"be {p}, got {len(v_params)} and {len(u_params)}",
         )
         return v_params, u_params
@@ -403,9 +403,7 @@ def annealing_schedule_from_QAOA_params(
         # ensure that time is increasing monotonically, if not, skip
         if times[i] < last_added_time:
             continue
-        anneal_fraction = np.abs(gammas[i]) / (
-            np.abs(gammas[i]) + np.abs(betas[i])
-        )
+        anneal_fraction = np.abs(gammas[i]) / (np.abs(gammas[i]) + np.abs(betas[i]))
         anneal_schedule.append((times[i], anneal_fraction))
         last_added_time = times[i]
 
