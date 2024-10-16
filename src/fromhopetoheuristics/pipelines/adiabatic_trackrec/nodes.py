@@ -75,7 +75,10 @@ def run_track_reconstruction_annealing(
 
     for i, qubo in enumerate(qubos):
         if qubo is not None:
-            log.info(f"Computing spectral gaps for QUBO {i+1}/{len(qubos)} (n={len(qubo)})")
+            log.info(
+                f"Computing spectral gaps for QUBO {i+1}/{len(qubos)} "
+                f"(n={len(qubo)})"
+            )
             track_reconstruction_annealing(
                 qubo,
                 seed,
