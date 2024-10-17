@@ -70,11 +70,11 @@ def create_metadata(
     :return: Path, where the filtered data is stored
     :rtype: str
     """
-    output_path = os.path.join(result_path_prefix, "qallse_data")
     prefix = f"data_frac{int(f*100)}_seed{seed}_num_parts{num_angle_parts}"
-    event_dir = os.path.join(output_path, prefix)
     event_id = re.search("(event[0-9]+)", trackml_input_path)[0]
+    output_path = os.path.join(result_path_prefix, "qallse_data", event_id)
 
+    event_dir = os.path.join(output_path, prefix)
     if os.path.exists(event_dir):
         event_path = os.path.join(event_dir, event_id)
         return {"metadata": {}, "event_path": event_path}  # FIXME
@@ -82,6 +82,7 @@ def create_metadata(
     metadata, event_path = create_dataset(
         density=f,
         output_path=output_path,
+        input_path=trackml_input_path,
         prefix=prefix,
         gen_doublets=True,
         random_seed=seed,
