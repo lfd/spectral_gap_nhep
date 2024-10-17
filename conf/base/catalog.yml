@@ -1,0 +1,6 @@
+
+
+"{namespace}.{variant}.regressor":
+  type: pickle.PickleDataSet
+  filepath: data/06_models/{namespace}/{variant}/regressor.pickle
+  versioned: true

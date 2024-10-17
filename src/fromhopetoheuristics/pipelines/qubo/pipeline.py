@@ -1,4 +1,5 @@
 from kedro.pipeline import Pipeline, node, pipeline
+from kedro.config import OmegaConfigLoader  # noqa: E402
 
 from .nodes import (
     build_qubos,
