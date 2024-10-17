@@ -49,6 +49,7 @@ def create_metadata(
     result_path_prefix: str,
     seed: int,
     trackml_input_path: str,
+    num_angle_parts: str,
     f: float = 0.1,
 ) -> Tuple[dict, str]:
     """
@@ -70,7 +71,7 @@ def create_metadata(
     :rtype: str
     """
     output_path = os.path.join(result_path_prefix, "qallse_data")
-    prefix = f"data_frac{int(f*100)}_seed{seed}"
+    prefix = f"data_frac{int(f*100)}_seed{seed}_num_parts{num_angle_parts}"
     event_dir = os.path.join(output_path, prefix)
     event_id = re.search("(event[0-9]+)", trackml_input_path)[0]
 

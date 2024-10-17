@@ -11,7 +11,9 @@ def create_pipeline() -> Pipeline:
                 {
                     "result_path_prefix": "params:output_path",
                     "trackml_input_path": "params:trackml_input_path",
+                    "num_angle_parts": "params:num_angle_parts",
                     "seed": "params:seed",
+                    "f": "params:data_fraction",
                 },
                 {
                     "metadata": "metadata",
