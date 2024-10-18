@@ -16,7 +16,6 @@ def track_reconstruction_annealing(
     qubo: np.ndarray,
     seed: int,
     fractions: Iterable[float],
-    result_path_prefix: str,
     geometric_index: int = 0,
     include_header: bool = True,
 ):
@@ -60,18 +59,10 @@ def track_reconstruction_annealing(
 
 def run_track_reconstruction_annealing(
     qubos: Dict,
-    event_path: str,
     seed: int,
     num_anneal_fractions: int,
 ):
-    time_stamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-
     fractions = np.linspace(0, 1, num=num_anneal_fractions, endpoint=True)
-    result_path_prefix = os.path.join(
-        os.path.dirname(event_path),
-        "spectral_gap",
-        time_stamp,
-    )
     first = True
 
     results = {}
@@ -81,7 +72,6 @@ def run_track_reconstruction_annealing(
             qubo,
             seed,
             fractions,
-            result_path_prefix,
             geometric_index=i,
             include_header=first,  # FIXME
         )
