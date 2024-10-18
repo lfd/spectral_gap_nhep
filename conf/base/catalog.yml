@@ -1,6 +1,5 @@
 
 
-"{namespace}.{variant}.regressor":
-  type: pickle.PickleDataSet
-  filepath: data/06_models/{namespace}/{variant}/regressor.pickle
-  versioned: true
+qubos:
+  type: fromhopetoheuristics.datasets.qallse_split.QuboDataset
+  filepath: data/03_primary

@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 import numpy as np
-from typing import Iterable, Optional, List
+from typing import Iterable, Optional, Dict
 
 from fromhopetoheuristics.utils.spectral_gap_calculator import (
     calculate_spectral_gap,
@@ -53,12 +53,13 @@ def track_reconstruction_annealing(
             ]
         )
 
-    for csv_data in csv_data_list:
-        save_to_csv(csv_data, result_path_prefix, "spectral_gap_evolution.csv")
+    # for csv_data in csv_data_list:
+    # save_to_csv(csv_data, result_path_prefix, "spectral_gap_evolution.csv")
+    return {"results": csv_data_list}
 
 
 def run_track_reconstruction_annealing(
-    qubos: List[Optional[np.ndarray]],
+    qubos: Dict,
     event_path: str,
     seed: int,
     num_anneal_fractions: int,
@@ -73,20 +74,17 @@ def run_track_reconstruction_annealing(
     )
     first = True
 
-    for i, qubo in enumerate(qubos):
-        if qubo is not None:
-            log.info(
-                f"Computing spectral gaps for QUBO {i+1}/{len(qubos)} "
-                f"(n={len(qubo)})"
-            )
-            track_reconstruction_annealing(
-                qubo,
-                seed,
-                fractions,
-                result_path_prefix,
-                geometric_index=i,
-                include_header=first,  # FIXME
-            )
-            first = False
+    results = {}
+    for i, qubo in qubos.items():
+        log.info(f"Computing spectral gaps for QUBO {i+1}/{len(qubos)}")
+        results[i] = track_reconstruction_annealing(
+            qubo,
+            seed,
+            fractions,
+            result_path_prefix,
+            geometric_index=i,
+            include_header=first,  # FIXME
+        )
+        first = False
 
-    return {}  # FIXME
+    return {"results": results}

@@ -69,12 +69,13 @@ class QuboDataset(AbstractDataset):
 
             qubo = dict_QUBO_to_matrix(Q)
 
-            if len(qubo) > 18:
-                log.warning(f"Too many variables for qubo {qubo_path}")
-                qubo = None
-            elif len(qubo) == 0:
-                log.warning(f"Empty QUBO {qubo_path}")
-                qubo = None
+            # FIXME: Warning triggered
+            # if len(qubo) > 18:
+            #     log.warning(f"Too many variables for qubo {qubo_path}")
+            #     qubo = None
+            # elif len(qubo) == 0:
+            #     log.warning(f"Empty QUBO {qubo_path}")
+            #     qubo = None
             qubos[i] = qubo
 
         return qubos
