@@ -3,7 +3,6 @@ from kedro.config import OmegaConfigLoader  # noqa: E402
 
 from .nodes import (
     build_qubos,
-    load_qubos,
     solve_qubos,
 )
 
@@ -18,19 +17,12 @@ def create_pipeline() -> Pipeline:
                     "event_path": "event_path",
                     "num_angle_parts": "params:num_angle_parts",
                 },
-                {"qubo_paths": "qubo_paths"},
-            ),
-            node(
-                load_qubos,
-                {"qubo_paths": "qubo_paths"},
                 {"qubos": "qubos"},
             ),
             node(
                 solve_qubos,
                 {
-                    "data_wrapper": "data_wrapper",
-                    "qubo_paths": "qubo_paths",
-                    "event_path": "event_path",
+                    "qubos": "qubos",
                     "seed": "params:seed",
                 },
                 {

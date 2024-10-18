@@ -1,6 +1,5 @@
-import pickle
 import os
-from typing import List
+from typing import Dict
 
 from qallse.cli.func import build_model, solve_neal
 from qallse.data_wrapper import DataWrapper
@@ -9,6 +8,7 @@ from fromhopetoheuristics.utils.data_utils import store_qubo
 from fromhopetoheuristics.utils.qaoa_utils import (
     dict_QUBO_to_matrix,
 )
+
 
 import logging
 
@@ -35,66 +35,33 @@ def build_qubos(
     :return: the path to the QUBO in dict form
     :rtype: List[str]
     """
-    qubo_paths = []
-    qubo_base_path = os.path.join(os.path.dirname(event_path), "QUBO")
+    qubos = {}
+    log.info(f"Generating {num_angle_parts} QUBOs")
     for i in range(num_angle_parts):
-        qubo_prefix = f"angle_index{i:02d}_"
-        qubo_path = os.path.join(qubo_base_path, f"{qubo_prefix}qubo.pickle")
-        if not os.path.exists(qubo_path):
-            extra_config = {
-                "geometric_index": i,
-                "xy_angle_parts ": num_angle_parts,
-            }
-            model = QallseSplit(data_wrapper, **extra_config)
-            build_model(event_path, model, False)
+        extra_config = {
+            "geometric_index": i,
+            "xy_angle_parts ": num_angle_parts,
+        }
+        model = QallseSplit(data_wrapper, **extra_config)
+        build_model(event_path, model, False)
 
-            qubo_path = store_qubo(event_path, model, qubo_prefix=qubo_prefix)
-            log.info(f"Generated QUBO at {qubo_path}")
-        qubo_paths.append(qubo_path)
-
-    return {"qubo_paths": qubo_paths}
-
-
-def load_qubos(qubo_paths: List[str]):
-    qubos = []
-    for qubo_path in qubo_paths:
-        log.info(f"Loading QUBO from {qubo_path}")
-        with open(qubo_path, "rb") as f:
-            Q = pickle.load(f)
-
-        qubo = dict_QUBO_to_matrix(Q)
-
-        if len(qubo) > 18:
-            log.warning(f"Too many variables for qubo {qubo_path}")
-            qubo = None
-        elif len(qubo) == 0:
-            log.warning(f"Empty QUBO {qubo_path}")
-            qubo = None
-        qubos.append(qubo)
-
+        qubos[i] = model
+        log.info(f"Generated QUBO {i+1}/{num_angle_parts}")
     return {"qubos": qubos}
 
 
 def solve_qubos(
-    data_wrapper: DataWrapper,
-    qubo_paths: List[str],
-    event_path: str,
+    qubos: Dict,
     seed: int,
 ):
-    responses = []
-    cl_solver_path = os.path.join(os.path.dirname(event_path), "cl_solver")
-    os.makedirs(cl_solver_path, exist_ok=True)
-    for i, qubo_path in enumerate(qubo_paths):
-        with open(qubo_path, "rb") as f:
-            qubo = pickle.load(f)
+    responses = {}
+    log.info(f"Solving {len(qubos)} QUBOs")
+
+    for i, qubo in qubos.items():
         response = solve_neal(qubo, seed=seed)
         # print_stats(data_wrapper, response, qubo) # FIXME: solve no track found case
 
-        filename = f"neal_response{i:02d}.pickle"
-        oname = os.path.join(cl_solver_path, filename)
-        with open(oname, "wb") as f:
-            pickle.dump(response, f)
-        log.info(f"Wrote response to {oname}")
-        responses.append(response)
+        log.info(f"Solved QUBO {i+1}/{len(qubos)}")
+        responses[i] = response
 
     return {"responses": responses}
