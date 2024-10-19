@@ -257,9 +257,15 @@ def initialise_QAOA_parameters(
 
     init_params = np.concatenate([beta_init, gamma_init])
 
-    bounds_beta = (-0.5 * np.pi, 0.5 * np.pi)
-    bounds_gamma = (-np.pi, np.pi)
-    bounds = [bounds_beta] * p + [bounds_gamma] * p
+    if fourier:
+        if p < 5:
+            bounds = [(-1/p, 1/p)] * 2 * p
+        else:
+            bounds = [(-0.25, 0.25)] * 2 * p
+    else:
+        bounds_beta = (-0.5 * np.pi, 0.5 * np.pi)
+        bounds_gamma = (-np.pi, np.pi)
+        bounds = [bounds_beta] * p + [bounds_gamma] * p
 
     return init_params, bounds
 
@@ -313,12 +319,10 @@ def solve_QUBO_with_QAOA(
         init_params, bounds = initialise_QAOA_parameters(
             p, random_param_init, seed, initial_params, fourier=False
         )
-        bounds = None
     else:
-        init_params, _ = initialise_QAOA_parameters(
+        init_params, bounds = initialise_QAOA_parameters(
             q, random_param_init, seed, initial_params, fourier=True
         )
-        bounds = None
 
     def cost_fkt(
         params: np.ndarray,
