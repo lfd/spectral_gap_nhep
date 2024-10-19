@@ -16,6 +16,7 @@ def create_pipeline() -> Pipeline:
                     "data_wrapper": "data_wrapper",
                     "event_path": "event_path",
                     "num_angle_parts": "params:num_angle_parts",
+                    "geometric_index": "params:geometric_index",
                 },
                 {"qubo_paths": "qubo_paths"},
             ),

@@ -16,6 +16,7 @@ def create_pipeline() -> Pipeline:
                     "seed": "params:seed",
                     "max_p": "params:max_p",
                     "q": "params:q",
+                    "geometric_index": "params:geometric_index",
                 },
                 {"qaoa_solution_path": "params:qaoa_result_file"},
             ),

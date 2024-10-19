@@ -246,8 +246,8 @@ def initialise_QAOA_parameters(
         beta_init = rng.random(p) * np.pi - np.pi * 0.5
         gamma_init = rng.random(p) * 2 * np.pi - np.pi
     else:
-        beta_init = np.repeat(0.25 * np.pi, p)
-        gamma_init = np.repeat(0.5 * np.pi, p)
+        beta_init = np.repeat(0.5 * np.pi, p)
+        gamma_init = np.zeros(p)
 
     init_params = np.concatenate([beta_init, gamma_init])
 

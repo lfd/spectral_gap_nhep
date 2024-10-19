@@ -62,6 +62,7 @@ def run_track_reconstruction_annealing(
     event_path: str,
     seed: int,
     num_anneal_fractions: int,
+    geometric_index: int = -1,
 ):
     time_stamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
@@ -74,6 +75,8 @@ def run_track_reconstruction_annealing(
     first = True
 
     for i, qubo in enumerate(qubos):
+        if geometric_index != -1:
+            i = geometric_index
         if qubo is not None:
             log.info(
                 f"Computing spectral gaps for QUBO {i+1}/{len(qubos)} "

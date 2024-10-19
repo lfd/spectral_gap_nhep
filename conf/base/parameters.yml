@@ -2,6 +2,7 @@ output_path: "results"
 trackml_input_path: "hepqpr-qallse/qallse/dsmaker/data/event000001000"
 data_fraction: 0.1
 num_angle_parts: 64
+geometric_index: -1 # angle part index, if -1 compute for all
 
 seed: 1000
 

@@ -58,7 +58,7 @@ def track_reconstruction_qaoa(
             this_q,
             seed=seed,
             initial_params=init_params,
-            random_param_init=True,
+            random_param_init=False,
         )
         if q == -1:
             init_params = np.concatenate([beta, gamma])
@@ -92,6 +92,7 @@ def run_track_reconstruction_qaoa(
     seed: int,
     max_p: int,
     q: int,
+    geometric_index: int = -1,
 ):
     time_stamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     result_path_prefix = os.path.join(
@@ -100,6 +101,8 @@ def run_track_reconstruction_qaoa(
     first = True
 
     for i, qubo in enumerate(qubos):
+        if geometric_index != -1:
+            i = geometric_index
         if qubo is not None:
             log.info(f"Optimising QUBO {i+1}/{len(qubos)} (n={len(qubo)})")
             track_reconstruction_qaoa(
