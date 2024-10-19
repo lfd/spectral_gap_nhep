@@ -298,6 +298,7 @@ def solve_QUBO_with_QAOA(
     seed: int = 12345,
     random_param_init: bool = False,
     initial_params: Optional[np.ndarray] = None,
+    optimiser: str = "COBYLA",
 ) -> Tuple[float, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     H, o = hamiltonian_from_qubo(qubo)
     circ = QAOAAnsatz(cost_operator=H, reps=p)
@@ -320,6 +321,7 @@ def solve_QUBO_with_QAOA(
         estimator: Estimator,
         p: int,
         q: int = -1,
+        optimiser: str = "COBYLA",
     ) -> float:
 
         if q != -1:
@@ -342,7 +344,7 @@ def solve_QUBO_with_QAOA(
         cost_fkt,
         init_params,
         args=(circ, H, estimator, p, q),
-        method="COBYLA",
+        method=optimiser,
         tol=1e-3,
         bounds=bounds,
     )

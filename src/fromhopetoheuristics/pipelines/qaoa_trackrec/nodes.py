@@ -22,10 +22,12 @@ def track_reconstruction_qaoa(
     include_header: bool = True,
     q=-1,
     max_p=20,
+    optimiser="COBYLA",
 ):
     if include_header:
         header_content = [
             "problem",
+            "optimiser",
             "num_qubits",
             "geometric_index",
             "seed",
@@ -59,6 +61,7 @@ def track_reconstruction_qaoa(
             seed=seed,
             initial_params=init_params,
             random_param_init=False,
+            optimiser=optimiser,
         )
         if q == -1:
             init_params = np.concatenate([beta, gamma])
@@ -67,6 +70,7 @@ def track_reconstruction_qaoa(
 
         row_content = [
             "track reconstruction",
+            optimiser,
             len(qubo),
             geometric_index,
             seed,
@@ -93,6 +97,7 @@ def run_track_reconstruction_qaoa(
     max_p: int,
     q: int,
     geometric_index: int = -1,
+    optimiser="COBYLA",
 ):
     time_stamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     result_path_prefix = os.path.join(
@@ -112,6 +117,7 @@ def run_track_reconstruction_qaoa(
                 geometric_index=i,
                 max_p=max_p,
                 q=q,
+                optimiser=optimiser,
                 include_header=first,  # FIXME
             )
             first = False

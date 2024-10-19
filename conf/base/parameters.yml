@@ -8,6 +8,7 @@ seed: 1000
 
 max_p: 20
 q: -1
+optimiser: "COBYLA"
 
 num_anneal_fractions: 11
 
