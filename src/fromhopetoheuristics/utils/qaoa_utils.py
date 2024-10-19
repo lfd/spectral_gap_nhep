@@ -215,6 +215,7 @@ def initialise_QAOA_parameters(
     random_init: bool = False,
     seed: int = 12345,
     initial_params: Optional[np.ndarray] = None,
+    fourier: bool = False,
 ) -> Tuple[np.ndarray, List[Tuple[float, float]]]:
     """
     Constructs a list of initialisation parameters for QAOA
@@ -228,6 +229,8 @@ def initialise_QAOA_parameters(
     :param initial_params: previous parameter initialisations that should be
         re-used, defaults to None
     :type initial_params: Optional[np.ndarray], optional
+    :param fourier: if fourier strategy is used
+    :type fourier: bool, optional
     :return: List of initial parameters
     :rtype: List[float]
     :return: Bounds of the parameter space
@@ -245,6 +248,9 @@ def initialise_QAOA_parameters(
         rng = np.random.default_rng(seed=seed)
         beta_init = rng.random(p) * np.pi - np.pi * 0.5
         gamma_init = rng.random(p) * 2 * np.pi - np.pi
+    elif fourier:
+        beta_init = np.zeros(p)
+        gamma_init = np.zeros(p)
     else:
         beta_init = np.repeat(0.5 * np.pi, p)
         gamma_init = np.zeros(p)
@@ -305,12 +311,12 @@ def solve_QUBO_with_QAOA(
     estimator = Estimator(seed=seed)
     if q == -1:
         init_params, bounds = initialise_QAOA_parameters(
-            p, random_param_init, seed, initial_params
+            p, random_param_init, seed, initial_params, fourier=False
         )
         bounds = None
     else:
         init_params, _ = initialise_QAOA_parameters(
-            q, random_param_init, seed, initial_params
+            q, random_param_init, seed, initial_params, fourier=True
         )
         bounds = None
 
@@ -321,7 +327,6 @@ def solve_QUBO_with_QAOA(
         estimator: Estimator,
         p: int,
         q: int = -1,
-        optimiser: str = "COBYLA",
     ) -> float:
 
         if q != -1:
@@ -405,7 +410,9 @@ def annealing_schedule_from_QAOA_params(
         # ensure that time is increasing monotonically, if not, skip
         if times[i] < last_added_time:
             continue
-        anneal_fraction = np.abs(gammas[i]) / (np.abs(gammas[i]) + np.abs(betas[i]))
+        anneal_fraction = np.abs(gammas[i]) / (
+            np.abs(gammas[i]) + np.abs(betas[i])
+        )
         anneal_schedule.append((times[i], anneal_fraction))
         last_added_time = times[i]
 
