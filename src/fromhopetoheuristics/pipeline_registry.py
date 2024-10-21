@@ -43,32 +43,25 @@ def register_pipelines() -> Dict[str, Pipeline]:
         create_qaoa_maxcut_pipeline() + create_anneal_schedule_pipeline()
     )
     pipelines["adiabatic_maxcut"] = create_adiabatic_maxcut_pipeline()
-    pipelines["maxcut"] = (
-        create_qaoa_maxcut_pipeline()
-        + create_adiabatic_maxcut_pipeline()
-        + create_anneal_schedule_pipeline()
-    )
+
+    pipelines["maxcut"] = pipelines["qaoa_maxcut"] + pipelines["adiabatic_maxcut"]
 
     pipelines["qubo"] = create_generation_pipeline() + create_qubo_pipeline()
     pipelines["qaoa_trackrec"] = (
-        create_generation_pipeline()
-        + create_qubo_pipeline()
+        pipelines["qubo"]
         + create_qaoa_trackrec_pipeline()
         + create_anneal_schedule_pipeline()
     )
     pipelines["adiabatic_trackrec"] = (
-        create_generation_pipeline()
-        + create_qubo_pipeline()
-        + create_adiabatic_trackrec_pipeline()
+        pipelines["qubo"] + create_adiabatic_trackrec_pipeline()
     )
     pipelines["anneal_schedule"] = create_anneal_schedule_pipeline()
+
     pipelines["trackrec"] = (
-        create_generation_pipeline()
-        + create_qubo_pipeline()
-        + create_qaoa_trackrec_pipeline()
-        + create_adiabatic_trackrec_pipeline()
+        pipelines["qaoa_trackrec"]
+        + pipelines["adiabatic_trackrec"]
         + create_anneal_schedule_pipeline()
-        # + create_visualization_pipeline() # FIXME
+        + create_visualization_pipeline()
     )
     pipelines["__default__"] = pipelines["trackrec"]
     return pipelines
