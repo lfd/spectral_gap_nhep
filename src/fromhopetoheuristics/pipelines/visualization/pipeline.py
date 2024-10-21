@@ -14,7 +14,7 @@ def create_pipeline() -> Pipeline:
                     "data_wrapper": "data_wrapper",
                 },
                 {
-                    "figures": "figures",
+                    "figures": "figures",  # FIXME: find suitable catalog entry
                 },
             )
         ]
