@@ -14,7 +14,7 @@ def create_pipeline() -> Pipeline:
                 build_qubos,
                 {
                     "data_wrapper": "data_wrapper",
-                    "event_path": "event_path",
+                    "doublets": "doublets",
                     "num_angle_parts": "params:num_angle_parts",
                 },
                 {"qubos": "qubos"},

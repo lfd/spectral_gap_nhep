@@ -17,7 +17,7 @@ log = logging.getLogger(__name__)
 
 def build_qubos(
     data_wrapper: DataWrapper,
-    event_path: str,
+    doublets,
     num_angle_parts: int,
 ):
     """
@@ -43,7 +43,7 @@ def build_qubos(
             "xy_angle_parts ": num_angle_parts,
         }
         model = QallseSplit(data_wrapper, **extra_config)
-        build_model(event_path, model, False)
+        build_model(doublets=doublets, model=model, add_missing=False)
 
         qubos[i] = model
         log.info(f"Generated QUBO {i+1}/{num_angle_parts}")
