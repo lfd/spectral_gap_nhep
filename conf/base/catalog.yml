@@ -21,6 +21,7 @@ qubos:
 adiabatic_track_reconstruction_results:
   type: pandas.JSONDataset
   filepath: data/04_feature/adiabatic_track_reconstruction_results.json
-  save_args:
-    orient: "records"
-    lines: True
+
+qaoa_track_reconstruction_results:
+  type: pandas.JSONDataset
+  filepath: data/04_feature/qaoa_track_reconstruction_results.json
