@@ -1,5 +1,26 @@
+hits:
+  type: pandas.CSVDataset
+  filepath: data/02_intermediate/hits.csv
 
+truth:
+  type: pandas.CSVDataset
+  filepath: data/02_intermediate/truth.csv
+
+particles:
+  type: pandas.CSVDataset
+  filepath: data/02_intermediate/particles.csv
+
+doublets:
+  type: pandas.CSVDataset
+  filepath: data/02_intermediate/doublets.csv
 
 qubos:
   type: fromhopetoheuristics.datasets.qallse_split.QuboDataset
   filepath: data/03_primary
+
+adiabatic_track_reconstruction_results:
+  type: pandas.JSONDataset
+  filepath: data/04_feature/adiabatic_track_reconstruction_results.json
+  save_args:
+    orient: "records"
+    lines: True
