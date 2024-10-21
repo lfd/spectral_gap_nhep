@@ -46,7 +46,6 @@ def load_dataset_data() -> dict:
 
 
 def create_metadata(
-    result_path_prefix: str,
     seed: int,
     trackml_input_path: str,
     num_angle_parts: str,
@@ -71,37 +70,28 @@ def create_metadata(
     :rtype: str
     """
     prefix = f"data_frac{int(f*100)}_seed{seed}_num_parts{num_angle_parts}"
-    event_id = re.search("(event[0-9]+)", trackml_input_path)[0]
-    output_path = os.path.join(result_path_prefix, "qallse_data", event_id)
 
-    event_dir = os.path.join(output_path, prefix)
-    if os.path.exists(event_dir):
-        event_path = os.path.join(event_dir, event_id)
-        return {"metadata": {}, "event_path": event_path}  # FIXME
-
-    metadata, event_path = create_dataset(
-        density=f,
-        output_path=output_path,
+    hits, truth, particles, doublets, metadata = create_dataset(
         input_path=trackml_input_path,
-        prefix=prefix,
-        gen_doublets=True,
+        density=f,
         random_seed=seed,
     )
 
     return {
+        "hits": hits,
+        "truth": truth,
+        "particles": particles,
+        "doublets": doublets,
         "metadata": metadata,
-        "event_path": event_path,
     }
 
 
-def create_qallse_datawrapper(event_path: str) -> DataWrapper:
+def create_qallse_datawrapper(hits, truth) -> DataWrapper:
     """
     Creates a qallse data wrapper form a given event path
 
-    :param event_path: The event path
-    :type event_path: str
     :return: Qallse data wrapper
     :rtype: DataWrapper
     """
-    dw = DataWrapper.from_path(event_path)
+    dw = DataWrapper(hits=hits, truth=truth)
     return {"data_wrapper": dw}

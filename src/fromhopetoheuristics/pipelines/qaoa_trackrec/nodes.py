@@ -79,24 +79,19 @@ def track_reconstruction_qaoa(
 
         for params in [beta, gamma, u, v]:
             row_content.extend(params)
-            row_content.extend(
-                [None for _ in range(max_p - len(params))]
-            )  # padding
+            row_content.extend([None for _ in range(max_p - len(params))])  # padding
 
         save_to_csv(row_content, result_path_prefix, "solution.csv")
 
 
 def run_track_reconstruction_qaoa(
     qubos: List[Optional[np.ndarray]],
-    event_path: str,
     seed: int,
     max_p: int,
     q: int,
 ):
     time_stamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-    result_path_prefix = os.path.join(
-        os.path.dirname(event_path), "QAOA", time_stamp
-    )
+    result_path_prefix = os.path.join(os.path.dirname(event_path), "QAOA", time_stamp)
     first = True
 
     for i, qubo in enumerate(qubos):

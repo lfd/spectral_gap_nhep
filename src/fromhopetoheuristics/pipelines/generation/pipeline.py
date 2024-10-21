@@ -9,21 +9,24 @@ def create_pipeline() -> Pipeline:
             node(
                 create_metadata,
                 {
-                    "result_path_prefix": "params:output_path",
+                    "seed": "params:seed",
                     "trackml_input_path": "params:trackml_input_path",
                     "num_angle_parts": "params:num_angle_parts",
-                    "seed": "params:seed",
                     "f": "params:data_fraction",
                 },
                 {
+                    "hits": "hits",
+                    "truth": "truth",
+                    "particles": "particles",
+                    "doublets": "doublets",
                     "metadata": "metadata",
-                    "event_path": "event_path",
                 },
             ),
             node(
                 create_qallse_datawrapper,
                 {
-                    "event_path": "event_path",
+                    "hits": "hits",
+                    "truth": "truth",
                 },
                 {
                     "data_wrapper": "data_wrapper",
