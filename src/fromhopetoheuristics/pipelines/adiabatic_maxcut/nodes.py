@@ -76,8 +76,7 @@ def run_maxcut_annealing(
     first = True
     for n in range(4, maxcut_max_qubits + 1):
         log.info(
-            f"Computing spectral gaps for QUBO with n={n} of "
-            "{maxcut_max_qubits}"
+            f"Computing spectral gaps for QUBO with n={n} of " "{maxcut_max_qubits}"
         )
         for density in np.linspace(0.5, 1, num=6, endpoint=True):
             log.info(f"\twith density={density}")

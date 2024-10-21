@@ -46,9 +46,7 @@ def create_anneal_schedule(
                 if betas is None or gammas is None:
                     continue
 
-                anneal_schedule = annealing_schedule_from_QAOA_params(
-                    betas, gammas
-                )
+                anneal_schedule = annealing_schedule_from_QAOA_params(betas, gammas)
 
                 for anneal_time, anneal_fraction in anneal_schedule:
                     row_content = [
@@ -60,9 +58,7 @@ def create_anneal_schedule(
                         n,
                         density,
                     ]
-                    save_to_csv(
-                        row_content, result_path_prefix, "anneal_schedule.csv"
-                    )
+                    save_to_csv(row_content, result_path_prefix, "anneal_schedule.csv")
     else:  # track reconstruction
         header_content.append("geometric_index")
         save_to_csv(header_content, result_path_prefix, "anneal_schedule.csv")
@@ -84,8 +80,6 @@ def create_anneal_schedule(
                     anneal_fraction,
                     i,
                 ]
-                save_to_csv(
-                    row_content, result_path_prefix, "anneal_schedule.csv"
-                )
+                save_to_csv(row_content, result_path_prefix, "anneal_schedule.csv")
 
     return {}

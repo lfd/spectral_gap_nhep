@@ -1,15 +1,11 @@
 from trackml.dataset import load_event, load_dataset
 import pandas as pd
 from typing import Tuple, Dict
-import os
-import re
 import random
 import numpy as np
 from datetime import datetime
 
 from qallse.data_wrapper import DataWrapper
-
-# from qallse.dsmaker import create_dataset
 
 import logging
 
@@ -39,18 +35,6 @@ def create_dataset(
     if random_seed is None:
         random_seed = random.randint(0, 1 << 30)
     random.seed(random_seed)
-
-    # event_id = re.search("(event[0-9]+)", input_path)[0]
-
-    # compute the prefix
-    # if prefix is None:
-    #     prefix = f"ez-{density}"
-    #     if high_pt_cut > 0:
-    #         prefix += f"_hpt-{high_pt_cut}"
-    #     else:
-    #         prefix += "_baby"
-    #     if double_hits_ok:
-    #         prefix += "_dbl"
 
     # ---------- prepare data
 
@@ -123,17 +107,6 @@ def create_dataset(
 
     new_truth.weight = new_truth.weight / new_truth.weight.sum()
 
-    # ---------- write data
-
-    # write the dataset to disk
-    # output_path = os.path.join(output_path, prefix)
-    # os.makedirs(output_path, exist_ok=True)
-    # output_path = os.path.join(output_path, event_id)
-
-    # new_hits.to_csv(output_path + "-hits.csv", index=False)
-    # new_truth.to_csv(output_path + "-truth.csv", index=False)
-    # new_particles.to_csv(output_path + "-particles.csv", index=False)
-
     # ---------- write metadata
 
     metadata = dict(
@@ -149,19 +122,11 @@ def create_dataset(
 
     metadata["params"] = input_params
 
-    # with open(output_path + "-meta.json", "w") as f:
-    #     json.dump(metadata, f, indent=4)
-
     # ------------ gen doublets
 
     from qallse.seeding import generate_doublets
 
     doublets_df = generate_doublets(hits=new_hits)
-    # with open(output_path + "-doublets.csv", "w") as f:
-    #     doublets_df.to_csv(f, index=False)
-    #     log.info(
-    #         f"Doublets (len={len(doublets_df)}) generated in f{output_path}."
-    # )
 
     return new_hits, new_truth, new_particles, doublets_df, metadata
 
@@ -223,8 +188,6 @@ def create_metadata(
     :return: Path, where the filtered data is stored
     :rtype: str
     """
-    prefix = f"data_frac{int(f*100)}_seed{seed}_num_parts{num_angle_parts}"
-
     hits, truth, particles, doublets, metadata = create_dataset(
         hits=event_hits,
         truth=event_truth,

@@ -85,9 +85,7 @@ def maxcut_qaoa(
 
         for params in [beta, gamma, u, v]:
             row_content.extend(params)
-            row_content.extend(
-                [None for _ in range(max_p - len(params))]
-            )  # padding
+            row_content.extend([None for _ in range(max_p - len(params))])  # padding
 
         save_to_csv(row_content, result_path_prefix, "solution.csv")
 
@@ -102,9 +100,7 @@ def run_maxcut_qaoa(
 ):
     time_stamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
-    result_path_prefix = os.path.join(
-        result_path_prefix, "MAXCUT/QAOA", time_stamp
-    )
+    result_path_prefix = os.path.join(result_path_prefix, "MAXCUT/QAOA", time_stamp)
 
     first = True
     for n in range(4, maxcut_max_qubits + 1):

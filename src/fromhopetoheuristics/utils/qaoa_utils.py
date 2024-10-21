@@ -259,7 +259,7 @@ def initialise_QAOA_parameters(
 
     if fourier:
         if p < 5:
-            bounds = [(-1/p, 1/p)] * 2 * p
+            bounds = [(-1 / p, 1 / p)] * 2 * p
         else:
             bounds = [(-0.25, 0.25)] * 2 * p
     else:
@@ -414,9 +414,7 @@ def annealing_schedule_from_QAOA_params(
         # ensure that time is increasing monotonically, if not, skip
         if times[i] < last_added_time:
             continue
-        anneal_fraction = np.abs(gammas[i]) / (
-            np.abs(gammas[i]) + np.abs(betas[i])
-        )
+        anneal_fraction = np.abs(gammas[i]) / (np.abs(gammas[i]) + np.abs(betas[i]))
         anneal_schedule.append((times[i], anneal_fraction))
         last_added_time = times[i]
 
