@@ -32,12 +32,20 @@ doublets:
 
 qubos:
   type: fromhopetoheuristics.datasets.qallse_split.QuboDataset
-  filepath: data/03_primary
+  filepath: data/03_qubos
 
 adiabatic_track_reconstruction_results:
   type: pandas.JSONDataset
-  filepath: data/04_feature/adiabatic_track_reconstruction_results.json
+  filepath: data/04_adiabatic/adiabatic_track_reconstruction_results.json
 
 qaoa_track_reconstruction_results:
   type: pandas.JSONDataset
-  filepath: data/04_feature/qaoa_track_reconstruction_results.json
+  filepath: data/04_qaoa/qaoa_track_reconstruction_results.json
+
+adiabatic_maxcut_results:
+  type: pandas.JSONDataset
+  filepath: data/04_adiabatic/adiabatic_maxcut_results.json
+
+qaoa_maxcut_results:
+  type: pandas.JSONDataset
+  filepath: data/04_qaoa/qaoa_maxcut_results.json
