@@ -4,6 +4,7 @@ from .nodes import visualize
 
 
 def create_pipeline() -> Pipeline:
+
     return pipeline(
         [
             node(
@@ -11,7 +12,6 @@ def create_pipeline() -> Pipeline:
                 {
                     "responses": "responses",
                     "data_wrapper": "data_wrapper",
-                    "event_path": "event_path",
                 },
                 {
                     "figures": "figures",
