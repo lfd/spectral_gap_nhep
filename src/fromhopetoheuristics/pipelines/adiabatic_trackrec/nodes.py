@@ -12,8 +12,10 @@ log = logging.getLogger(__name__)
 
 def track_reconstruction_annealing(
     qubo: np.ndarray,
-    fractions: Iterable[float],
+    num_anneal_fractions: float,
 ):
+    fractions = np.linspace(0, 1, num=num_anneal_fractions, endpoint=True)
+
     gs_energies = []
     fes_energies = []
     gaps = []
@@ -34,7 +36,6 @@ def run_track_reconstruction_annealing(
     qubos: Dict,
     num_anneal_fractions: int,
 ):
-    fractions = np.linspace(0, 1, num=num_anneal_fractions, endpoint=True)
 
     results = {}
     for i, qubo in qubos.items():
@@ -43,8 +44,8 @@ def run_track_reconstruction_annealing(
             continue
         log.info(f"Computing spectral gaps for QUBO {i+1}/{len(qubos)}")
         results[i] = track_reconstruction_annealing(
-            qubo,
-            fractions,
+            qubo=qubo,
+            num_anneal_fractions=num_anneal_fractions,
         )
 
     results = pd.DataFrame.from_dict(results)
