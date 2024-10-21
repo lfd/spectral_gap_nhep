@@ -19,6 +19,7 @@ def build_qubos(
     data_wrapper: DataWrapper,
     doublets,
     num_angle_parts: int,
+    geometric_index: int = -1,
 ):
     """
     Creates partial QUBO from TrackML data using Qallse. The data is split into
@@ -31,13 +32,19 @@ def build_qubos(
     :type event_path: str
     :param num_angle_parts: Number of angle segments in the detector, equals
         the number of resulting QUBOs
-    :type num_angle_parts: int
+    :param geometric_index: The angle part, for which to build the QUBO, if -1
+        build all
+    :type geometric_index: int
     :return: the path to the QUBO in dict form
     :rtype: List[str]
     """
     qubos = {}
     log.info(f"Generating {num_angle_parts} QUBOs")
-    for i in range(num_angle_parts):
+    if geometric_index == -1:
+        angle_parts = range(num_angle_parts)
+    else:
+        angle_parts = [geometric_index]
+    for i in angle_parts:
         extra_config = {
             "geometric_index": i,
             "xy_angle_parts ": num_angle_parts,

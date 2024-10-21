@@ -1,11 +1,13 @@
 trackml_input_path: "hepqpr-qallse/qallse/dsmaker/data/event000001000"
-data_fraction: 0.01
-num_angle_parts: 5
+data_fraction: 0.1
+num_angle_parts: 64
+# geometric_index: -1 # angle part index, if -1 compute for all
 
 seed: 1000 #TODO: consider different seeds
 
-max_p: 2 #TODO: find a more explicit name
-q: -1 #TODO: find a more explicit name
+max_p: 20
+q: -1
+optimiser: "COBYLA"
 
 num_anneal_fractions: 11
 

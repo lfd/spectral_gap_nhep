@@ -15,6 +15,7 @@ def create_pipeline() -> Pipeline:
                     "seed": "params:seed",
                     "max_p": "params:max_p",
                     "q": "params:q",
+                    "optimiser": "params:optimiser",
                 },
                 {"results": "qaoa_track_reconstruction_results"},
             ),

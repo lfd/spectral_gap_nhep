@@ -17,6 +17,7 @@ def track_reconstruction_qaoa(
     seed: int,
     q=-1,
     max_p=20,
+    optimiser="COBYLA",
 ):
     if q == 0:
         return
@@ -40,7 +41,8 @@ def track_reconstruction_qaoa(
             this_q,
             seed=seed,
             initial_params=init_params,
-            random_param_init=True,
+            random_param_init=False,
+            optimiser=optimiser,
         )
         if q == -1:
             init_params = np.concatenate([beta, gamma])
@@ -67,6 +69,7 @@ def run_track_reconstruction_qaoa(
     seed: int,
     max_p: int,
     q: int,
+    optimiser="COBYLA",
 ):
     results = {}
     for i, qubo in qubos.items():
@@ -83,6 +86,7 @@ def run_track_reconstruction_qaoa(
                 seed=seed,
                 q=q,
                 max_p=max_p,
+                optimiser=optimiser,
             ),
             "min_energy": min_energy,
             "opt_var_assignment": opt_var_assignment,

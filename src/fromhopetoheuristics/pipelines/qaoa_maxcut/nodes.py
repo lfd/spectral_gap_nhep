@@ -22,10 +22,12 @@ def maxcut_qaoa(
     include_header: bool = True,
     max_p=20,
     q=-1,
+    optimiser="COBYLA",
 ):
     if include_header:
         header_content = [
             "problem",
+            "optimiser",
             "num_qubits",
             "density",
             "seed",
@@ -61,6 +63,7 @@ def maxcut_qaoa(
             seed=seed,
             initial_params=init_params,
             random_param_init=True,
+            optimiser=optimiser,
         )
         if q == -1:
             init_params = np.concatenate([beta, gamma])
@@ -69,6 +72,7 @@ def maxcut_qaoa(
 
         row_content = [
             "maxcut",
+            optimiser,
             len(qubo),
             density,
             seed,
@@ -94,6 +98,7 @@ def run_maxcut_qaoa(
     max_p: int,
     q: int,
     maxcut_max_qubits: int,
+    optimiser="COBYLA",
 ):
     time_stamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
@@ -113,6 +118,7 @@ def run_maxcut_qaoa(
                 result_path_prefix,
                 max_p=max_p,
                 q=q,
+                optimiser=optimiser,
                 include_header=first,  # FIXME
             )
             first = False
