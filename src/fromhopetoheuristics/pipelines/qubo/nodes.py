@@ -64,4 +64,4 @@ def solve_qubos(
         log.info(f"Solved QUBO {i+1}/{len(qubos)}")
         responses[i] = response
 
-    return {"responses": responses}
+    return {"responses": responses}  # FIXME find suitable catalog entry
