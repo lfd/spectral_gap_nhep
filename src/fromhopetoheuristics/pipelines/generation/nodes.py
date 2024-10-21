@@ -47,9 +47,12 @@ def load_dataset_data() -> dict:
 
 def create_metadata(
     seed: int,
-    trackml_input_path: str,
     num_angle_parts: str,
-    f: float = 0.1,
+    f: float,
+    event_cells,
+    event_hits,
+    event_particles,
+    event_truth,
 ) -> Tuple[dict, str]:
     """
     Creates/filters and stores TrackML event data for a given fraction of data.
@@ -72,7 +75,9 @@ def create_metadata(
     prefix = f"data_frac{int(f*100)}_seed{seed}_num_parts{num_angle_parts}"
 
     hits, truth, particles, doublets, metadata = create_dataset(
-        input_path=trackml_input_path,
+        hits=event_hits,
+        truth=event_truth,
+        particles=event_particles,
         density=f,
         random_seed=seed,
     )

@@ -10,9 +10,12 @@ def create_pipeline() -> Pipeline:
                 create_metadata,
                 {
                     "seed": "params:seed",
-                    "trackml_input_path": "params:trackml_input_path",
                     "num_angle_parts": "params:num_angle_parts",
                     "f": "params:data_fraction",
+                    "event-cells": "event-cells",
+                    "event-hits": "event-hits",
+                    "event-particles": "event-particles",
+                    "event-truth": "event-truth",
                 },
                 {
                     "hits": "hits",
