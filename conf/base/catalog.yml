@@ -1,16 +1,16 @@
-event-cells:
+event_cells:
   type: pandas.CSVDataset
   filepath: data/01_raw/event000001000-cells.csv
 
-event-hits:
+event_hits:
   type: pandas.CSVDataset
   filepath: data/01_raw/event000001000-hits.csv
 
-event-particles:
+event_particles:
   type: pandas.CSVDataset
   filepath: data/01_raw/event000001000-particles.csv
 
-event-truth:
+event_truth:
   type: pandas.CSVDataset
   filepath: data/01_raw/event000001000-truth.csv
 
