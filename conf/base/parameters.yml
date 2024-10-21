@@ -1,12 +1,11 @@
-output_path: "results"
 trackml_input_path: "hepqpr-qallse/qallse/dsmaker/data/event000001000"
-data_fraction: 0.1
-num_angle_parts: 64
+data_fraction: 0.01
+num_angle_parts: 5
 
-seed: 1000
+seed: 1000 #TODO: consider different seeds
 
-max_p: 20
-q: -1
+max_p: 2 #TODO: find a more explicit name
+q: -1 #TODO: find a more explicit name
 
 num_anneal_fractions: 11
 
