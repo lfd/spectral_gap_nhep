@@ -50,11 +50,7 @@ def register_pipelines() -> Dict[str, Pipeline]:
     pipelines["maxcut"] = pipelines["qaoa_maxcut"] + pipelines["adiabatic_maxcut"]
 
     pipelines["qubo"] = create_generation_pipeline() + create_qubo_pipeline()
-    pipelines["qaoa_trackrec"] = (
-        pipelines["qubo"]
-        + create_qaoa_trackrec_pipeline()
-        + create_qaoa_trackrec_pipeline()
-    )
+    pipelines["qaoa_trackrec"] = pipelines["qubo"] + create_qaoa_trackrec_pipeline()
     pipelines["adiabatic_trackrec"] = (
         pipelines["qubo"] + create_adiabatic_trackrec_pipeline()
     )
