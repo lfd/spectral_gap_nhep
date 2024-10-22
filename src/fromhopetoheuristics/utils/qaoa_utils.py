@@ -383,7 +383,9 @@ def times_from_QAOA_params(betas: np.ndarray, gammas: np.ndarray) -> np.ndarray:
     time = 0.0
     time_midpoints = np.zeros(p + 1)
     for i in range(p):
-        time_segment = np.abs(gammas[i]) + np.abs(betas[i])
+        time_segment = np.mean(
+            np.abs(gammas[i]) + np.abs(betas[i])
+        )  # TODO: check if this is correct; I added a mean here
         time += time_segment
         time_midpoints[i] = time - 0.5 * time_segment
 
