@@ -1,74 +1,119 @@
 event_cells:
   type: pandas.CSVDataset
   filepath: data/01_raw/event000001000-cells.csv
+  metadata:
+    kedro-viz:
+      layer: Event Data
 
 event_hits:
   type: pandas.CSVDataset
   filepath: data/01_raw/event000001000-hits.csv
+  metadata:
+    kedro-viz:
+      layer: Event Data
 
 event_particles:
   type: pandas.CSVDataset
   filepath: data/01_raw/event000001000-particles.csv
+  metadata:
+    kedro-viz:
+      layer: Event Data
 
 event_truth:
   type: pandas.CSVDataset
   filepath: data/01_raw/event000001000-truth.csv
+  metadata:
+    kedro-viz:
+      layer: Event Data
 
 hits:
   type: pandas.CSVDataset
   filepath: data/02_intermediate/hits.csv
+  metadata:
+    kedro-viz:
+      layer: Preprocessing
 
 truth:
   type: pandas.CSVDataset
   filepath: data/02_intermediate/truth.csv
+  metadata:
+    kedro-viz:
+      layer: Preprocessing
 
 particles:
   type: pandas.CSVDataset
   filepath: data/02_intermediate/particles.csv
+  metadata:
+    kedro-viz:
+      layer: Preprocessing
 
 doublets:
   type: pandas.CSVDataset
   filepath: data/02_intermediate/doublets.csv
+  metadata:
+    kedro-viz:
+      layer: Preprocessing
 
 qubos:
   type: fromhopetoheuristics.datasets.qallse_split.QuboDataset
   filepath: data/03_qubos
+  # metadata:
+  #   kedro-viz:
+  #     layer: Preprocessing
 
 adiabatic_track_reconstruction_results:
   type: pandas.JSONDataset
   filepath: data/04_adiabatic/adiabatic_track_reconstruction_results.json
   load_args:
     convert_axes: false
+  metadata:
+    kedro-viz:
+      layer: Adiabatic
 
 adiabatic_maxcut_results:
   type: pandas.JSONDataset
   filepath: data/04_adiabatic/adiabatic_maxcut_results.json
   load_args:
     convert_axes: false
+  metadata:
+    kedro-viz:
+      layer: Adiabatic
 
 qaoa_track_reconstruction_results:
   type: pandas.JSONDataset
   filepath: data/05_qaoa/qaoa_track_reconstruction_results.json
   load_args:
     convert_axes: false
+  metadata:
+    kedro-viz:
+      layer: QAOA
 
 qaoa_maxcut_results:
   type: pandas.JSONDataset
   filepath: data/05_qaoa/qaoa_maxcut_results.json
   load_args:
     convert_axes: false
+  metadata:
+    kedro-viz:
+      layer: QAOA
 
 anneal_schedule_maxcut_results:
   type: pandas.JSONDataset
   filepath: data/06_schedules/anneal_schedule_maxcut_results.json
   load_args:
     convert_axes: false
+  metadata:
+    kedro-viz:
+      layer: Schedules
 
 anneal_schedule_track_reconstruction_results:
   type: pandas.JSONDataset
   filepath: data/06_schedules/anneal_schedule_track_reconstruction_results.json
   load_args:
     convert_axes: false
+  metadata:
+    kedro-viz:
+      layer: Schedules
 
 figures: #FIXME: currently only dummy dataset
   type: plotly.HTMLDataset
