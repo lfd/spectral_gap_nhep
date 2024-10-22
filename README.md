@@ -45,6 +45,7 @@ This will run the default pipeline which consists of all individual pipelines de
 #### QAOA Maxcut
 
 Solving the Maxcut problem using Quadratic Approximate Optimization Algorithm (QAOA).
+It also calculates the annealing schedules for this problem.
 
 #### Adiabatic Maxcut
 
@@ -57,14 +58,11 @@ This pipeline loads event data and prepares a qubo for the following two track r
 #### QAOA Track Reconstruction
 
 Solving the track reconstruction problem using QAOA.
+It also calculates the annealing schedules for this problem.
 
 #### Adiabatic Track Reconstruction
 
 Solving the track reconstruction problem using quantum annealing.
-
-#### Anneal Schedules
-
-Calculating the annealing schedules for the two QAOA pipelines.
 
 #### Visualization
 

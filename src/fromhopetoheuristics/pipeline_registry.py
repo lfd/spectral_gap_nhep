@@ -47,22 +47,22 @@ def register_pipelines() -> Dict[str, Pipeline]:
     )
     pipelines["adiabatic_maxcut"] = create_adiabatic_maxcut_pipeline()
 
-    pipelines["maxcut"] = pipelines["qaoa_maxcut"] + pipelines["adiabatic_maxcut"]
+    pipelines["maxcut"] = (
+        pipelines["qaoa_maxcut"]
+        + pipelines["adiabatic_maxcut"]
+        + create_maxcut_anneal_schedule_pipeline()
+    )
 
     pipelines["qubo"] = create_generation_pipeline() + create_qubo_pipeline()
     pipelines["qaoa_trackrec"] = pipelines["qubo"] + create_qaoa_trackrec_pipeline()
     pipelines["adiabatic_trackrec"] = (
         pipelines["qubo"] + create_adiabatic_trackrec_pipeline()
     )
-    pipelines["anneal_schedule"] = (
-        create_maxcut_anneal_schedule_pipeline()
-        + create_trackrecon_anneal_schedule_pipeline()
-    )
 
     pipelines["trackrec"] = (
         pipelines["qaoa_trackrec"]
         + pipelines["adiabatic_trackrec"]
-        + pipelines["anneal_schedule"]
+        + create_trackrecon_anneal_schedule_pipeline()
         + create_visualization_pipeline()
     )
     pipelines["__default__"] = pipelines["trackrec"] + pipelines["maxcut"]
