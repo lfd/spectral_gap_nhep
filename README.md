@@ -84,3 +84,7 @@ Besides that, we make use of two submodules:
 ## 🚧 Contributing
 
 Contributions are highly welcome! Take a look at our [Contribution Guidelines](https://github.com/cirKITers/qml-essentials/blob/main/CONTRIBUTING.md).
+
+---
+
+![overview](doc/kedro-pipeline.svg)
