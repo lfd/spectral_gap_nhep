@@ -699,9 +699,9 @@ g <- ggplot(d_qaoa_reshaped) +
             "beta" = COLOURS.LIST[[4]],
             "gamma" = COLOURS.LIST[[2]]
         ),
-        labels = ifelse(
-            tikz, c("$\\beta$", "$\\gamma$"),
-            c("beta", "gamma")
+        labels = c(
+            ifelse(tikz, "$\\beta$", "beta"),
+            ifelse(tikz, "$\\gamma$", "gamma")
         )
     ) +
     facet_wrap(q ~ .,
@@ -746,7 +746,10 @@ g <- ggplot(d_qaoa_selected) +
             "beta" = COLOURS.LIST[[4]],
             "gamma" = COLOURS.LIST[[2]]
         ),
-        labels = c("$\\beta$", "$\\gamma$"),
+        labels = c(
+            ifelse(tikz, "$\\beta$", "beta"),
+            ifelse(tikz, "$\\gamma$", "gamma")
+        )
     ) +
     scale_x_continuous(
         ifelse(tikz, "$p$", "p"),

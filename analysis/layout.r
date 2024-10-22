@@ -5,6 +5,8 @@ HEIGHT <- 7.28972 * INCH.PER.CM * 0.95
 OUTDIR_PDF <- "img-pdf/"
 OUTDIR_TIKZ <- "img-tikz/"
 COLOURS.LIST <- c("black", "#E69F00", "#999999", "#009371", "#beaed4", "#ed665a", "#1f78b4", "#009371")
+POINT.SIZE <- 0.5
+LINE.SIZE <- 1
 
 theme_paper_base <- function() {
     return(theme_bw(base_size = BASE.SIZE) +
