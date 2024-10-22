@@ -11,3 +11,5 @@ optimiser: "COBYLA"
 num_anneal_fractions: 11
 
 maxcut_max_qubits: 10
+
+geometric_index: -1 # angle part index, if -1 compute for all

@@ -40,10 +40,12 @@ def build_qubos(
     """
     qubos = {}
     log.info(f"Generating {num_angle_parts} QUBOs")
+
     if geometric_index == -1:
         angle_parts = range(num_angle_parts)
     else:
         angle_parts = [geometric_index]
+
     for i in angle_parts:
         extra_config = {
             "geometric_index": i,

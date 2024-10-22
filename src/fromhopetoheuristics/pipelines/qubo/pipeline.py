@@ -16,6 +16,7 @@ def create_pipeline() -> Pipeline:
                     "data_wrapper": "data_wrapper",
                     "doublets": "doublets",
                     "num_angle_parts": "params:num_angle_parts",
+                    "geometric_index": "params:geometric_index",
                 },
                 {"qubos": "qubos"},
             ),
