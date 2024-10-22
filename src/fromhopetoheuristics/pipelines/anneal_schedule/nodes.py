@@ -62,7 +62,7 @@ def create_trackrecon_anneal_schedule(
     # header_content.append("geometric_index")
     # save_to_csv(header_content, result_path_prefix, "anneal_schedule.csv")
 
-    result = {}
+    results = {}
     for i in range(num_angle_parts):
         # betas, gammas = load_params_from_csv(
         #     qaoa_result_file, q=q, p=max_p, geometric_index=i
