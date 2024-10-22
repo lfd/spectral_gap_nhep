@@ -37,15 +37,39 @@ qubos:
 adiabatic_track_reconstruction_results:
   type: pandas.JSONDataset
   filepath: data/04_adiabatic/adiabatic_track_reconstruction_results.json
-
-qaoa_track_reconstruction_results:
-  type: pandas.JSONDataset
-  filepath: data/04_qaoa/qaoa_track_reconstruction_results.json
+  load_args:
+    convert_axes: false
 
 adiabatic_maxcut_results:
   type: pandas.JSONDataset
   filepath: data/04_adiabatic/adiabatic_maxcut_results.json
+  load_args:
+    convert_axes: false
+
+qaoa_track_reconstruction_results:
+  type: pandas.JSONDataset
+  filepath: data/05_qaoa/qaoa_track_reconstruction_results.json
+  load_args:
+    convert_axes: false
 
 qaoa_maxcut_results:
   type: pandas.JSONDataset
-  filepath: data/04_qaoa/qaoa_maxcut_results.json
+  filepath: data/05_qaoa/qaoa_maxcut_results.json
+  load_args:
+    convert_axes: false
+
+anneal_schedule_maxcut_results:
+  type: pandas.JSONDataset
+  filepath: data/06_schedules/anneal_schedule_maxcut_results.json
+  load_args:
+    convert_axes: false
+
+anneal_schedule_track_reconstruction_results:
+  type: pandas.JSONDataset
+  filepath: data/06_schedules/anneal_schedule_track_reconstruction_results.json
+  load_args:
+    convert_axes: false
+
+figures: #FIXME: currently only dummy dataset
+  type: plotly.HTMLDataset
+  filepath: data/07_figures/dummy.html
