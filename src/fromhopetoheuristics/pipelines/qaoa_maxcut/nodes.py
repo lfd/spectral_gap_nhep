@@ -1,9 +1,8 @@
 from datetime import datetime
 import numpy as np
-import os
+import pandas as pd
 
 from fromhopetoheuristics.utils.maxcut_utils import provide_random_maxcut_QUBO
-from fromhopetoheuristics.utils.data_utils import save_to_csv
 from fromhopetoheuristics.utils.qaoa_utils import (
     compute_min_energy_solution,
     solve_QUBO_with_QAOA,
@@ -31,30 +30,28 @@ def maxcut_qaoa(
         return
     init_params = None
     for p in range(1, max_p + 1):
-        if q > p:
-            this_q = p
-        else:
-            this_q = q
         log.info(f"Running QAOA for q = {q}, p = {p}/{max_p}")
+
         qaoa_energy, beta, gamma, u, v = solve_QUBO_with_QAOA(
             qubo,
             p,
-            this_q,
+            q if q <= p else p,
             seed=seed,
             initial_params=init_params,
             random_param_init=True,
             optimiser=optimiser,
         )
-        if q == -1:
-            init_params = np.concatenate([beta, gamma])
-        else:
-            init_params = np.concatenate([v, u])
 
         qaoa_energies.append(qaoa_energy)
         betas.append(beta)
         gammas.append(gamma)
         us.append(u)
         vs.append(v)
+
+        if q == -1:
+            init_params = np.concatenate([beta, gamma])
+        else:
+            init_params = np.concatenate([v, u])
 
     return {
         "qaoa_energies": qaoa_energies,
@@ -98,4 +95,5 @@ def run_maxcut_qaoa(
                 "opt_var_assignment": opt_var_assignment,
             }
 
+    results = pd.DataFrame.from_dict(results)
     return {"results": results}
