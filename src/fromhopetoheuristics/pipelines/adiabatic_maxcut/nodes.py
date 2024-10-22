@@ -1,10 +1,9 @@
 from datetime import datetime
 import numpy as np
 from typing import Iterable
-import os
+import pandas as pd
 
 from fromhopetoheuristics.utils.maxcut_utils import provide_random_maxcut_QUBO
-from fromhopetoheuristics.utils.data_utils import save_to_csv
 from fromhopetoheuristics.utils.spectral_gap_calculator import (
     calculate_spectral_gap,
 )
@@ -63,4 +62,5 @@ def run_maxcut_annealing(
                 ),
             )
 
+    results = pd.DataFrame.from_dict(results)
     return {"results": results}
