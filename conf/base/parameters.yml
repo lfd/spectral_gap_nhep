@@ -11,5 +11,3 @@ optimiser: "COBYLA"
 num_anneal_fractions: 11
 
 maxcut_max_qubits: 10
-
-qaoa_result_file: ""
