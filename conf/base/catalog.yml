@@ -1,6 +1,27 @@
+trackrecon_parameters:
+  type: pandas.CSVDataset
+  filepath: data/00_parameters/trackrecon_parameters.csv
+  load_args:
+    convert_axes: false
+  versioned: true
+  metadata:
+    kedro-viz:
+      layer: Export
+
+maxcut_parameters:
+  type: pandas.CSVDataset
+  filepath: data/00_parameters/trackrecon_parameters.csv
+  load_args:
+    convert_axes: false
+  versioned: true
+  metadata:
+    kedro-viz:
+      layer: Export
+      
 event_cells:
   type: pandas.CSVDataset
   filepath: data/01_raw/event000001000-cells.csv
+  versioned: true
   metadata:
     kedro-viz:
       layer: Event Data
@@ -8,6 +29,7 @@ event_cells:
 event_hits:
   type: pandas.CSVDataset
   filepath: data/01_raw/event000001000-hits.csv
+  versioned: true
   metadata:
     kedro-viz:
       layer: Event Data
@@ -15,6 +37,7 @@ event_hits:
 event_particles:
   type: pandas.CSVDataset
   filepath: data/01_raw/event000001000-particles.csv
+  versioned: true
   metadata:
     kedro-viz:
       layer: Event Data
@@ -22,6 +45,7 @@ event_particles:
 event_truth:
   type: pandas.CSVDataset
   filepath: data/01_raw/event000001000-truth.csv
+  versioned: true
   metadata:
     kedro-viz:
       layer: Event Data
@@ -37,6 +61,7 @@ hits:
 truth:
   type: pandas.CSVDataset
   filepath: data/02_intermediate/truth.csv
+  versioned: true
   metadata:
     kedro-viz:
       layer: Preprocessing
@@ -44,6 +69,7 @@ truth:
 particles:
   type: pandas.CSVDataset
   filepath: data/02_intermediate/particles.csv
+  versioned: true
   metadata:
     kedro-viz:
       layer: Preprocessing
@@ -51,6 +77,7 @@ particles:
 doublets:
   type: pandas.CSVDataset
   filepath: data/02_intermediate/doublets.csv
+  versioned: true
   metadata:
     kedro-viz:
       layer: Preprocessing
@@ -67,6 +94,7 @@ adiabatic_track_reconstruction_results:
   filepath: data/04_adiabatic/adiabatic_track_reconstruction_results.json
   load_args:
     convert_axes: false
+  versioned: true
   metadata:
     kedro-viz:
       layer: Adiabatic
@@ -76,6 +104,7 @@ adiabatic_maxcut_results:
   filepath: data/04_adiabatic/adiabatic_maxcut_results.json
   load_args:
     convert_axes: false
+  versioned: true
   metadata:
     kedro-viz:
       layer: Adiabatic
@@ -85,6 +114,7 @@ qaoa_track_reconstruction_results:
   filepath: data/05_qaoa/qaoa_track_reconstruction_results.json
   load_args:
     convert_axes: false
+  versioned: true
   metadata:
     kedro-viz:
       layer: QAOA
@@ -94,6 +124,7 @@ qaoa_maxcut_results:
   filepath: data/05_qaoa/qaoa_maxcut_results.json
   load_args:
     convert_axes: false
+  versioned: true
   metadata:
     kedro-viz:
       layer: QAOA
@@ -103,6 +134,7 @@ anneal_schedule_maxcut_results:
   filepath: data/06_schedules/anneal_schedule_maxcut_results.json
   load_args:
     convert_axes: false
+  versioned: true
   metadata:
     kedro-viz:
       layer: Schedules
@@ -112,6 +144,7 @@ anneal_schedule_track_reconstruction_results:
   filepath: data/06_schedules/anneal_schedule_track_reconstruction_results.json
   load_args:
     convert_axes: false
+  versioned: true
   metadata:
     kedro-viz:
       layer: Schedules
@@ -130,20 +163,3 @@ maxcut_figures: #FIXME: currently only dummy dataset
     kedro-viz:
       layer: Export
 
-trackrecon_parameters:
-  type: pandas.CSVDataset
-  filepath: data/00_parameters/trackrecon_parameters.csv
-  load_args:
-    convert_axes: false
-  metadata:
-    kedro-viz:
-      layer: Export
-
-maxcut_parameters:
-  type: pandas.CSVDataset
-  filepath: data/00_parameters/trackrecon_parameters.csv
-  load_args:
-    convert_axes: false
-  metadata:
-    kedro-viz:
-      layer: Export
