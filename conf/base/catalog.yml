@@ -29,6 +29,7 @@ event_truth:
 hits:
   type: pandas.CSVDataset
   filepath: data/02_intermediate/hits.csv
+  versioned: true
   metadata:
     kedro-viz:
       layer: Preprocessing
@@ -115,6 +116,34 @@ anneal_schedule_track_reconstruction_results:
     kedro-viz:
       layer: Schedules
 
-figures: #FIXME: currently only dummy dataset
+trackrecon_figures: #FIXME: currently only dummy dataset
   type: plotly.HTMLDataset
   filepath: data/07_figures/dummy.html
+  metadata:
+    kedro-viz:
+      layer: Export
+
+maxcut_figures: #FIXME: currently only dummy dataset
+  type: plotly.HTMLDataset
+  filepath: data/07_figures/dummy.html
+  metadata:
+    kedro-viz:
+      layer: Export
+
+trackrecon_parameters:
+  type: pandas.CSVDataset
+  filepath: data/00_parameters/trackrecon_parameters.csv
+  load_args:
+    convert_axes: false
+  metadata:
+    kedro-viz:
+      layer: Export
+
+maxcut_parameters:
+  type: pandas.CSVDataset
+  filepath: data/00_parameters/trackrecon_parameters.csv
+  load_args:
+    convert_axes: false
+  metadata:
+    kedro-viz:
+      layer: Export
