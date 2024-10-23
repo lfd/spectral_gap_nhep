@@ -26,8 +26,11 @@ from fromhopetoheuristics.pipelines.anneal_schedule.pipeline import (
 from fromhopetoheuristics.pipelines.anneal_schedule.pipeline import (
     create_trackrecon_pipeline as create_trackrecon_anneal_schedule_pipeline,
 )
-from fromhopetoheuristics.pipelines.visualization.pipeline import (
-    create_pipeline as create_visualization_pipeline,
+from fromhopetoheuristics.pipelines.export.pipeline import (
+    create_trackrecon_pipeline as create_trackrecon_export_pipeline,
+)
+from fromhopetoheuristics.pipelines.export.pipeline import (
+    create_maxcut_pipeline as create_maxcut_export_pipeline,
 )
 
 
@@ -48,6 +51,7 @@ def register_pipelines() -> Dict[str, Pipeline]:
         pipelines["qaoa_maxcut"]
         + pipelines["adiabatic_maxcut"]
         + create_maxcut_anneal_schedule_pipeline()
+        + create_maxcut_export_pipeline()
     )
 
     pipelines["qubo"] = create_qubo_pipeline()
@@ -60,7 +64,7 @@ def register_pipelines() -> Dict[str, Pipeline]:
         pipelines["qaoa_trackrec"]
         + pipelines["adiabatic_trackrec"]
         + create_trackrecon_anneal_schedule_pipeline()
-        + create_visualization_pipeline()
+        + create_trackrecon_export_pipeline()
     )
     pipelines["__default__"] = pipelines["trackrec"] + pipelines["maxcut"]
     return pipelines
