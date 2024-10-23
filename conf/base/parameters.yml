@@ -1,6 +1,5 @@
 data_fraction: 0.1
 num_angle_parts: 64
-# geometric_index: -1 # angle part index, if -1 compute for all
 
 seed: 1000 #TODO: consider different seeds
 
