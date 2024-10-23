@@ -36,8 +36,6 @@ class QuboDataset(AbstractVersionedDataset):
             with open(qubo_path, "rb") as f:
                 Q = pickle.load(f)
 
-            qubo = dict_QUBO_to_matrix(Q)
-
             # FIXME: Warning triggered
             # if len(qubo) > 18:
             #     log.warning(f"Too many variables for qubo {qubo_path}")
@@ -45,7 +43,7 @@ class QuboDataset(AbstractVersionedDataset):
             # elif len(qubo) == 0:
             #     log.warning(f"Empty QUBO {qubo_path}")
             #     qubo = None
-            qubos[i] = qubo
+            qubos[i] = Q
 
         return qubos
 

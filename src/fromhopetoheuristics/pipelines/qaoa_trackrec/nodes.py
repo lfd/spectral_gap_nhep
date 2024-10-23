@@ -3,6 +3,7 @@ from typing import Optional, List
 
 from fromhopetoheuristics.utils.qaoa_utils import (
     compute_min_energy_solution,
+    dict_QUBO_to_matrix,
     run_QAOA,
 )
 import pandas as pd
@@ -20,10 +21,10 @@ def run_track_reconstruction_qaoa(
     optimiser="COBYLA",
 ):
     results = []
-    qubo = qubos[0] # FIXME
+    qubo = dict_QUBO_to_matrix(qubos[0]) # FIXME
     if qubo is None or qubo.size == 0:
         log.warning(f"Skipping qubo")
-        return {}
+        return {"results": pd.DataFrame()}
 
     log.info(f"Optimising QUBO with n={len(qubo)}")
     res_info = {"num_qubits": len(qubo)}
