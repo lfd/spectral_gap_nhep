@@ -80,7 +80,8 @@ doublets:
 
 qubos:
   type: fromhopetoheuristics.datasets.qallse_split.QuboDataset
-  filepath: data/03_qubos
+  filepath: data/03_qubos/qubo
+  versioned: true
   # metadata:
   #   kedro-viz:
   #     layer: Preprocessing
