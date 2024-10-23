@@ -1,7 +1,10 @@
 from qallse.qallse_d0 import QallseD0, D0Config
 import numpy as np
 
-from fromhopetoheuristics.utils.data_structures import ExtendedDoublet, ExtendedTriplet
+from fromhopetoheuristics.utils.data_structures import (
+    ExtendedDoublet,
+    ExtendedTriplet,
+)
 
 
 class SplitConfig(D0Config):
@@ -56,3 +59,19 @@ class QallseSplit(QallseD0):
 
     def _get_base_config(self):
         return SplitConfig()
+
+
+def build_model(doublets, model, add_missing):
+
+    # prepare doublets
+    if add_missing:
+        print("Cheat on, adding missing doublets.")
+        doublets = model.dataw.add_missing_doublets(doublets)
+    else:
+        p, r, ms = model.dataw.compute_score(doublets)
+        print(
+            f"INPUT -- precision (%): {p * 100:.4f}, recall (%): {r * 100:.4f}, missing: {len(ms)}"
+        )
+
+    # build the qubo
+    model.build_model(doublets=doublets)

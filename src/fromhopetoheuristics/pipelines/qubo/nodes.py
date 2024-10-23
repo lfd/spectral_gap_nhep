@@ -4,10 +4,10 @@ import pandas as pd
 import random
 from datetime import datetime
 
-from qallse.cli.func import build_model, solve_neal
+from qallse.cli.func import solve_neal
 from qallse.data_wrapper import DataWrapper
 from trackml.dataset import load_event, load_dataset
-from fromhopetoheuristics.utils.model import QallseSplit
+from fromhopetoheuristics.utils.model import QallseSplit, build_model
 
 import logging
 
@@ -16,23 +16,6 @@ log = logging.getLogger(__name__)
 # TODO: currently we're loading data using the the external trackml-library
 # However, we should switch to the kedro internal dataloader and catalog
 BARREL_VOLUME_IDS = [8, 13, 17]
-
-
-def build_model(doublets, model, add_missing):
-
-    # prepare doublets
-    if add_missing:
-        log.info("Cheat on, adding missing doublets.")
-        doublets = model.dataw.add_missing_doublets(doublets)
-    else:
-        p, r, ms = model.dataw.compute_score(doublets)
-        log.info(
-            f"INPUT -- precision (%): {p * 100:.4f}, recall (%): \
-                {r * 100:.4f}, missing: {len(ms)}"
-        )
-
-    # build the qubo
-    model.build_model(doublets=doublets)
 
 
 def build_qubos(
@@ -61,7 +44,7 @@ def build_qubos(
     qubos = {}
     log.info(f"Generating {num_angle_parts} QUBOs")
 
-    if geometric_index == -1:
+    if geometric_index == -1: # FIXME: only generate for one index
         angle_parts = range(num_angle_parts)
     else:
         angle_parts = [geometric_index]

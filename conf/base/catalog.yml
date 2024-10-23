@@ -87,60 +87,48 @@ qubos:
   #     layer: Preprocessing
 
 adiabatic_track_reconstruction_results:
-  type: pandas.JSONDataset
-  filepath: data/04_adiabatic/adiabatic_track_reconstruction_results.json
-  load_args:
-    convert_axes: false
+  type: pandas.CSVDataset
+  filepath: data/04_adiabatic/adiabatic_track_reconstruction_results.csv
   versioned: true
   metadata:
     kedro-viz:
       layer: Adiabatic
 
 adiabatic_maxcut_results:
-  type: pandas.JSONDataset
-  filepath: data/04_adiabatic/adiabatic_maxcut_results.json
-  load_args:
-    convert_axes: false
+  type: pandas.CSVDataset
+  filepath: data/04_adiabatic/adiabatic_maxcut_results.csv
   versioned: true
   metadata:
     kedro-viz:
       layer: Adiabatic
 
 qaoa_track_reconstruction_results:
-  type: pandas.JSONDataset
-  filepath: data/05_qaoa/qaoa_track_reconstruction_results.json
-  load_args:
-    convert_axes: false
+  type: pandas.CSVDataset
+  filepath: data/05_qaoa/qaoa_track_reconstruction_results.csv
   versioned: true
   metadata:
     kedro-viz:
       layer: QAOA
 
 qaoa_maxcut_results:
-  type: pandas.JSONDataset
-  filepath: data/05_qaoa/qaoa_maxcut_results.json
-  load_args:
-    convert_axes: false
+  type: pandas.CSVDataset
+  filepath: data/05_qaoa/qaoa_maxcut_results.csv
   versioned: true
   metadata:
     kedro-viz:
       layer: QAOA
 
 anneal_schedule_maxcut_results:
-  type: pandas.JSONDataset
-  filepath: data/06_schedules/anneal_schedule_maxcut_results.json
-  load_args:
-    convert_axes: false
+  type: pandas.CSVDataset
+  filepath: data/06_schedules/anneal_schedule_maxcut_results.csv
   versioned: true
   metadata:
     kedro-viz:
       layer: Schedules
 
 anneal_schedule_track_reconstruction_results:
-  type: pandas.JSONDataset
-  filepath: data/06_schedules/anneal_schedule_track_reconstruction_results.json
-  load_args:
-    convert_axes: false
+  type: pandas.CSVDataset
+  filepath: data/06_schedules/anneal_schedule_track_reconstruction_results.csv
   versioned: true
   metadata:
     kedro-viz:

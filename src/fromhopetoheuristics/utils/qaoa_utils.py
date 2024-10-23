@@ -1,4 +1,5 @@
 import numpy as np
+import logging
 from typing import Dict, Tuple, Optional, List
 from qiskit import QuantumCircuit
 from qiskit.primitives import StatevectorEstimator as Estimator
@@ -6,6 +7,8 @@ from qiskit.quantum_info import SparsePauliOp, Statevector
 from qiskit.circuit.library import QAOAAnsatz
 from qiskit_algorithms.eigensolvers import NumPyEigensolver
 from scipy.optimize import minimize
+
+log = logging.getLogger(__name__)
 
 # Global variable to store generated problems
 # Prevents re-generation, when a problem was already generated
@@ -184,7 +187,7 @@ def dict_QUBO_to_matrix(dict_qubo: Dict[Tuple[str, str], float]) -> np.ndarray:
     return qubo_matrix
 
 
-def compute_min_energy_solution(qubo: np.ndarray) -> Tuple[float, np.ndarray]:
+def compute_min_energy_solution(qubo: np.ndarray) -> Tuple[float, str]:
     """
     Computes the minimum energy solution for a given QUBO
 
@@ -193,7 +196,7 @@ def compute_min_energy_solution(qubo: np.ndarray) -> Tuple[float, np.ndarray]:
     :return: Energy of optimal solution
     :rtype: float
     :return: Optimal solution in form of the variable assignment
-    :rtype: np.ndarray
+    :rtype: str
     """
     H, o = hamiltonian_from_qubo(qubo)
 
@@ -383,9 +386,7 @@ def times_from_QAOA_params(betas: np.ndarray, gammas: np.ndarray) -> np.ndarray:
     time = 0.0
     time_midpoints = np.zeros(p + 1)
     for i in range(p):
-        time_segment = np.mean(
-            np.abs(gammas[i]) + np.abs(betas[i])
-        )  # TODO: check if this is correct; I added a mean here
+        time_segment = np.abs(gammas[i]) + np.abs(betas[i])
         time += time_segment
         time_midpoints[i] = time - 0.5 * time_segment
 
@@ -423,3 +424,42 @@ def annealing_schedule_from_QAOA_params(
     # at the end of the anneal schedule, the annealing fraction is 1
     anneal_schedule.append((times[p], 1.0))
     return anneal_schedule
+
+
+def run_QAOA(
+    qubo,
+    seed: int,
+    max_p=20,
+    q=-1,
+    optimiser="COBYLA",
+) -> List[dict]:
+    results = []
+
+    init_params = None
+    for p in range(1, max_p + 1):
+        log.info(f"Running QAOA for q = {q}, p = {p}/{max_p}")
+
+        res = {"p": p}
+        res["qaoa_energy"], betas, gammas, us, vs = solve_QUBO_with_QAOA(
+            qubo,
+            p,
+            q if q <= p else p,
+            seed=seed,
+            initial_params=init_params,
+            random_param_init=True,
+            optimiser=optimiser,
+        )
+
+        if q == -1:
+            init_params = np.concatenate([betas, gammas])
+        else:
+            init_params = np.concatenate([vs, us])
+
+        res.update({f"beta{i+1:02d}": b for i, b in enumerate(betas)})
+        res.update({f"gamma{i+1:02d}": g for i, g in enumerate(gammas)})
+        res.update({f"u{i+1:02d}": u for i, u in enumerate(us)})
+        res.update({f"v{i+1:02d}": v for i, v in enumerate(vs)})
+        results.append(res)
+
+    return results
+
