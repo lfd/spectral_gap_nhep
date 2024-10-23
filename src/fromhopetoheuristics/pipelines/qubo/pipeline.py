@@ -4,6 +4,8 @@ from kedro.config import OmegaConfigLoader  # noqa: E402
 from .nodes import (
     build_qubos,
     solve_qubos,
+    create_metadata,
+    create_qallse_datawrapper,
 )
 
 
