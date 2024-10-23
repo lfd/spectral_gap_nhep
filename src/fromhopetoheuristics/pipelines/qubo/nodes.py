@@ -1,34 +1,14 @@
 import os
 from typing import Dict
 
-from qallse.cli.func import build_model, solve_neal
+from qallse.cli.func import solve_neal
 from qallse.data_wrapper import DataWrapper
-from fromhopetoheuristics.utils.model import QallseSplit
-from fromhopetoheuristics.utils.data_utils import store_qubo
-from fromhopetoheuristics.utils.qaoa_utils import (
-    dict_QUBO_to_matrix,
-)
+from fromhopetoheuristics.utils.model import QallseSplit, build_model
 
 
 import logging
 
 log = logging.getLogger(__name__)
-
-
-def build_model(doublets, model, add_missing):
-
-    # prepare doublets
-    if add_missing:
-        print("Cheat on, adding missing doublets.")
-        doublets = model.dataw.add_missing_doublets(doublets)
-    else:
-        p, r, ms = model.dataw.compute_score(doublets)
-        print(
-            f"INPUT -- precision (%): {p * 100:.4f}, recall (%): {r * 100:.4f}, missing: {len(ms)}"
-        )
-
-    # build the qubo
-    model.build_model(doublets=doublets)
 
 
 def build_qubos(
@@ -57,7 +37,7 @@ def build_qubos(
     qubos = {}
     log.info(f"Generating {num_angle_parts} QUBOs")
 
-    if geometric_index == -1:
+    if geometric_index == -1: # FIXME: only generate for one index
         angle_parts = range(num_angle_parts)
     else:
         angle_parts = [geometric_index]

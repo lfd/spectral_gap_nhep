@@ -1,66 +1,33 @@
 from datetime import datetime
 import numpy as np
-from typing import Iterable
+from typing import Iterable, List
 import pandas as pd
 
 from fromhopetoheuristics.utils.maxcut_utils import provide_random_maxcut_QUBO
-from fromhopetoheuristics.utils.spectral_gap_calculator import (
-    calculate_spectral_gap,
-)
+from fromhopetoheuristics.utils.spectral_gap_calculator import annealing
 import logging
 
 log = logging.getLogger(__name__)
 
 
-def maxcut_annealing(
-    num_qubits: int,
-    density: float,
-    seed: int,
-    fractions: Iterable[float],
-):
-    qubo = provide_random_maxcut_QUBO(num_qubits, density, seed)
-
-    gs_energies = []
-    fes_energies = []
-    gaps = []
-
-    for fraction in fractions:
-        gs_energy, fes_energy, gap = calculate_spectral_gap(fraction, qubo)
-        gs_energies.append(gs_energy)
-        fes_energies.append(fes_energy)
-        gaps.append(gap)
-
-    return {"gs_energies": gs_energies, "fes_energies": fes_energies, "gaps": gaps}
-
-
 def run_maxcut_annealing(
     seed: int,
     num_anneal_fractions: int,
-    maxcut_max_qubits: int,
+    maxcut_n_qubits: int,
+    maxcut_graph_density: float,
 ):
     fractions = np.linspace(0, 1, num=num_anneal_fractions, endpoint=True)
 
-    results = {}
-    for n_qubits in range(4, maxcut_max_qubits + 1):
-        log.info(
-            f"Computing spectral gaps for QUBO with n={n_qubits} of "
-            "{maxcut_max_qubits}"
-        )
-        results[n_qubits] = {}
+    log.info(
+        f"Running QAOA maxcut for n={maxcut_n_qubits} "
+        f"with density={maxcut_graph_density}"
+    )
 
-        for density in np.linspace(
-            0.5, 1, num=6, endpoint=True
-        ):  # FIXME: propagate params
-            log.info(f"\twith density={density}")
+    qubo = provide_random_maxcut_QUBO(maxcut_n_qubits, maxcut_n_qubits, seed)
+    results = annealing(
+        qubo,
+        fractions,
+    )
 
-            results[n_qubits][density] = (
-                maxcut_annealing(
-                    n_qubits,
-                    density,
-                    seed,
-                    fractions,
-                ),
-            )
-
-    results = pd.DataFrame.from_dict(results)
+    results = pd.DataFrame.from_records(results)
     return {"results": results}

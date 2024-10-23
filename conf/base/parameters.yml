@@ -3,12 +3,13 @@ num_angle_parts: 64
 
 seed: 1000 #TODO: consider different seeds
 
-max_p: 20
+max_p: 5
 q: -1
 optimiser: "COBYLA"
 
 num_anneal_fractions: 11
 
-maxcut_max_qubits: 10
+maxcut_n_qubits: 4
+maxcut_graph_density: 0.7
 
-geometric_index: -1 # angle part index, if -1 compute for all
+geometric_index: 27 # angle part index

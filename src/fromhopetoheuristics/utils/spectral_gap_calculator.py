@@ -1,4 +1,5 @@
 import numpy as np
+from typing import List, Iterable
 
 from qiskit.quantum_info import SparsePauliOp, Pauli
 from qiskit_algorithms.eigensolvers import NumPyEigensolver
@@ -55,3 +56,17 @@ def calculate_spectral_gap(fraction: float, qubo: np.ndarray, num_dec_pos: int =
     eigenvalues = np.real(np.unique(eigenvalues))
     spectral_gap = np.around(np.abs(eigenvalues[0] - eigenvalues[1]), num_dec_pos)
     return eigenvalues[0], eigenvalues[1], spectral_gap
+
+def annealing(
+    qubo: np.ndarray,
+    fractions: Iterable[float],
+) -> List[dict]:
+    results = []
+
+    for fraction in fractions:
+        res = {"fraction": fraction}
+        res["gs"], res["fes"], res["gap"] = calculate_spectral_gap(fraction, qubo)
+        results.append(res)
+
+    return results
+

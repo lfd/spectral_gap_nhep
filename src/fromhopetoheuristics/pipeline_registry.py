@@ -63,7 +63,7 @@ def register_pipelines() -> Dict[str, Pipeline]:
         pipelines["qaoa_trackrec"]
         + pipelines["adiabatic_trackrec"]
         + create_trackrecon_anneal_schedule_pipeline()
-        + create_visualization_pipeline()
+        # + create_visualization_pipeline()
     )
     pipelines["__default__"] = pipelines["trackrec"] + pipelines["maxcut"]
     return pipelines
