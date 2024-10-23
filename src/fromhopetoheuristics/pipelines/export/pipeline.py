@@ -40,16 +40,6 @@ def create_maxcut_pipeline() -> Pipeline:
     return pipeline(
         [
             node(
-                visualize,
-                {
-                    "responses": "responses",
-                    "data_wrapper": "data_wrapper",
-                },
-                {
-                    "figures": "maxcut_figures",  # FIXME: find suitable catalog entry
-                },
-            ),
-            node(
                 export_parameters,
                 {
                     "seed": "params:seed",
