@@ -25,6 +25,6 @@ def visualize(responses, data_wrapper):
 
 
 def export_parameters(**kwargs):
-    params = pd.DataFrame.from_dict(kwargs)
+    log.info(f"Exporting parameters: {kwargs}")
 
-    return {"parameters": params}
+    return {"parameters": kwargs}

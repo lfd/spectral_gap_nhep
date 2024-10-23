@@ -1,27 +1,23 @@
 trackrecon_parameters:
-  type: pandas.CSVDataset
+  type: json.JSONDataset
   filepath: data/00_parameters/trackrecon_parameters.csv
-  load_args:
-    convert_axes: false
   versioned: true
   metadata:
     kedro-viz:
       layer: Export
 
 maxcut_parameters:
-  type: pandas.CSVDataset
+  type: json.JSONDataset
   filepath: data/00_parameters/trackrecon_parameters.csv
-  load_args:
-    convert_axes: false
   versioned: true
   metadata:
     kedro-viz:
       layer: Export
-      
+
 event_cells:
   type: pandas.CSVDataset
   filepath: data/01_raw/event000001000-cells.csv
-  versioned: true
+  versioned: false
   metadata:
     kedro-viz:
       layer: Event Data
@@ -29,7 +25,7 @@ event_cells:
 event_hits:
   type: pandas.CSVDataset
   filepath: data/01_raw/event000001000-hits.csv
-  versioned: true
+  versioned: false
   metadata:
     kedro-viz:
       layer: Event Data
@@ -37,7 +33,7 @@ event_hits:
 event_particles:
   type: pandas.CSVDataset
   filepath: data/01_raw/event000001000-particles.csv
-  versioned: true
+  versioned: false
   metadata:
     kedro-viz:
       layer: Event Data
@@ -45,7 +41,7 @@ event_particles:
 event_truth:
   type: pandas.CSVDataset
   filepath: data/01_raw/event000001000-truth.csv
-  versioned: true
+  versioned: false
   metadata:
     kedro-viz:
       layer: Event Data
