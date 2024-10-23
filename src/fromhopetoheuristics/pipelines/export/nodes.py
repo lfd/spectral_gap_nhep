@@ -3,6 +3,7 @@ from qallse.cli.func import (
     process_response,
 )
 from qallse.plotting import iplot_results
+import pandas as pd
 
 import logging
 
@@ -21,3 +22,9 @@ def visualize(responses, data_wrapper):
         )
 
     return {"figures": figs}
+
+
+def export_parameters(**kwargs):
+    params = pd.DataFrame.from_dict(kwargs)
+
+    return {"parameters": params}
