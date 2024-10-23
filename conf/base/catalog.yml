@@ -1,6 +1,6 @@
 trackrecon_parameters:
   type: json.JSONDataset
-  filepath: data/00_parameters/trackrecon_parameters.csv
+  filepath: data/00_parameters/trackrecon_parameters.json
   versioned: true
   metadata:
     kedro-viz:
@@ -8,7 +8,7 @@ trackrecon_parameters:
 
 maxcut_parameters:
   type: json.JSONDataset
-  filepath: data/00_parameters/trackrecon_parameters.csv
+  filepath: data/00_parameters/maxcut_parameters.json
   versioned: true
   metadata:
     kedro-viz:
