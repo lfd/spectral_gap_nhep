@@ -39,7 +39,8 @@ def hamiltonian_from_ising(
     :param h: Optional[np.ndarray]: Linear Ising terms, can be None.
     :param o: float: Offset value.
 
-    :return: Tuple[SparsePauliOp, float]: A tuple containing the Hamiltonian as a SparsePauliOp and the offset.
+    :return: Tuple[SparsePauliOp, float]: A tuple containing the Hamiltonian
+        as a SparsePauliOp and the offset.
     """
     # Initialize an empty list to store Hamiltonian terms
     terms: List[Tuple[str, float]] = []
@@ -53,7 +54,8 @@ def hamiltonian_from_ising(
                 t = "".join(term)
                 terms.append((t, angle))
 
-    # Add quadratic terms to the Hamiltonian (assuming Ising matrix with zero diagonal elements)
+    # Add quadratic terms to the Hamiltonian (assuming Ising matrix
+    # with zero diagonal elements)
     n = J.shape[0]
     for i in range(n):
         for j in range(i + 1, n):
@@ -234,8 +236,8 @@ def initialise_QAOA_parameters(
         p (int): Number of QAOA layers
         random_init (bool, optional): Whether to initialise randomly, defaults to False
         seed (int, optional): random_seed, defaults to 12345
-        initial_params (Optional[np.ndarray], optional): previous parameter initialisations that should be
-            re-used, defaults to None
+        initial_params (Optional[np.ndarray], optional): previous parameter
+            initialisations that should be re-used, defaults to None
         fourier (bool, optional): if fourier strategy is used
 
     Returns:

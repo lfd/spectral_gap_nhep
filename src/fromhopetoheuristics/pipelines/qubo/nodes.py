@@ -1,4 +1,3 @@
-from typing import Dict, Tuple
 import numpy as np
 import pandas as pd
 import random
@@ -251,7 +250,8 @@ def load_event_data(event: str) -> dict[str, pd.DataFrame]:
         event (str): The event id
 
     Returns:
-        dict[str, pd.DataFrame]: A dictionary containing the hits, cells, particles, and truth data.
+        dict[str, pd.DataFrame]: A dictionary containing the hits, cells, particles,
+            and truth data.
     """
     hits, cells, particles, truth = load_event(f"dataset/{event}")
 
