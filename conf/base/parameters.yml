@@ -1,5 +1,5 @@
 data_fraction: 0.1
-num_angle_parts: 10
+num_angle_parts: 64
 
 seed: 1000 #TODO: consider different seeds
 
