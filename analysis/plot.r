@@ -13,21 +13,6 @@ if (!tikz) {
     LINE.SIZE <- 0.5
 }
 
-create_plot <- function(g, save_name, w, h, use_tikz) {
-    if (use_tikz) {
-        tikz(
-            str_c(OUTDIR_TIKZ, save_name, ".tex"),
-            width = WIDTH * w, height = HEIGHT * h
-        )
-    } else {
-        pdf(
-            str_c(OUTDIR_PDF, save_name, ".pdf"),
-            width = WIDTH * w, height = HEIGHT * h
-        )
-    }
-    print(g)
-    dev.off()
-}
 create_save_locations(tikz)
 
 qaoa_file_list <- list.files(

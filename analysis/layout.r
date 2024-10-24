@@ -26,3 +26,19 @@ create_save_locations <- function(tikz) {
         dir.create(OUTDIR_PDF, recursive = TRUE)
     }
 }
+
+create_plot <- function(g, save_name, w, h, use_tikz) {
+    if (use_tikz) {
+        tikz(
+            str_c(OUTDIR_TIKZ, save_name, ".tex"),
+            width = WIDTH * w, height = HEIGHT * h
+        )
+    } else {
+        pdf(
+            str_c(OUTDIR_PDF, save_name, ".pdf"),
+            width = WIDTH * w, height = HEIGHT * h
+        )
+    }
+    print(g)
+    dev.off()
+}
