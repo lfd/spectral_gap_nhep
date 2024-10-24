@@ -135,16 +135,23 @@ anneal_schedule_track_reconstruction_results:
       layer: Schedules
 
 trackrecon_figures: #FIXME: currently only dummy dataset
-  type: plotly.HTMLDataset
-  filepath: data/07_figures/dummy.html
+  type: fromhopetoheuristics.datasets.composed_dataset.ComposedDataset
+  filepath: data/07_figures/trackrecon_figures.html
+  versioned: true
+  dataset:
+    type: plotly.HTMLDataset
+    resolver: html_dataset
   metadata:
     kedro-viz:
       layer: Export
 
 maxcut_figures: #FIXME: currently only dummy dataset
-  type: plotly.HTMLDataset
-  filepath: data/07_figures/dummy.html
+  type: fromhopetoheuristics.datasets.composed_dataset.ComposedDataset
+  filepath: data/07_figures/maxcut_figures.html
+  versioned: true
+  dataset:
+    type: plotly.HTMLDataset
+    resolver: html_dataset
   metadata:
     kedro-viz:
       layer: Export
-
