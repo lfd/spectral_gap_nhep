@@ -12,12 +12,11 @@ def create_pipeline() -> Pipeline:
                 run_track_reconstruction_annealing,
                 {
                     "qubos": "qubos",
-                    "event_path": "event_path",
-                    "seed": "params:seed",
                     "num_anneal_fractions": "params:num_anneal_fractions",
-                    "geometric_index": "params:geometric_index",
                 },
-                {},
+                {
+                    "results": "adiabatic_track_reconstruction_results",
+                },
             ),
         ]
     )

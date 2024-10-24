@@ -11,14 +11,14 @@ def create_pipeline() -> Pipeline:
             node(
                 run_maxcut_qaoa,
                 {
-                    "result_path_prefix": "params:output_path",
                     "seed": "params:seed",
                     "max_p": "params:max_p",
                     "q": "params:q",
-                    "maxcut_max_qubits": "params:maxcut_max_qubits",
+                    "maxcut_n_qubits": "params:maxcut_n_qubits",
+                    "maxcut_graph_density": "params:maxcut_graph_density",
                     "optimiser": "params:optimiser",
                 },
-                {"qaoa_solution_path": "params:qaoa_result_file"},
+                {"results": "qaoa_maxcut_results"},
             )
         ]
     )

@@ -1,7 +1,13 @@
 # From Hope To Heuristics
-## Realistic Runtime Estimates for Quantum Optimisation in NHEP
+**Realistic Runtime Estimates for Quantum Optimisation in NHEP**
 
-<!-- TODO: Project description -->
+## Approach
+
+For the QUBO formulation we build on the [HEPQPR.Qallse](https://github.com/derlin/hepqpr-qallse) project.
+
+<!-- TODO: add description -->
+
+To work with smaller sized QUBOs, we only focus on hit-triplets present in a specified angle, similar to the approach presented by [Schwägerl et al.](https://arxiv.org/pdf/2303.13249).
 
 ## :rocket: Getting Started
 
@@ -25,31 +31,42 @@ Extract the data into a `dataset` folder, such that the structure is as follows:
 ```
 Head over to the [TrackML Library Repo](https://github.com/stroblme/trackml-library) for more details. -->
 
-### Minimal Working Example
+### Quickstart
 
 After installing all the dependencies, simply execute
 ```
 kedro run
 ```
 
-This will run the default pipeline consisting of
-- generating partial dataset from event
-- building the QUBO
-- computing spectral gaps for QUBOs with less than 19 variables
-<!-- 
-```
-export PYTHONPATH=$PATHONPATH:src/
-python main.py t
-``` -->
+This will run the default pipeline which consists of all individual pipelines described in the following section.
 
-## Approach
+### Pipelines
 
-For the QUBO formulation we build on the [HEPQPR.Qallse](https://github.com/derlin/hepqpr-qallse) project.
+#### QAOA Maxcut
 
-<!-- TODO: add description -->
+Solving the Maxcut problem using Quadratic Approximate Optimization Algorithm (QAOA).
+It also calculates the annealing schedules for this problem.
 
-To work with smaller sized QUBOs, we only focus on hit-triplets present in a specified angle, similar to the approach presented by [Schwägerl et al.](https://arxiv.org/pdf/2303.13249).
+#### Adiabatic Maxcut
 
+Solving the Maxcut problem using adiabatic quantum computing, aka. annealing.
+
+#### Qubo Formulation
+
+This pipeline loads event data and prepares a qubo for the following two track reconstruction pipelines.
+
+#### QAOA Track Reconstruction
+
+Solving the track reconstruction problem using QAOA.
+It also calculates the annealing schedules for this problem.
+
+#### Adiabatic Track Reconstruction
+
+Solving the track reconstruction problem using quantum annealing.
+
+#### Visualization
+
+Visualization of all results.
 
 ## Project Structure
 
@@ -67,3 +84,7 @@ Besides that, we make use of two submodules:
 ## 🚧 Contributing
 
 Contributions are highly welcome! Take a look at our [Contribution Guidelines](https://github.com/cirKITers/qml-essentials/blob/main/CONTRIBUTING.md).
+
+---
+
+![overview](doc/kedro-pipeline.svg)

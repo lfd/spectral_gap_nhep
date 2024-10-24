@@ -13,6 +13,30 @@
                 "run",
             ],
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Kedro: trackrec",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "kedro",
+            "args": [
+                "run",
+                "--pipeline",
+                "trackrec"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Kedro: maxcut",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "kedro",
+            "args": [
+                "run",
+                "--pipeline",
+                "maxcut"
+            ],
+            "console": "integratedTerminal"
         }
     ]
 }

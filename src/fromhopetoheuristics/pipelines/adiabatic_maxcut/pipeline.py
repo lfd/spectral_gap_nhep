@@ -11,12 +11,12 @@ def create_pipeline() -> Pipeline:
             node(
                 run_maxcut_annealing,
                 {
-                    "result_path_prefix": "params:output_path",
                     "seed": "params:seed",
                     "num_anneal_fractions": "params:num_anneal_fractions",
-                    "maxcut_max_qubits": "params:maxcut_max_qubits",
+                    "maxcut_n_qubits": "params:maxcut_n_qubits",
+                    "maxcut_graph_density": "params:maxcut_graph_density",
                 },
-                {},
+                {"results": "adiabatic_maxcut_results"},
             )
         ]
     )

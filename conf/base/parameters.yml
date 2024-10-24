@@ -1,17 +1,15 @@
-output_path: "results"
-trackml_input_path: "hepqpr-qallse/qallse/dsmaker/data/event000001000"
 data_fraction: 0.1
-num_angle_parts: 64
-geometric_index: -1 # angle part index, if -1 compute for all
+num_angle_parts: 10
 
-seed: 1000
+seed: 1000 #TODO: consider different seeds
 
-max_p: 20
+max_p: 5
 q: -1
 optimiser: "COBYLA"
 
 num_anneal_fractions: 11
 
-maxcut_max_qubits: 10
+maxcut_n_qubits: 4
+maxcut_graph_density: 0.7
 
-qaoa_result_file: ""
+geometric_index: 27 # angle part index

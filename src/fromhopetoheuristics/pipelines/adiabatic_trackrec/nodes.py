@@ -1,95 +1,54 @@
-import os
-from datetime import datetime
 import numpy as np
-from typing import Iterable, Optional, List
+from fromhopetoheuristics.utils.qaoa_utils import dict_QUBO_to_matrix
 
-from fromhopetoheuristics.utils.spectral_gap_calculator import (
-    calculate_spectral_gap,
-)
-from fromhopetoheuristics.utils.data_utils import save_to_csv
+from fromhopetoheuristics.utils.spectral_gap_calculator import annealing
+import pandas as pd
+
+from typing import List, Dict, Any
+
 import logging
 
 log = logging.getLogger(__name__)
 
 
-def track_reconstruction_annealing(
-    qubo: np.ndarray,
-    seed: int,
-    fractions: Iterable[float],
-    result_path_prefix: str,
-    geometric_index: int = 0,
-    include_header: bool = True,
-):
-    csv_data_list = []
-    if include_header:
-        csv_data_list.append(
-            [
-                "problem",
-                "num_qubits",
-                "geometric_index",
-                "seed",
-                "fraction",
-                "gs",
-                "fes",
-                "gap",
-            ]
-        )
-
-    for fraction in fractions:
-        gs_energy, fes_energy, gap = calculate_spectral_gap(
-            fraction,
-            qubo,
-        )
-        csv_data_list.append(
-            [
-                "track reconstruction",
-                len(qubo),
-                geometric_index,
-                seed,
-                np.round(fraction, 2),
-                gs_energy,
-                fes_energy,
-                gap,
-            ]
-        )
-
-    for csv_data in csv_data_list:
-        save_to_csv(csv_data, result_path_prefix, "spectral_gap_evolution.csv")
-
-
 def run_track_reconstruction_annealing(
-    qubos: List[Optional[np.ndarray]],
-    event_path: str,
-    seed: int,
+    qubos: List[Dict[str, Any]],
     num_anneal_fractions: int,
-    geometric_index: int = -1,
-):
-    time_stamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+) -> Dict[str, pd.DataFrame]:
+    """
+    Runs the track reconstruction algorithm using the adiabatic quantum computer.
 
+    Parameters
+    ----------
+    qubos : List[Dict[str, Any]]
+        The QUBO matrix to be solved
+    num_anneal_fractions : int
+        The number of points in the annealing schedule to use
+
+    Returns
+    -------
+    Dict[str, pd.DataFrame]
+        A dictionary with a single key, "results", which contains a DataFrame
+        with the results of the computation. The columns of the DataFrame are
+        the different points in the annealing schedule, and the rows are the
+        different possible states of the quantum computer.
+    """
+    qubo = dict_QUBO_to_matrix(qubos[0])  # FIXME
     fractions = np.linspace(0, 1, num=num_anneal_fractions, endpoint=True)
-    result_path_prefix = os.path.join(
-        os.path.dirname(event_path),
-        "spectral_gap",
-        time_stamp,
+
+    results = []
+    if qubo.size == 0:
+        log.warning("Skipping QUBO")
+        return {"results": pd.DataFrame()}
+    log.info("Computing spectral gaps")
+    res_info = dict()
+    res_data = annealing(
+        qubo=qubo,
+        fractions=fractions,
     )
-    first = True
+    for res in res_data:
+        res.update(res_info)
+        results.append(res)
 
-    for i, qubo in enumerate(qubos):
-        if geometric_index != -1:
-            i = geometric_index
-        if qubo is not None:
-            log.info(
-                f"Computing spectral gaps for QUBO {i+1}/{len(qubos)} "
-                f"(n={len(qubo)})"
-            )
-            track_reconstruction_annealing(
-                qubo,
-                seed,
-                fractions,
-                result_path_prefix,
-                geometric_index=i,
-                include_header=first,  # FIXME
-            )
-            first = False
-
-    return {}  # FIXME
+    results = pd.DataFrame.from_records(results)
+    return {"results": results}
