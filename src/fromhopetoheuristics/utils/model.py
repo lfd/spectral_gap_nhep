@@ -70,7 +70,8 @@ def build_model(doublets, model, add_missing):
     else:
         p, r, ms = model.dataw.compute_score(doublets)
         print(
-            f"INPUT -- precision (%): {p * 100:.4f}, recall (%): {r * 100:.4f}, missing: {len(ms)}"
+            f"INPUT -- precision (%): {p * 100:.4f}, recall (%):\
+                {r * 100:.4f}, missing: {len(ms)}"
         )
 
     # build the qubo

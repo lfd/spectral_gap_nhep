@@ -462,4 +462,3 @@ def run_QAOA(
         results.append(res)
 
     return results
-

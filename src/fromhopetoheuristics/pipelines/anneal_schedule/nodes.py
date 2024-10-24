@@ -29,5 +29,3 @@ def create_anneal_schedule(
         anneal_schedule, columns=["anneal_time", "anneal_fraction"]
     )
     return {"results": results}
-
-

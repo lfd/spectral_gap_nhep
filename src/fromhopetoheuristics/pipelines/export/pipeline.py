@@ -14,7 +14,8 @@ def create_trackrecon_pipeline() -> Pipeline:
                     "data_wrapper": "data_wrapper",
                 },
                 {
-                    "figures": "trackrecon_figures",  # FIXME: find suitable catalog entry
+                    "figures": "trackrecon_figures",
+                    # FIXME: find suitable catalog entry
                 },
             ),
             node(

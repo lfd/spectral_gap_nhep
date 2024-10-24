@@ -44,7 +44,8 @@ def build_qubos(
     qubos = {}
     log.info(f"Generating {num_angle_parts} QUBOs")
 
-    if geometric_index == -1: # FIXME: only generate for one index
+    # FIXME: only generate for one index
+    if geometric_index == -1:
         angle_parts = range(num_angle_parts)
     else:
         angle_parts = [geometric_index]

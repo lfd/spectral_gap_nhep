@@ -3,11 +3,7 @@ from typing import Any, Dict
 import pickle
 import os
 import glob
-
 import numpy as np
-from fromhopetoheuristics.utils.qaoa_utils import (
-    dict_QUBO_to_matrix,
-)
 from kedro.io import AbstractVersionedDataset
 
 from qallse import dumper

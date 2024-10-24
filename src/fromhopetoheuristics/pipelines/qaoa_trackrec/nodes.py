@@ -21,9 +21,9 @@ def run_track_reconstruction_qaoa(
     optimiser="COBYLA",
 ):
     results = []
-    qubo = dict_QUBO_to_matrix(qubos[0]) # FIXME
+    qubo = dict_QUBO_to_matrix(qubos[0])  # FIXME
     if qubo is None or qubo.size == 0:
-        log.warning(f"Skipping qubo")
+        log.warning("Skipping qubo")
         return {"results": pd.DataFrame()}
 
     log.info(f"Optimising QUBO with n={len(qubo)}")
@@ -34,11 +34,11 @@ def run_track_reconstruction_qaoa(
     )
 
     res_data = run_QAOA(
-            qubo=qubo,
-            seed=seed,
-            q=q,
-            max_p=max_p,
-            optimiser=optimiser,
+        qubo=qubo,
+        seed=seed,
+        q=q,
+        max_p=max_p,
+        optimiser=optimiser,
     )
     for res in res_data:
         res.update(res_info)

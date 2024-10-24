@@ -57,6 +57,7 @@ def calculate_spectral_gap(fraction: float, qubo: np.ndarray, num_dec_pos: int =
     spectral_gap = np.around(np.abs(eigenvalues[0] - eigenvalues[1]), num_dec_pos)
     return eigenvalues[0], eigenvalues[1], spectral_gap
 
+
 def annealing(
     qubo: np.ndarray,
     fractions: Iterable[float],
@@ -65,8 +66,8 @@ def annealing(
 
     for fraction in fractions:
         res = {"fraction": fraction}
+        res = {"fraction": fraction}
         res["gs"], res["fes"], res["gap"] = calculate_spectral_gap(fraction, qubo)
         results.append(res)
 
     return results
-

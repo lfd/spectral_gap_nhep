@@ -12,14 +12,14 @@ def run_track_reconstruction_annealing(
     qubos,
     num_anneal_fractions: int,
 ):
-    qubo = dict_QUBO_to_matrix(qubos[0]) # FIXME
+    qubo = dict_QUBO_to_matrix(qubos[0])  # FIXME
     fractions = np.linspace(0, 1, num=num_anneal_fractions, endpoint=True)
 
     results = []
     if qubo.size == 0:
-        log.warning(f"Skipping QUBO")
+        log.warning("Skipping QUBO")
         return {"results": pd.DataFrame()}
-    log.info(f"Computing spectral gaps")
+    log.info("Computing spectral gaps")
     res_info = dict()
     res_data = annealing(
         qubo=qubo,
