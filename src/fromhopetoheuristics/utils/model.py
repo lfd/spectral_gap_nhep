@@ -74,7 +74,7 @@ def build_model(doublets, model, add_missing):
     else:
         p, r, ms = model.dataw.compute_score(doublets)
         log.info(
-            f"Precision: {p * 100:.4f}%, recall:{r * 100:.4f}%, missing: {len(ms)}"
+            f"Precision: {p * 100:.4f}%, Recall:{r * 100:.4f}%, Missing: {len(ms)}"
         )
 
     # build the qubo
