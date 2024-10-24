@@ -6,6 +6,10 @@ from fromhopetoheuristics.utils.data_structures import (
     ExtendedTriplet,
 )
 
+import logging
+
+log = logging.getLogger(__name__)
+
 
 class SplitConfig(D0Config):
     xy_angle_parts = 64
@@ -65,13 +69,12 @@ def build_model(doublets, model, add_missing):
 
     # prepare doublets
     if add_missing:
-        print("Cheat on, adding missing doublets.")
+        log.info("Cheat on, adding missing doublets.")
         doublets = model.dataw.add_missing_doublets(doublets)
     else:
         p, r, ms = model.dataw.compute_score(doublets)
-        print(
-            f"INPUT -- precision (%): {p * 100:.4f}, recall (%):\
-                {r * 100:.4f}, missing: {len(ms)}"
+        log.info(
+            f"Precision: {p * 100:.4f}%, recall:{r * 100:.4f}%, missing: {len(ms)}"
         )
 
     # build the qubo
