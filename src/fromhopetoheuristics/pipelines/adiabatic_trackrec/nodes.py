@@ -41,7 +41,7 @@ def run_track_reconstruction_annealing(
         log.warning("Skipping QUBO")
         return {"results": pd.DataFrame()}
     log.info("Computing spectral gaps")
-    res_info = dict()
+    res_info = {"num_qubits": len(qubo)}
     res_data = annealing(
         qubo=qubo,
         fractions=fractions,
