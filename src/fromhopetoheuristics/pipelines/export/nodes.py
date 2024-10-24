@@ -29,7 +29,7 @@ def visualize(responses: List, data_wrapper) -> dict:
     """
     dims = list("xy")
     figs = {}
-    for i, response in enumerate(responses):
+    for i, response in responses.items():
         final_doublets, _ = process_response(response)
         _, missings, _ = diff_rows(final_doublets, data_wrapper.get_real_doublets())
 
