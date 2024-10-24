@@ -1,5 +1,5 @@
 import numpy as np
-from typing import Optional, List
+from typing import Optional, List, Dict
 
 from fromhopetoheuristics.utils.qaoa_utils import (
     compute_min_energy_solution,
@@ -14,12 +14,36 @@ log = logging.getLogger(__name__)
 
 
 def run_track_reconstruction_qaoa(
-    qubos: List[Optional[np.ndarray]],
-    seed: int,
-    max_p: int,
-    q: int,
-    optimiser="COBYLA",
-):
+    qubos: List[Optional[np.ndarray]],  # List of QUBO matrices
+    seed: int,  # Random seed
+    max_p: int,  # Maximum number of layers in the QAOA circuit
+    q: int,  # Number of parameters in the FOURIER strategy
+    optimiser: str = "COBYLA",  # Optimiser to use
+) -> Dict[str, pd.DataFrame]:  # Returns a dictionary with a single key "results"
+    """
+    Runs the QAOA algorithm on a given list of QUBO matrices.
+
+    Parameters
+    ----------
+    qubos : List[Optional[np.ndarray]]
+        List of QUBO matrices to be solved.
+    seed : int
+        Random seed for reproducibility.
+    max_p : int
+        Maximum number of layers in the QAOA circuit.
+    q : int
+        Number of parameters in the FOURIER strategy.
+    optimiser : str, optional
+        The optimiser to use. Defaults to "COBYLA".
+
+    Returns
+    -------
+    Dict[str, pd.DataFrame]
+        A dictionary with a single key "results", which contains a DataFrame
+        with the results of the computation. The columns of the DataFrame are
+        the different points in the annealing schedule, and the rows are the
+        different possible states of the quantum computer.
+    """
     results = []
     qubo = dict_QUBO_to_matrix(qubos[0])  # FIXME
     if qubo is None or qubo.size == 0:

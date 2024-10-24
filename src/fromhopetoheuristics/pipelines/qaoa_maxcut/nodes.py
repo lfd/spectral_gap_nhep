@@ -6,6 +6,8 @@ from fromhopetoheuristics.utils.qaoa_utils import (
     run_QAOA,
 )
 
+from typing import Dict
+
 import logging
 
 log = logging.getLogger(__name__)
@@ -17,8 +19,34 @@ def run_maxcut_qaoa(
     q: int,
     maxcut_n_qubits: int = 4,
     maxcut_graph_density: float = 0.7,
-    optimiser="COBYLA",
-):
+    optimiser: str = "COBYLA",
+) -> Dict[str, pd.DataFrame]:
+    """
+    Runs the QAOA algorithm on a randomly generated MaxCut problem.
+
+    Parameters
+    ----------
+    seed: int
+        The seed used to generate the random maxcut problem.
+    max_p: int
+        The number of layers of the QAOA circuit.
+    q: int
+        The number of parameters in the FOURIER strategy.
+    maxcut_n_qubits: int, optional
+        The number of qubits to use. Defaults to 4.
+    maxcut_graph_density: float, optional
+        The density of the graph to use. Defaults to 0.7.
+    optimiser: str, optional
+        The optimiser to use. Defaults to "COBYLA".
+
+    Returns
+    -------
+    Dict[str, pd.DataFrame]
+        A dictionary with a single key, "results", which contains a DataFrame
+        with the results of the computation. The columns of the DataFrame are
+        the different points in the annealing schedule, and the rows are the
+        different possible states of the quantum computer.
+    """
     results = []
     res_info = {}
     log.info(

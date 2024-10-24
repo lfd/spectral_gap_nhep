@@ -19,42 +19,41 @@ def hamiltonian_from_qubo(qubo: np.ndarray) -> Tuple[SparsePauliOp, float]:
     """
     Creates Qiskit Hamiltonian based on the QUBO matrix
 
-    :param qubo: np.ndarray: QUBO matrix
+    Args:
+        qubo (np.ndarray): QUBO matrix
 
-    :return: SparsePauliOp: Hamiltonian
-    :return: float: Offset
+    Returns:
+        Tuple[SparsePauliOp, float]: (Hamiltonian, Offset)
     """
     J, h, o = pure_QUBO_to_ising(qubo)
     return hamiltonian_from_ising(J, h, o)
 
 
 def hamiltonian_from_ising(
-    J: np.ndarray, h: np.ndarray, o: float
+    J: np.ndarray, h: Optional[np.ndarray], o: float
 ) -> Tuple[SparsePauliOp, float]:
     """
-    Creates Qiskit Hamiltonian based on the Ising matrix and linear terms
+    Creates a Qiskit Hamiltonian based on the Ising matrix and linear terms.
 
-    :param J: np.ndarray: Ising matrix
-    :param h: np.ndarray: linear Ising terms
-    :param o: np.ndarray: offset
+    :param J: np.ndarray: The Ising matrix representing quadratic terms.
+    :param h: Optional[np.ndarray]: Linear Ising terms, can be None.
+    :param o: float: Offset value.
 
-    :return: SparsePauliOp: Hamiltonian
-    :return: float: Offset
+    :return: Tuple[SparsePauliOp, float]: A tuple containing the Hamiltonian as a SparsePauliOp and the offset.
     """
+    # Initialize an empty list to store Hamiltonian terms
+    terms: List[Tuple[str, float]] = []
 
-    # Initialize empty Hamiltonian
-    terms = []
-
-    # Linear Terms
+    # Add linear terms to the Hamiltonian
     if h is not None:
-        term = ["I"] * len(J)
+        term: List[str] = ["I"] * len(J)
         for i, angle in enumerate(h):
             if angle > 0:
                 term[i] = "Z"
                 t = "".join(term)
                 terms.append((t, angle))
 
-    # Quadratic Terms (Assuming a Ising matrix with zero diagonal elements)
+    # Add quadratic terms to the Hamiltonian (assuming Ising matrix with zero diagonal elements)
     n = J.shape[0]
     for i in range(n):
         for j in range(i + 1, n):
@@ -65,12 +64,15 @@ def hamiltonian_from_ising(
                 t = "".join(term)
                 terms.append((t, J[i][j] + J[j][i]))
 
-    hamiltonian = SparsePauliOp.from_list(terms)
+    # Create a SparsePauliOp from the list of terms
+    hamiltonian: SparsePauliOp = SparsePauliOp.from_list(terms)
 
     return hamiltonian, o
 
 
-def pure_ising_to_QUBO(J: np.ndarray) -> Tuple[np.ndarray, float]:
+def pure_ising_to_QUBO(
+    J: np.ndarray,  # Ising Matrix
+) -> Tuple[np.ndarray, float]:  # QUBO Matrix and Offset
     """
     Calculate QUBO Matrix Q and offset E0 from J, such that
     s^T J s equals x^T Q x + E0
@@ -78,10 +80,11 @@ def pure_ising_to_QUBO(J: np.ndarray) -> Tuple[np.ndarray, float]:
     n = number of variables
     The transformation x_i = (1+s_i)/2 holds.
 
-    :param J: np.ndarray: Ising Matrix
+    Args:
+        J (np.ndarray): Ising Matrix
 
-    :return: np.ndarray: QUBO Matrix
-    :return: float: Offset
+    Returns:
+        Tuple[np.ndarray, float]: QUBO Matrix and Offset
     """
     n = J.shape[0]
     qubo = 4 * (J - np.diag(np.ones(n).T @ J))
@@ -98,26 +101,29 @@ def pure_QUBO_to_ising(Q: np.ndarray) -> Tuple[np.ndarray, np.ndarray, float]:
 
     :param Q: np.ndarray: QUBO Matrix
 
-    :return: np.ndarray: Quadratic Ising matrix
-    :return: np.ndarray: Linear terms
-    :return: float: Offset
+    :return: Tuple[np.ndarray, np.ndarray, float]:
+            - Quadratic Ising matrix
+            - Linear terms
+            - Offset
     """
-    J = 0.25 * Q
+    J: np.ndarray = 0.25 * Q
     np.fill_diagonal(J, 0.0)
 
-    h = 0.5 * np.sum(Q, axis=1)
-    o = 0.25 * (np.sum(Q) + np.trace(Q))
+    h: np.ndarray = 0.5 * np.sum(Q, axis=1)
+    o: float = 0.25 * (np.sum(Q) + np.trace(Q))
     return J, h, o
 
 
 def provide_random_QUBO(nqubits: int, problem_seed: int = 777) -> np.ndarray:
     """
-    Generates a randomly created QUBO from uniform distribution
+    Generates a randomly created QUBO from uniform distribution.
 
-    :param nqubits: int: Number of qubits / nodes in the problem
-    :param problem_seed: Seed for numpys default random number generator
+    Args:
+        nqubits (int): Number of qubits / nodes in the problem.
+        problem_seed (int, optional): Seed for numpy's default random number generator.
 
-    :return: np.ndarray: QUBO matrix
+    Returns:
+        np.ndarray: QUBO matrix.
     """
     global problems
 
@@ -133,19 +139,19 @@ def provide_random_QUBO(nqubits: int, problem_seed: int = 777) -> np.ndarray:
 
 
 def cost_function(
-    J: np.ndarray,
-    x: np.ndarray,
-    h: Optional[np.ndarray] = None,
-    offset: Optional[np.ndarray] = None,
-) -> np.ndarray:
+    J: np.ndarray,  # QUBO or Ising matrix
+    x: np.ndarray,  # Variable assignment either in [0,1] (QUBO) or in [-1, 1] (Ising)
+    h: Optional[np.ndarray] = None,  # Linear terms for Ising model (Default None)
+    offset: Optional[float] = 0.0,  # Ising model offset (Default 0)
+) -> np.ndarray:  # Batched costs for variable assignments
     """
     Computes x^T * J * x + hT * x + o for a given batch
 
     :param J: np.ndarray: QUBO or Ising matrix
     :param x: np.ndarray: Variable assignment either in [0,1] (QUBO)
               or in [-1, 1] (Ising)
-    :param h: Optional(np.ndarray): Linear terms for Ising model (Default None)
-    :param offset: Optional(np.ndarray): Ising model offset (Default 0)
+    :param h: Optional[np.ndarray]: Linear terms for Ising model (Default None)
+    :param offset: Optional[float]: Ising model offset (Default 0)
 
     :return: np.ndarray: Batched costs for variable assignments
     """
@@ -163,12 +169,13 @@ def cost_function(
 
 def dict_QUBO_to_matrix(dict_qubo: Dict[Tuple[str, str], float]) -> np.ndarray:
     """
-    Transforms QUBO in dictinary form to matrix
+    Transforms QUBO in dictionary form to matrix
 
-    :param dict_qubo: QUBO dict
-    :type dict_qubo: Dict[Tuple[str, str], float]
-    :return: QUBO matrix
-    :rtype: np.ndarray
+    Args:
+        dict_qubo (Dict[Tuple[str, str], float]): QUBO dictionary
+
+    Returns:
+        np.ndarray: QUBO matrix
     """
     # get unique set of variable names
     names = []
@@ -191,11 +198,11 @@ def compute_min_energy_solution(qubo: np.ndarray) -> Tuple[float, str]:
     """
     Computes the minimum energy solution for a given QUBO
 
-    :param qubo: QUBO to be solved excact
+    :param qubo: QUBO to be solved exactly
     :type qubo: np.ndarray
-    :return: Energy of optimal solution
+    :return: The energy of the optimal solution
     :rtype: float
-    :return: Optimal solution in form of the variable assignment
+    :return: The optimal solution in form of the variable assignment
     :rtype: str
     """
     H, o = hamiltonian_from_qubo(qubo)
@@ -203,12 +210,12 @@ def compute_min_energy_solution(qubo: np.ndarray) -> Tuple[float, str]:
     eigensolver = NumPyEigensolver()
     eigensolver_result = eigensolver.compute_eigenvalues(H)
 
-    min_eigenvalue = np.real(eigensolver_result.eigenvalues[0])
+    min_eigenvalue: float = np.real(eigensolver_result.eigenvalues[0])
     eigenvector = eigensolver_result.eigenstates[0]
     sv = Statevector(eigenvector)
-    solution = sv.sample_counts(1).popitem()[0]
+    solution: str = sv.sample_counts(1).popitem()[0]
 
-    min_energy = min_eigenvalue + o
+    min_energy: float = min_eigenvalue + o
 
     return min_energy, solution
 
@@ -223,21 +230,17 @@ def initialise_QAOA_parameters(
     """
     Constructs a list of initialisation parameters for QAOA
 
-    :param p: Number of QAOA layers
-    :type p: int
-    :param random_init: Whether to initialise randomly, defaults to False
-    :type random_init: bool, optional
-    :param seed: random_seed, defaults to 12345
-    :type seed: int, optional
-    :param initial_params: previous parameter initialisations that should be
-        re-used, defaults to None
-    :type initial_params: Optional[np.ndarray], optional
-    :param fourier: if fourier strategy is used
-    :type fourier: bool, optional
-    :return: List of initial parameters
-    :rtype: List[float]
-    :return: Bounds of the parameter space
-    :rtype: List[Tuple[float, float]]
+    Args:
+        p (int): Number of QAOA layers
+        random_init (bool, optional): Whether to initialise randomly, defaults to False
+        seed (int, optional): random_seed, defaults to 12345
+        initial_params (Optional[np.ndarray], optional): previous parameter initialisations that should be
+            re-used, defaults to None
+        fourier (bool, optional): if fourier strategy is used
+
+    Returns:
+        Tuple[np.ndarray, List[Tuple[float, float]]]: List of initial parameters
+            List of initial parameters, List of bounds of the parameter space
     """
     if initial_params is not None:
         n_prev = len(initial_params) // 2
@@ -274,8 +277,32 @@ def initialise_QAOA_parameters(
 
 
 def get_FOURIER_params(
-    v_params: np.ndarray, u_params: np.ndarray, p: int, q: int = -1
+    v_params: np.ndarray,
+    u_params: np.ndarray,
+    p: int,
+    q: int = -1,
 ) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Compute the parameters from the FOURIER strategy to the QAOA parameters.
+
+    Parameters
+    ----------
+    v_params : np.ndarray
+        The parameters of the cosine part of the FOURIER strategy.
+    u_params : np.ndarray
+        The parameters of the sine part of the FOURIER strategy.
+    p : int
+        The number of layers of the QAOA circuit.
+    q : int, optional
+        The number of parameters in the FOURIER strategy. Defaults to -1.
+
+    Returns
+    -------
+    betas : np.ndarray
+        The QAOA parameters for the beta angles.
+    gammas : np.ndarray
+        The QAOA parameters for the gamma angles.
+    """
     if q == -1:
         assert len(v_params) == len(u_params) == p, (
             "Length of the parameter vector without FOURIER stragety should",
@@ -315,6 +342,39 @@ def solve_QUBO_with_QAOA(
     initial_params: Optional[np.ndarray] = None,
     optimiser: str = "COBYLA",
 ) -> Tuple[float, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Solve a QUBO using the QAOA algorithm.
+
+    Parameters
+    ----------
+    qubo : np.ndarray
+        A QUBO matrix.
+    p : int
+        The number of layers of the QAOA circuit.
+    q : int, optional
+        The number of parameters in the FOURIER strategy. Defaults to -1.
+    seed : int, optional
+        The seed for the random number generator. Defaults to 12345.
+    random_param_init : bool, optional
+        Whether to generate the initial parameters randomly. Defaults to False.
+    initial_params : Optional[np.ndarray], optional
+        The initial parameters for the QAOA algorithm. Defaults to None.
+    optimiser : str, optional
+        The optimiser to use. Defaults to "COBYLA".
+
+    Returns
+    -------
+    energy : float
+        The energy of the solution.
+    betas : np.ndarray
+        The QAOA parameters for the beta angles.
+    gammas : np.ndarray
+        The QAOA parameters for the gamma angles.
+    u_params : np.ndarray
+        The parameters for the U gates.
+    v_params : np.ndarray
+        The parameters for the V gates.
+    """
     H, o = hamiltonian_from_qubo(qubo)
     circ = QAOAAnsatz(cost_operator=H, reps=p)
     estimator = Estimator(seed=seed)
@@ -373,22 +433,31 @@ def solve_QUBO_with_QAOA(
 
 def times_from_QAOA_params(betas: np.ndarray, gammas: np.ndarray) -> np.ndarray:
     """
-    Derive midpoints of each time_interval (gamma_i + beta_i)
+    Derive midpoints of each time_interval (gamma_i + beta_i).
 
-    :param betas: Beta parameters
-    :type betas: np.ndarray
-    :param gammas: Gamma parameters
-    :type gammas: np.ndarray
-    :return: Array of times
-    :rtype: np.ndarray
+    Parameters
+    ----------
+    betas : np.ndarray
+        Beta parameters.
+    gammas : np.ndarray
+        Gamma parameters.
+
+    Returns
+    -------
+    np.ndarray
+        Array of times.
     """
-    p = len(betas)
-    time = 0.0
-    time_midpoints = np.zeros(p + 1)
+    p: int = len(betas)  # Number of QAOA layers
+    time: float = 0.0  # Initialize total time
+    time_midpoints: np.ndarray = np.zeros(p + 1)  # Array to store time midpoints
     for i in range(p):
-        time_segment = np.abs(gammas[i]) + np.abs(betas[i])
-        time += time_segment
-        time_midpoints[i] = time - 0.5 * time_segment
+        time_segment: float = np.abs(gammas[i]) + np.abs(
+            betas[i]
+        )  # Duration of current segment
+        time += time_segment  # Increment total time
+        time_midpoints[i] = (
+            time - 0.5 * time_segment
+        )  # Calculate midpoint of current segment
 
     time_midpoints[p] = time  # Add total annealing time
     return time_midpoints
@@ -401,13 +470,18 @@ def annealing_schedule_from_QAOA_params(
     Derive Annealing schedule from QAOA parameters according to Zhou et al.
     (https://journals.aps.org/prx/pdf/10.1103/PhysRevX.10.021067, Sec. VB)
 
-    :param betas: Beta parameters
-    :type betas: np.ndarray
-    :param gammas: Gamma parameters
-    :type gammas: np.ndarray
-    :return: Annealing schedule (e.g. for Dwave), contains a list of tuples of
+    Parameters
+    ----------
+    betas : np.ndarray
+        Beta parameters
+    gammas : np.ndarray
+        Gamma parameters
+
+    Returns
+    -------
+    List[Tuple[float, float]]
+        Annealing schedule (e.g. for Dwave), contains a list of tuples of
         the form (anneal_time, anneal_fraction).
-    :rtype: List[Tuple[float, float]]
     """
     p = len(betas)
     times = times_from_QAOA_params(betas, gammas)
@@ -427,19 +501,41 @@ def annealing_schedule_from_QAOA_params(
 
 
 def run_QAOA(
-    qubo,
+    qubo: np.ndarray,
     seed: int,
-    max_p=20,
-    q=-1,
-    optimiser="COBYLA",
+    max_p: int = 20,
+    q: int = -1,
+    optimiser: str = "COBYLA",
 ) -> List[dict]:
-    results = []
+    """
+    Run the QAOA algorithm on a given QUBO problem.
 
-    init_params = None
+    Parameters
+    ----------
+    qubo : np.ndarray
+        The QUBO matrix to be solved.
+    seed : int
+        Random seed for reproducibility.
+    max_p : int, optional
+        Maximum number of QAOA layers to run, defaults to 20.
+    q : int, optional
+        Number of parameters in the FOURIER strategy, defaults to -1.
+    optimiser : str, optional
+        The optimiser to use, defaults to "COBYLA".
+
+    Returns
+    -------
+    List[dict]
+        A list of results for each layer p, containing QAOA energy,
+        beta, gamma, u, and v parameters.
+    """
+    results: List[dict] = []
+
+    init_params: Optional[np.ndarray] = None
     for p in range(1, max_p + 1):
         log.info(f"Running QAOA for q = {q}, p = {p}/{max_p}")
 
-        res = {"p": p}
+        res: dict = {"p": p}
         res["qaoa_energy"], betas, gammas, us, vs = solve_QUBO_with_QAOA(
             qubo,
             p,

@@ -9,6 +9,9 @@ from qallse.data_wrapper import DataWrapper
 from trackml.dataset import load_event, load_dataset
 from fromhopetoheuristics.utils.model import QallseSplit, build_model
 
+
+from typing import List, Dict, Any, Tuple, Optional
+
 import logging
 
 log = logging.getLogger(__name__)
@@ -20,10 +23,10 @@ BARREL_VOLUME_IDS = [8, 13, 17]
 
 def build_qubos(
     data_wrapper: DataWrapper,
-    doublets,
+    doublets: List,
     num_angle_parts: int,
     geometric_index: int = -1,
-):
+) -> Dict[str, QallseSplit]:
     """
     Creates partial QUBO from TrackML data using Qallse. The data is split into
     several parts by the angle in the XY-plane of the detector, from which the
@@ -31,15 +34,16 @@ def build_qubos(
 
     :param data_wrapper: Qallse data wrapper
     :type data_wrapper: DataWrapper
-    :param event_path: path, from which to load the TrackML data
-    :type event_path: str
+    :param doublets: List of doublets to be used in the QUBO
+    :type doublets: List[ExtendedDoublet]
     :param num_angle_parts: Number of angle segments in the detector, equals
         the number of resulting QUBOs
     :param geometric_index: The angle part, for which to build the QUBO, if -1
         build all
     :type geometric_index: int
-    :return: the path to the QUBO in dict form
-    :rtype: List[str]
+    :return: The QUBOs in dictionary form, where the keys are the angle part
+        indices
+    :rtype: Dict[str, QallseSplit]
     """
     qubos = {}
     log.info(f"Generating {num_angle_parts} QUBOs")
@@ -64,9 +68,24 @@ def build_qubos(
 
 
 def solve_qubos(
-    qubos: Dict,
+    qubos: Dict[str, QallseSplit],
     seed: int,
-):
+) -> Dict[str, Any]:
+    """
+    Solve the provided QUBOs using a specified seed.
+
+    Parameters
+    ----------
+    qubos : Dict[str, QallseSplit]
+        A dictionary of QUBOs to be solved, where the key is the identifier.
+    seed : int
+        Random seed for reproducibility.
+
+    Returns
+    -------
+    Dict[str, Any]
+        A dictionary containing the responses for each solved QUBO.
+    """
     responses = {}
     log.info(f"Solving {len(qubos)} QUBOs")
 
@@ -81,17 +100,47 @@ def solve_qubos(
 
 
 def create_dataset(
-    hits,
-    particles,
-    truth,
-    density=0.1,
-    min_hits_per_track=5,
-    high_pt_cut=1.0,
-    double_hits_ok=False,
-    random_seed=None,
-    phi_bounds=None,
+    hits: pd.DataFrame,
+    particles: pd.DataFrame,
+    truth: pd.DataFrame,
+    density: float = 0.1,
+    min_hits_per_track: int = 5,
+    high_pt_cut: float = 1.0,
+    double_hits_ok: bool = False,
+    random_seed: Optional[int] = None,
+    phi_bounds: Optional[Tuple[float, float]] = None,
 ) -> Tuple[Dict, str]:
-    # capture all parameters, so we can dump them to a file later
+    """
+    Create a dataset for Qallse from the given hits, particles, and truth.
+
+    Parameters
+    ----------
+    hits : pd.DataFrame
+        The hits.
+    particles : pd.DataFrame
+        The particles.
+    truth : pd.DataFrame
+        The truth.
+    density : float, optional
+        The density of the tracks to sample. Defaults to 0.1.
+    min_hits_per_track : int, optional
+        The minimum number of hits per track. Defaults to 5.
+    high_pt_cut : float, optional
+        The high Pt cut. Defaults to 1.0.
+    double_hits_ok : bool, optional
+        If True, double hits are allowed. Defaults to False.
+    random_seed : Optional[int], optional
+        The random seed. Defaults to None.
+    phi_bounds : Optional[Tuple[float, float]], optional
+        The phi bounds. Defaults to None.
+
+    Returns
+    -------
+    Dict
+        The metadata.
+    str
+        The path to the dataset.
+    """
 
     input_params = locals()
 
@@ -115,7 +164,6 @@ def create_dataset(
     log.debug(f"Loaded {len(df)} hits.")
 
     # ---------- filter hits
-
     # keep only hits in the barrel region
     df = df[hits.volume_id.isin(BARREL_VOLUME_IDS)]
     log.debug(f"Filtered hits from barrel. Remaining hits: {len(df)}.")
@@ -195,7 +243,16 @@ def create_dataset(
     return new_hits, new_truth, new_particles, doublets_df, metadata
 
 
-def load_event_data(event) -> dict:
+def load_event_data(event: str) -> dict[str, pd.DataFrame]:
+    """
+    Load the hits, cells, particles, and truth information for a given event.
+
+    Args:
+        event (str): The event id
+
+    Returns:
+        dict[str, pd.DataFrame]: A dictionary containing the hits, cells, particles, and truth data.
+    """
     hits, cells, particles, truth = load_event(f"dataset/{event}")
 
     return {
@@ -206,11 +263,16 @@ def load_event_data(event) -> dict:
     }
 
 
-def load_dataset_data() -> dict:
+def load_dataset_data() -> Dict[str, pd.DataFrame]:
+    """
+    Load the hits, cells, particles, and truth information for the entire dataset.
+
+    Returns:
+        dict[str, pd.DataFrame]: A dictionary containing the dataset data.
+    """
     dataset = pd.DataFrame()
 
     for event_id, hits, cells, particles, truth in load_dataset("dataset"):
-
         dataset = dataset.append(
             {
                 "event_id": event_id,
@@ -227,30 +289,36 @@ def load_dataset_data() -> dict:
 
 def create_metadata(
     seed: int,
-    num_angle_parts: str,
     f: float,
-    event_cells,
-    event_hits,
-    event_particles,
-    event_truth,
-) -> Tuple[dict, str]:
+    event_hits: pd.DataFrame,
+    event_particles: pd.DataFrame,
+    event_truth: pd.DataFrame,
+) -> Tuple[Dict[str, Any], str]:
     """
     Creates/filters and stores TrackML event data for a given fraction of data.
     Uses Qallse to filter the data.
 
-    :param result_path_prefix: Where to store the data
-    :type result_path_prefix: str
-    :param seed: seed for randomised data filtering, defaults to 12345
-    :type seed: int, optional
-    :param trackml_input_path: Path of the TrackML event, which is to be used
-    :type trackml_input_path: str
-    :param f: fraction of the data, which is to be used, defaults to 0.1
-    :type f: float, optional
+    Parameters
+    ----------
+    seed : int
+        seed for randomised data filtering, defaults to 12345
+    f : float
+        fraction of the data, which is to be used, defaults to 0.1
+    event_cells : pd.DataFrame
+        cells of the event
+    event_hits : pd.DataFrame
+        hits of the event
+    event_particles : pd.DataFrame
+        particles of the event
+    event_truth : pd.DataFrame
+        truth information of the event
 
-    :return: Qallse event metadata
-    :rtype: dict
-    :return: Path, where the filtered data is stored
-    :rtype: str
+    Returns
+    -------
+    tuple
+        A tuple containing:
+        - a dictionary with the filtered data
+        - the path, where the filtered data is stored
     """
     hits, truth, particles, doublets, metadata = create_dataset(
         hits=event_hits,
@@ -269,12 +337,23 @@ def create_metadata(
     }
 
 
-def create_qallse_datawrapper(hits, truth) -> DataWrapper:
+def create_qallse_datawrapper(
+    hits: pd.DataFrame, truth: pd.DataFrame
+) -> Dict[str, DataWrapper]:
     """
     Creates a qallse data wrapper form a given event path
 
-    :return: Qallse data wrapper
-    :rtype: DataWrapper
+    Parameters
+    ----------
+    hits : pd.DataFrame
+        hits of the event
+    truth : pd.DataFrame
+        truth information of the event
+
+    Returns
+    -------
+    dict
+        A dictionary containing the qallse data wrapper
     """
     dw = DataWrapper(hits=hits, truth=truth)
     return {"data_wrapper": dw}

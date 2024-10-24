@@ -16,9 +16,7 @@ def create_pipeline() -> Pipeline:
                 create_metadata,
                 {
                     "seed": "params:seed",
-                    "num_angle_parts": "params:num_angle_parts",
                     "f": "params:data_fraction",
-                    "event_cells": "event_cells",
                     "event_hits": "event_hits",
                     "event_particles": "event_particles",
                     "event_truth": "event_truth",
