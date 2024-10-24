@@ -5,6 +5,7 @@ library(ggh4x)
 library(stringr)
 library(tikzDevice)
 library(patchwork)
+library(rjson)
 source("layout.r")
 
 tikz <- FALSE
@@ -15,83 +16,67 @@ if (!tikz) {
 
 create_save_locations(tikz)
 
-qaoa_file_list <- list.files(
-    path = "../results/selected_id/event000001000/data_frac10_seed1000_num_parts64/QAOA",
-    pattern = "solution.csv$",
+param_path <- "../data/00_parameters/trackrecon_parameters.json"
+qaoa_path <- "../data/05_qaoa/qaoa_track_reconstruction_results.csv"
+as_path <- "../data/06_schedules/anneal_schedule_track_reconstruction_results.csv"
+energy_path <- "../data/04_adiabatic/adiabatic_track_reconstruction_results.csv"
+
+apply_version_to_df <- function(df, file) {
+    df$version <- str_extract(
+        file,
+        "\\d{4}-\\d{2}-\\d{2}T\\d{2}\\.\\d{2}\\.\\d{2}\\.\\d{3}Z"
+    )
+    return(df)
+}
+
+read_csv_and_apply_version <- function(file) {
+    df <- read.csv(file)
+    return(apply_version_to_df(df, file))
+}
+
+read_json_and_apply_version <- function(file) {
+    df <- fromJSON(file = file) %>% as.data.frame()
+    return(apply_version_to_df(df, file))
+}
+
+load_data <- function(file_list, d_params) {
+    df <- lapply(
+        setNames(nm = file_list),
+        read_csv_and_apply_version
+    ) %>%
+        bind_rows() %>%
+        merge(d_params, by = "version")
+    return(df)
+}
+
+param_file_list <- list.files(
+    path = param_path,
     recursive = TRUE,
     full.names = TRUE,
 )
-d_qaoa <- lapply(setNames(nm = qaoa_file_list), read.csv) %>% bind_rows()
+
+qaoa_file_list <- list.files(
+    path = qaoa_path,
+    recursive = TRUE,
+    full.names = TRUE,
+)
 
 as_file_list <- list.files(
-    path = "../results/selected_id/event000001000/data_frac10_seed1000_num_parts64/QAOA",
-    pattern = "anneal_schedule.csv$",
+    path = as_path,
     recursive = TRUE,
     full.names = TRUE,
 )
-d_as <- lapply(setNames(nm = as_file_list), read.csv) %>% bind_rows()
 
-d_gap0 <- read.csv(
-    "../results/qallse_data/data_frac10_seed1000_num_parts64/spectral_gap/2024-10-17-09-56-56/spectral_gap_evolution.csv",
-    stringsAsFactors = FALSE
+energy_file_list <- list.files(
+    path = energy_path,
+    recursive = TRUE,
+    full.names = TRUE,
 )
-d_gap1 <- read.csv(
-    "../results/qallse_data/event000001001/data_frac10_seed1000_num_parts64/spectral_gap/2024-10-17-14-28-16/spectral_gap_evolution.csv",
-    stringsAsFactors = FALSE
-)
-d_gap0$event <- 0
-d_gap1$event <- 1
-d_gap <- rbind(d_gap0, d_gap1)
 
-d_gap2 <- read.csv(
-    "../results/qallse_data/event000001002/data_frac10_seed1000_num_parts64/spectral_gap/2024-10-18-14-54-17/spectral_gap_evolution.csv",
-    stringsAsFactors = FALSE
-)
-d_gap2$event <- 4
-d_gap <- rbind(d_gap, d_gap1)
-
-d_gap4 <- read.csv(
-    "../results/qallse_data/event000001004/data_frac10_seed1000_num_parts64/spectral_gap/2024-10-18-19-48-36/spectral_gap_evolution.csv",
-    stringsAsFactors = FALSE
-)
-d_gap4$event <- 4
-d_gap <- rbind(d_gap, d_gap4)
-
-d_gap5 <- read.csv(
-    "../results/qallse_data/event000001005/data_frac10_seed1000_num_parts64/spectral_gap/2024-10-18-14-52-48/spectral_gap_evolution.csv",
-    stringsAsFactors = FALSE
-)
-d_gap5$event <- 5
-d_gap <- rbind(d_gap, d_gap5)
-
-d_gap6 <- read.csv(
-    "../results/qallse_data/event000001006/data_frac10_seed1000_num_parts64/spectral_gap/2024-10-18-14-54-24/spectral_gap_evolution.csv",
-    stringsAsFactors = FALSE
-)
-d_gap6$event <- 6
-d_gap <- rbind(d_gap, d_gap6)
-
-d_gap7 <- read.csv(
-    "../results/qallse_data/event000001007/data_frac10_seed1000_num_parts64/spectral_gap/2024-10-18-14-56-22/spectral_gap_evolution.csv",
-    stringsAsFactors = FALSE
-)
-d_gap7$event <- 7
-d_gap <- rbind(d_gap, d_gap7)
-
-d_gap8 <- read.csv(
-    "../results/qallse_data/event000001008/data_frac10_seed1000_num_parts64/spectral_gap/2024-10-18-14-55-34/spectral_gap_evolution.csv",
-    stringsAsFactors = FALSE
-)
-d_gap8$event <- 8
-d_gap <- rbind(d_gap, d_gap8)
-
-d_gap9 <- read.csv(
-    "../results/qallse_data/event000001009/data_frac10_seed1000_num_parts64/spectral_gap/2024-10-18-14-56-05/spectral_gap_evolution.csv",
-    stringsAsFactors = FALSE
-)
-d_gap9$event <- 9
-d_gap <- rbind(d_gap, d_gap9)
-
+d_params <- lapply(setNames(nm = param_file_list), read_json_and_apply_version) %>% bind_rows()
+d_qaoa <- load_data(qaoa_file_list, d_params)
+d_as <- load_data(as_file_list, d_params)
+d_energy <- load_data(energy_file_list, d_params)
 
 qubit_labeller <- function(layer) {
     if (tikz) {
@@ -109,37 +94,19 @@ q_labeller <- function(layer) {
     ifelse(layer != "RI", paste0("q = ", layer), layer)
 }
 
-d_gap$qubit_range <- ifelse(
-    d_gap$num_qubits <= 5,
-    "1-5",
-    ifelse(d_gap$num_qubits <= 10, "6-10",
-        ifelse(d_gap$num_qubits <= 15, "11-15", "16-18")
-    )
-)
-d_gap$qubit_range <- factor(d_gap$qubit_range, levels = c("1-5", "6-10", "11-15", "16-18")) # , "10-14", "15-18"))
-d_gap <- d_gap %>%
-    group_by(geometric_index, event) %>%
+d_energy <- d_energy %>%
+    group_by(geometric_index, seed, num_angle_parts) %>%
     mutate(
         min_gap_frac = min(ifelse(gap == min(gap), fraction, 1)),
         min_gap = min(gap)
     ) %>%
     ungroup()
 
-d_gap_selected <- read.csv(
-    "../results/selected_id/event000001000/data_frac10_seed1000_num_parts64/spectral_gap/2024-10-20-05-45-21/spectral_gap_evolution.csv",
-    stringsAsFactors = FALSE
-)
-d_gap_selected <- d_gap_selected %>%
-    group_by(geometric_index) %>%
-    mutate(
-        min_gap_frac = min(ifelse(gap == min(gap), fraction, 1)),
-        min_gap = min(gap)
-    ) %>%
-    ungroup()
-d_gap_selected_msg <- d_gap_selected %>% filter(fraction == min_gap_frac)
-d_gap_selected_msg$mid <- d_gap_selected_msg$gs + 0.5 * d_gap_selected_msg$gap
+d_energy_selected <- d_energy %>% filter(geometric_index == 2)
+d_energy_selected_msg <- d_energy_selected %>% filter(fraction == min_gap_frac)
+d_energy_selected_msg$mid <- d_energy_selected_msg$gs + 0.5 * d_energy_selected_msg$gap
 
-g <- ggplot(d_gap_selected, aes(x = fraction)) +
+g <- ggplot(d_energy_selected, aes(x = fraction)) +
     geom_line(
         linewidth = LINE.SIZE,
         mapping = aes(y = fes, colour = "First Excited State")
@@ -151,9 +118,9 @@ g <- ggplot(d_gap_selected, aes(x = fraction)) +
     geom_segment(
         aes(
             x = min_gap_frac,
-            y = d_gap_selected_msg$fes,
+            y = d_energy_selected_msg$fes,
             xend = min_gap_frac,
-            yend = d_gap_selected_msg$gs,
+            yend = d_energy_selected_msg$gs,
         ),
         colour = COLOURS.LIST[[1]],
         linewidth = LINE.SIZE
@@ -184,7 +151,7 @@ g <- ggplot(d_gap_selected, aes(x = fraction)) +
         )
     )
 
-g_inset <- ggplot(d_gap_selected, aes(x = fraction)) +
+g_inset <- ggplot(d_energy_selected, aes(x = fraction)) +
     geom_line(
         linewidth = LINE.SIZE,
         mapping = aes(y = fes, colour = "First Excited State")
@@ -197,8 +164,8 @@ g_inset <- ggplot(d_gap_selected, aes(x = fraction)) +
         aes(
             x = min_gap_frac,
             xend = min_gap_frac,
-            y = d_gap_selected_msg$mid - 0.05,
-            yend = d_gap_selected_msg$gs,
+            y = d_energy_selected_msg$mid - 0.05,
+            yend = d_energy_selected_msg$gs,
             colour = "Minimum Spectral Gap",
         ),
         lineend = "round",
@@ -209,8 +176,8 @@ g_inset <- ggplot(d_gap_selected, aes(x = fraction)) +
         aes(
             x = min_gap_frac,
             xend = min_gap_frac,
-            y = d_gap_selected_msg$mid + 0.05,
-            yend = d_gap_selected_msg$fes,
+            y = d_energy_selected_msg$mid + 0.05,
+            yend = d_energy_selected_msg$fes,
             colour = "Minimum Spectral Gap",
         ),
         lineend = "round",
@@ -218,8 +185,8 @@ g_inset <- ggplot(d_gap_selected, aes(x = fraction)) +
         linewidth = LINE.SIZE
     ) +
     geom_text(
-        x = d_gap_selected_msg$min_gap_frac,
-        y = d_gap_selected_msg$mid,
+        x = d_energy_selected_msg$min_gap_frac,
+        y = d_energy_selected_msg$mid,
         size = 2,
         label = "d",
     ) +
@@ -263,7 +230,7 @@ g <- g + inset_element(g_inset, 0.4, 0.05, 0.95, 0.6)
 save_name <- str_c("energy_selected")
 create_plot(g, save_name, 0.5, 1, tikz)
 
-g <- ggplot(d_gap_selected, aes(x = fraction, y = gap)) +
+g <- ggplot(d_energy_selected, aes(x = fraction, y = gap)) +
     geom_line(
         aes(colour = "Spectral Gap"),
         linewidth = LINE.SIZE,
@@ -305,7 +272,7 @@ g <- ggplot(d_gap_selected, aes(x = fraction, y = gap)) +
         )
     )
 
-g_inset <- ggplot(d_gap_selected, aes(x = fraction, y = gap)) +
+g_inset <- ggplot(d_energy_selected, aes(x = fraction, y = gap)) +
     geom_line(
         aes(colour = "Spectral Gap"),
         linewidth = LINE.SIZE,
@@ -358,15 +325,13 @@ g <- g + inset_element(g_inset, 0.4, 0.5, 0.95, 0.95)
 save_name <- str_c("gap_selected")
 create_plot(g, save_name, 0.5, 0.75, tikz)
 
-c <- d_gap %>%
+c <- d_energy %>%
     filter(fraction == 0) %>%
-    group_by(qubit_range) %>%
     count()
 print(c)
 
 
-d_gap_stats <- d_gap %>%
-    group_by(qubit_range) %>%
+d_energy_stats <- d_energy %>%
     summarise(
         frac_min = min(min_gap_frac),
         frac_avg = mean(min_gap_frac),
@@ -376,11 +341,11 @@ d_gap_stats <- d_gap %>%
         frac_quartile3 = quantile(min_gap_frac, 0.75),
         frac_sd = sd(min_gap_frac)
     )
-d_gap_stats$frac_lower_bound <- d_gap_stats$frac_avg - d_gap_stats$frac_sd
-d_gap_stats$frac_upper_bound <- d_gap_stats$frac_avg + d_gap_stats$frac_sd
+d_energy_stats$frac_lower_bound <- d_energy_stats$frac_avg - d_energy_stats$frac_sd
+d_energy_stats$frac_upper_bound <- d_energy_stats$frac_avg + d_energy_stats$frac_sd
 
-d_gap_avgs <- d_gap %>%
-    group_by(fraction, qubit_range) %>%
+d_energy_avgs <- d_energy %>%
+    group_by(fraction) %>%
     summarise(
         gap_avg = mean(gap),
         gap_median = median(gap),
@@ -404,16 +369,16 @@ d_gap_avgs <- d_gap %>%
         gs_max = max(gs),
         gs_sd = sd(gs),
     ) %>%
-    merge(d_gap_stats, by = c("qubit_range"))
+    merge(d_energy_stats)
 
-d_gap_avgs$gap_lower_bound <- d_gap_avgs$gap_avg - d_gap_avgs$gap_sd
-d_gap_avgs$gap_upper_bound <- d_gap_avgs$gap_avg + d_gap_avgs$gap_sd
-d_gap_avgs$fes_lower_bound <- d_gap_avgs$fes_avg - d_gap_avgs$fes_sd
-d_gap_avgs$fes_upper_bound <- d_gap_avgs$fes_avg + d_gap_avgs$fes_sd
-d_gap_avgs$gs_lower_bound <- d_gap_avgs$gs_avg - d_gap_avgs$gs_sd
-d_gap_avgs$gs_upper_bound <- d_gap_avgs$gs_avg + d_gap_avgs$gs_sd
+d_energy_avgs$gap_lower_bound <- d_energy_avgs$gap_avg - d_energy_avgs$gap_sd
+d_energy_avgs$gap_upper_bound <- d_energy_avgs$gap_avg + d_energy_avgs$gap_sd
+d_energy_avgs$fes_lower_bound <- d_energy_avgs$fes_avg - d_energy_avgs$fes_sd
+d_energy_avgs$fes_upper_bound <- d_energy_avgs$fes_avg + d_energy_avgs$fes_sd
+d_energy_avgs$gs_lower_bound <- d_energy_avgs$gs_avg - d_energy_avgs$gs_sd
+d_energy_avgs$gs_upper_bound <- d_energy_avgs$gs_avg + d_energy_avgs$gs_sd
 
-g <- ggplot(d_gap_avgs, mapping = aes(x = fraction)) +
+g <- ggplot(d_energy_avgs, mapping = aes(x = fraction)) +
     geom_line(
         linewidth = LINE.SIZE,
         mapping = aes(y = gap_avg, colour = "Spectral Gap")
@@ -468,18 +433,12 @@ g <- ggplot(d_gap_avgs, mapping = aes(x = fraction)) +
             "Minimum Spectral Gap"
         )
     ) +
-    theme(legend.position = "right") +
-    facet_grid(qubit_range ~ .,
-        labeller = labeller(
-            geometric_index = index_labeller,
-            qubit_range = qubit_labeller
-        )
-    )
+    theme(legend.position = "right")
 
 save_name <- str_c("gap_stat")
 create_plot(g, save_name, 1, 1, tikz)
 
-g <- ggplot(d_gap_avgs, mapping = aes(x = fraction)) +
+g <- ggplot(d_energy_avgs, mapping = aes(x = fraction)) +
     geom_line(
         linewidth = LINE.SIZE,
         mapping = aes(y = fes_avg, colour = "First Excited State")
@@ -555,19 +514,13 @@ g <- ggplot(d_gap_avgs, mapping = aes(x = fraction)) +
             "Minimum Spectral Gap"
         )
     ) +
-    theme(legend.position = "right") +
-    facet_grid(. ~ qubit_range,
-        labeller = labeller(
-            geometric_index = index_labeller,
-            qubit_range = qubit_labeller
-        )
-    )
+    theme(legend.position = "right")
 
 save_name <- str_c("energy_stat")
 create_plot(g, save_name, 1, 1, tikz)
 
-d_qaoa$appr_ratio <- d_qaoa$energy / d_qaoa$optimal_energy
-d_qaoa$q <- factor(d_qaoa$q, labels = c("RI", 1, 3, 8, 10, 15, 20, 25))
+d_qaoa$q <- as.factor(d_qaoa$q)
+d_qaoa$appr_ratio <- d_qaoa$qaoa_energy / d_qaoa$min_energy
 
 g <- ggplot(d_qaoa) +
     geom_point(aes(x = p, y = appr_ratio, colour = q),
@@ -585,14 +538,13 @@ g <- ggplot(d_qaoa) +
 save_name <- str_c("qaoa_energy")
 
 create_plot(g, save_name, 1, 1, tikz)
-d_gap_ev0 <- d_gap %>% filter(event == 0)
 
 d_as <- d_as %>%
     group_by(geometric_index) %>%
     mutate(rel_anneal_time = anneal_time / max(anneal_time)) %>%
     ungroup() %>%
-    merge(d_gap_ev0, by = "geometric_index")
-d_as$q <- factor(d_as$q, labels = c("RI", 1, 3, 8, 10, 15, 20, 25))
+    merge(d_energy)
+d_as$q <- as.factor(d_as$q)
 
 g <- ggplot(d_as) +
     geom_point(aes(x = rel_anneal_time, y = anneal_fraction, colour = "Anneal Fraction"),
@@ -652,7 +604,7 @@ d_qaoa_reshaped <- d_qaoa %>%
 d_qaoa_reshaped$beta <- abs(d_qaoa_reshaped$beta)
 d_qaoa_reshaped$gamma <- abs(d_qaoa_reshaped$gamma)
 
-d_qaoa_reshaped <- d_qaoa_reshaped %>% filter(p == 50)
+d_qaoa_reshaped <- d_qaoa_reshaped %>% filter(p == max_p)
 
 g <- ggplot(d_qaoa_reshaped) +
     geom_point(aes(
@@ -691,8 +643,7 @@ g <- ggplot(d_qaoa_reshaped) +
     ) +
     facet_wrap(q ~ .,
         scales = "free_y",
-        labeller = labeller(q = q_labeller),
-        ncol = 4
+        labeller = labeller(q = q_labeller)
     ) +
     scale_x_continuous(
         ifelse(tikz, "$p$", "p"),
@@ -705,43 +656,3 @@ g <- ggplot(d_qaoa_reshaped) +
 save_name <- str_c("qaoa_params")
 create_plot(g, save_name, 1, 1, tikz)
 
-d_qaoa_selected <- d_qaoa_reshaped %>% filter(q == 1)
-
-g <- ggplot(d_qaoa_selected) +
-    geom_point(aes(
-        x = g_paramindex, y = gamma,
-        colour = "gamma"
-    ), size = POINT.SIZE) +
-    geom_line(aes(
-        x = g_paramindex, y = gamma,
-        colour = "gamma"
-    ), linewidth = LINE.SIZE) +
-    geom_point(aes(
-        x = b_paramindex, y = beta,
-        colour = "beta"
-    ), size = POINT.SIZE) +
-    geom_line(aes(
-        x = b_paramindex, y = beta,
-        colour = "beta"
-    ), linewidth = LINE.SIZE) +
-    theme_paper_base() +
-    scale_colour_manual(
-        "",
-        values = c(
-            "beta" = COLOURS.LIST[[4]],
-            "gamma" = COLOURS.LIST[[2]]
-        ),
-        labels = c(
-            ifelse(tikz, "$\\beta$", "beta"),
-            ifelse(tikz, "$\\gamma$", "gamma")
-        )
-    ) +
-    scale_x_continuous(
-        ifelse(tikz, "$p$", "p"),
-        breaks = seq(0, 50, by = 10)
-    ) +
-    scale_y_continuous("Parameter value") +
-    theme(legend.position = "right")
-
-save_name <- str_c("qaoa_params_selected")
-create_plot(g, save_name, 0.35, 0.4, tikz)
