@@ -62,7 +62,10 @@ def build_qubos(
         build_model(doublets=doublets, model=model, add_missing=False)
 
         qubos[i] = model
-        log.info(f"Generated QUBO {i+1}/{num_angle_parts}")
+        if geometric_index == -1:
+            log.info(f"Generated QUBO {i+1}/{num_angle_parts}")
+        else:
+            log.info(f"Generated QUBO {i}")
     return {"qubos": qubos}
 
 
