@@ -5,20 +5,20 @@ from qallse.cli.func import (
 from qallse.plotting import iplot_results
 import pandas as pd
 
-from typing import Dict, List
+from typing import Dict
 import logging
 
 log = logging.getLogger(__name__)
 
 
-def visualize(responses: List, data_wrapper) -> dict:
+def visualize(responses: Dict, data_wrapper) -> dict:
     """
     Visualize the results from responses.
 
     Parameters
     ----------
-    responses : List
-        A list of response objects to process.
+    responses : Dict
+        A dict of response objects to process.
     data_wrapper :
         An object that provides access to real doublets data.
 
