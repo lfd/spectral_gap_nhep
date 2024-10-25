@@ -79,12 +79,26 @@ doublets:
       layer: Preprocessing
 
 qubos:
-  type: fromhopetoheuristics.datasets.qallse_split.QuboDataset
-  filepath: data/03_qubos/qubo
+  type: fromhopetoheuristics.datasets.composed_dataset.ComposedDataset
+  filepath: data/03_qubos/qubo.pickle
   versioned: true
-  # metadata:
-  #   kedro-viz:
-  #     layer: Preprocessing
+  dataset:
+    type: pickle.PickleDataset
+    resolver: pickle_dataset
+  metadata:
+    kedro-viz:
+      layer: Export
+
+xplets:
+  type: fromhopetoheuristics.datasets.composed_dataset.ComposedDataset
+  filepath: data/03_qubos/xplet.pickle
+  versioned: true
+  dataset:
+    type: pickle.PickleDataset
+    resolver: pickle_dataset
+  metadata:
+    kedro-viz:
+      layer: Export
 
 adiabatic_track_reconstruction_results:
   type: pandas.CSVDataset

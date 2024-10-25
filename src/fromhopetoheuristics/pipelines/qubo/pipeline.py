@@ -47,7 +47,7 @@ def create_pipeline() -> Pipeline:
                     "num_angle_parts": "params:num_angle_parts",
                     "geometric_index": "params:geometric_index",
                 },
-                {"qubos": "qubos"},
+                {"qubos": "qubos", "xplets": "xplets"},
             ),
             node(
                 solve_qubos,

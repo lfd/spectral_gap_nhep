@@ -7,6 +7,7 @@ from qallse.cli.func import solve_neal
 from qallse.data_wrapper import DataWrapper
 from trackml.dataset import load_event, load_dataset
 from fromhopetoheuristics.utils.model import QallseSplit, build_model
+from fromhopetoheuristics.utils.data_structures import ExtendedDoublet
 
 
 from typing import List, Dict, Any, Tuple, Optional
@@ -22,29 +23,36 @@ BARREL_VOLUME_IDS = [8, 13, 17]
 
 def build_qubos(
     data_wrapper: DataWrapper,
-    doublets: List,
+    doublets: List[ExtendedDoublet],
     num_angle_parts: int,
     geometric_index: int = -1,
-) -> Dict[str, QallseSplit]:
+) -> Dict[str, pd.DataFrame]:
     """
     Creates partial QUBO from TrackML data using Qallse. The data is split into
     several parts by the angle in the XY-plane of the detector, from which the
     QUBO is built.
 
-    :param data_wrapper: Qallse data wrapper
-    :type data_wrapper: DataWrapper
-    :param doublets: List of doublets to be used in the QUBO
-    :type doublets: List[ExtendedDoublet]
-    :param num_angle_parts: Number of angle segments in the detector, equals
+    Parameters
+    ----------
+    data_wrapper : DataWrapper
+        Qallse data wrapper
+    doublets : List[ExtendedDoublet]
+        List of doublets to be used in the QUBO
+    num_angle_parts : int
+        Number of angle segments in the detector, equals
         the number of resulting QUBOs
-    :param geometric_index: The angle part, for which to build the QUBO, if -1
-        build all
-    :type geometric_index: int
-    :return: The QUBOs in dictionary form, where the keys are the angle part
+    geometric_index : int, optional
+        The angle part, for which to build the QUBO, if -1
+        build all, defaults to -1
+
+    Returns
+    -------
+    Dict[str, QallseSplit]
+        The QUBOs in dictionary form, where the keys are the angle part
         indices
-    :rtype: Dict[str, QallseSplit]
     """
     qubos = {}
+    xplets = {}
     log.info(f"Generating {num_angle_parts} QUBOs")
 
     # FIXME: only generate for one index
@@ -61,12 +69,13 @@ def build_qubos(
         model = QallseSplit(data_wrapper, **extra_config)
         build_model(doublets=doublets, model=model, add_missing=False)
 
-        qubos[i] = model
+        qubos[i], xplets[i] = model.serialize()
         if geometric_index == -1:
             log.info(f"Generated QUBO {i+1}/{num_angle_parts}")
         else:
             log.info(f"Generated QUBO {i}")
-    return {"qubos": qubos}
+
+    return {"qubos": qubos, "xplets": xplets}
 
 
 def solve_qubos(
