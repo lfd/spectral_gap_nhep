@@ -18,7 +18,8 @@ def run_track_reconstruction_qaoa(
     seed: int,  # Random seed
     max_p: int,  # Maximum number of layers in the QAOA circuit
     q: int,  # Number of parameters in the FOURIER strategy
-    optimiser: str = "COBYLA",  # Optimiser to use
+    optimiser: str,  # Optimiser to use
+    geometric_index: int,  # Index of the geometric QUBO
 ) -> Dict[str, pd.DataFrame]:  # Returns a dictionary with a single key "results"
     """
     Runs the QAOA algorithm on a given list of QUBO matrices.
@@ -45,7 +46,12 @@ def run_track_reconstruction_qaoa(
         different possible states of the quantum computer.
     """
     results = []
-    qubo = dict_QUBO_to_matrix(qubos[0])  # FIXME
+
+    if geometric_index != -1:
+        qubo = dict_QUBO_to_matrix(qubos[str(geometric_index)])
+    else:
+        qubo = dict_QUBO_to_matrix(qubos["0"])  # FIXME
+
     if qubo is None or qubo.size == 0:
         log.warning("Skipping qubo")
         return {"results": pd.DataFrame()}

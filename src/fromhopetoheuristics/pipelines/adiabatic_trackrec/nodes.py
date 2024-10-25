@@ -14,6 +14,7 @@ log = logging.getLogger(__name__)
 def run_track_reconstruction_annealing(
     qubos: List[Dict[str, Any]],
     num_anneal_fractions: int,
+    geometric_index: int,
 ) -> Dict[str, pd.DataFrame]:
     """
     Runs the track reconstruction algorithm using the adiabatic quantum computer.
@@ -33,7 +34,11 @@ def run_track_reconstruction_annealing(
         the different points in the annealing schedule, and the rows are the
         different possible states of the quantum computer.
     """
-    qubo = dict_QUBO_to_matrix(qubos[0])  # FIXME
+    if geometric_index != -1:
+        qubo = dict_QUBO_to_matrix(qubos[str(geometric_index)])
+    else:
+        qubo = dict_QUBO_to_matrix(qubos["0"])
+
     fractions = np.linspace(0, 1, num=num_anneal_fractions, endpoint=True)
 
     results = []
