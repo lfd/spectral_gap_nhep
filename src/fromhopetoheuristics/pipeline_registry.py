@@ -55,16 +55,20 @@ def register_pipelines() -> Dict[str, Pipeline]:
     )
 
     pipelines["qubo"] = create_qubo_pipeline()
-    pipelines["qaoa_trackrec"] = pipelines["qubo"] + create_qaoa_trackrec_pipeline()
+    pipelines["qaoa_trackrec"] = (
+        pipelines["qubo"]
+        + create_qaoa_trackrec_pipeline()
+        + create_trackrecon_anneal_schedule_pipeline()
+        + create_trackrecon_export_pipeline()
+    )
     pipelines["adiabatic_trackrec"] = (
-        pipelines["qubo"] + create_adiabatic_trackrec_pipeline()
+        pipelines["qubo"]
+        + create_adiabatic_trackrec_pipeline()
+        + create_trackrecon_export_pipeline()
     )
 
     pipelines["trackrec"] = (
-        pipelines["qaoa_trackrec"]
-        + pipelines["adiabatic_trackrec"]
-        + create_trackrecon_anneal_schedule_pipeline()
-        + create_trackrecon_export_pipeline()
+        pipelines["qaoa_trackrec"] + create_adiabatic_trackrec_pipeline()
     )
     pipelines["__default__"] = pipelines["trackrec"] + pipelines["maxcut"]
     return pipelines
