@@ -104,7 +104,7 @@ def solve_qubos(
         response = solve_neal(qubo, seed=seed)
         # print_stats(data_wrapper, response, qubo) # FIXME: solve no track found case
 
-        log.info(f"Solved QUBO {i+1}/{len(qubos)}")
+        log.info(f"Solved QUBO for index {i}")
         responses[i] = response
 
     return {"responses": responses}  # FIXME find suitable catalog entry
