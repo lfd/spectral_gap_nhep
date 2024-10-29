@@ -3,21 +3,10 @@ from kedro.pipeline import Pipeline, node, pipeline
 from .nodes import visualize, export_parameters
 
 
-def create_trackrecon_pipeline() -> Pipeline:
+def create_trackrecon_export_pipeline() -> Pipeline:
 
     return pipeline(
         [
-            node(
-                visualize,
-                {
-                    "responses": "responses",
-                    "data_wrapper": "data_wrapper",
-                },
-                {
-                    "figures": "trackrecon_figures",
-                    # FIXME: find suitable catalog entry
-                },
-            ),
             node(
                 export_parameters,
                 {
@@ -36,7 +25,7 @@ def create_trackrecon_pipeline() -> Pipeline:
     )
 
 
-def create_maxcut_pipeline() -> Pipeline:
+def create_maxcut_export_pipeline() -> Pipeline:
 
     return pipeline(
         [
@@ -52,6 +41,25 @@ def create_maxcut_pipeline() -> Pipeline:
                     "num_anneal_fractions": "params:num_anneal_fractions",
                 },
                 {"parameters": "maxcut_parameters"},
+            ),
+        ]
+    )
+
+
+def create_trackrecon_viz_pipeline() -> Pipeline:
+    return pipeline(
+        [
+            node(
+                visualize,
+                {
+                    "responses": "responses",
+                    "data_wrapper": "data_wrapper",
+                    "qaoa_results": "qaoa_track_reconstruction_results",
+                    "adiabatic_results": "adiabatic_track_reconstruction_results",
+                },
+                {
+                    "figures": "trackrecon_figures",
+                },
             ),
         ]
     )
