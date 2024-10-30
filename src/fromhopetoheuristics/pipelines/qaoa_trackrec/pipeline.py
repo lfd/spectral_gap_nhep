@@ -1,8 +1,6 @@
 from kedro.pipeline import Pipeline, node, pipeline
 
-from .nodes import (
-    run_track_reconstruction_qaoa,
-)
+from .nodes import run_track_reconstruction_qaoa
 
 
 def create_pipeline() -> Pipeline:
