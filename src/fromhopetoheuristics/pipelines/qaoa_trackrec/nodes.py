@@ -19,6 +19,7 @@ def run_track_reconstruction_qaoa(
     max_p: int,  # Maximum number of layers in the QAOA circuit
     q: int,  # Number of parameters in the FOURIER strategy
     optimiser: str,  # Optimiser to use
+    tolerance: float,  # Tolerance for the optimization algorithm
     geometric_index: int,  # Index of the geometric QUBO
 ) -> Dict[str, pd.DataFrame]:  # Returns a dictionary with a single key "results"
     """
@@ -36,6 +37,10 @@ def run_track_reconstruction_qaoa(
         Number of parameters in the FOURIER strategy.
     optimiser : str, optional
         The optimiser to use. Defaults to "COBYLA".
+    tolerance : float, optional
+        The tolerance for the optimization algorithm. Defaults to 1e-3.
+    geometric_index : int, optional
+        The index of the geometric QUBO to use. Defaults to -1.
 
     Returns
     -------
@@ -69,6 +74,7 @@ def run_track_reconstruction_qaoa(
         q=q,
         max_p=max_p,
         optimiser=optimiser,
+        tolerance=tolerance,
     )
     for res in res_data:
         res.update(res_info)

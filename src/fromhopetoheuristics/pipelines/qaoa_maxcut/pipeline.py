@@ -17,6 +17,7 @@ def create_pipeline() -> Pipeline:
                     "maxcut_n_qubits": "params:maxcut_n_qubits",
                     "maxcut_graph_density": "params:maxcut_graph_density",
                     "optimiser": "params:optimiser",
+                    "tolerance": "params:tolerance",
                 },
                 {"results": "qaoa_maxcut_results"},
             )
