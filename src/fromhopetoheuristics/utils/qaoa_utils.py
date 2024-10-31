@@ -6,6 +6,7 @@ from qiskit.primitives import StatevectorEstimator as Estimator
 from qiskit.quantum_info import SparsePauliOp, Statevector
 from qiskit.circuit.library import QAOAAnsatz
 from qiskit_algorithms.eigensolvers import NumPyEigensolver
+from scipy.optimize import minimize as scipy_minimize
 from scipy.optimize import minimize, Bounds, OptimizeResult
 
 log = logging.getLogger(__name__)
@@ -383,11 +384,15 @@ def spsa(fun, x0, args, tol=None, bounds=None, **options):
 
     def grad(f_cost, w, c, bounds, args):
         # bernoulli-like distribution
-        # TODO: add bounds
         deltak = np.random.choice([-1, 1], size=len(w))
 
         # simultaneous perturbations
         ck_deltak = c * deltak
+
+        # TODO: this may cause the optimizer to get stuck
+        if bounds is not None:
+            for i, bound in enumerate(bounds):
+                ck_deltak[i] = np.clip(ck_deltak[i], bound[0], bound[1])
 
         # gradient approximation
         DELTA_L = f_cost(w + ck_deltak, *args) - f_cost(w - ck_deltak, *args)
@@ -405,6 +410,7 @@ def spsa(fun, x0, args, tol=None, bounds=None, **options):
         # the number 2 in the front is an estimative of
         # the initial changes of the parameters,
         # different changes might need other choices
+        # Added 1e-3 to avoid division by zero
         a = 2 * ((A + 1) ** alpha) / (g0_abs + 1e-3)
 
         return a, A
@@ -441,12 +447,12 @@ def spsa(fun, x0, args, tol=None, bounds=None, **options):
     return OptimizeResult(x=w, fun=cost, nit=k, success=success, message=message)
 
 
-def cust_minimize(*args, **kwargs):
+def minimize(*args, **kwargs):
     if kwargs["method"] == "SPSA":
         kwargs
         return spsa(*args, **kwargs)
     else:
-        return minimize(*args, **kwargs)
+        return scipy_minimize(*args, **kwargs)
 
 
 def solve_QUBO_with_QAOA(
@@ -528,7 +534,7 @@ def solve_QUBO_with_QAOA(
         cost = result.data.evs
         return cost
 
-    min_result = cust_minimize(
+    min_result = minimize(
         cost_fkt,
         init_params,
         args=(circ, H, estimator, p, q),
