@@ -34,13 +34,15 @@ class ComposedDataset(AbstractVersionedDataset):
     def _get_versioned_path(self, version: str) -> PurePosixPath:
         return self.fp.parent / self.fp.stem / version / f"*{self.fp.suffix}"
 
-    def load(self) -> Any:
+    def load(self) -> Dict[str, Any]:
         outputs = {}
         for ident in glob.glob(self._get_load_path().as_posix()):
-            outputs[ident] = self.dataset_module(filepath=ident).load()
+            outputs[PurePosixPath(ident).stem] = self.dataset_module(
+                filepath=ident
+            ).load()
         return outputs
 
-    def save(self, outputs: Dict, **kwargs) -> None:
+    def save(self, outputs: Dict[str, Any], **kwargs) -> None:
         actual_path = self._get_save_path().parent
         os.makedirs(actual_path, exist_ok=True)
 

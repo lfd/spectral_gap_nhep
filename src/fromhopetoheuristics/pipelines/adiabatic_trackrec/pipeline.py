@@ -13,6 +13,7 @@ def create_pipeline() -> Pipeline:
                 {
                     "qubos": "qubos",
                     "num_anneal_fractions": "params:num_anneal_fractions",
+                    "geometric_index": "params:geometric_index",
                 },
                 {
                     "results": "adiabatic_track_reconstruction_results",

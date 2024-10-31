@@ -1,4 +1,5 @@
 from qallse.qallse_d0 import QallseD0, D0Config
+from qallse.dumper import use_markers, xplets_to_serializable_dict
 import numpy as np
 
 from fromhopetoheuristics.utils.data_structures import (
@@ -6,6 +7,8 @@ from fromhopetoheuristics.utils.data_structures import (
     ExtendedTriplet,
 )
 
+from typing import Tuple
+import json
 import logging
 
 log = logging.getLogger(__name__)
@@ -63,6 +66,45 @@ class QallseSplit(QallseD0):
 
     def _get_base_config(self):
         return SplitConfig()
+
+    def serialize(self) -> Tuple:
+        """
+        Serialize model and their associated xplets.
+
+        Parameters
+        ----------
+        qubos : Dict[str, QallseSplit]
+            A dictionary of QUBOs, where the keys are the angle part indices and
+            the values are the QUBOs themselves.
+
+        Returns
+        -------
+        Dict[str, pd.DataFrame]
+            A dictionary with two keys: "qubos" and "xplets". The value for "qubos"
+            is a Pandas DataFrame, where the index is the angle part index and the
+            columns are the QUBO matrix elements. The value for "xplets" is also a
+            Pandas DataFrame, where the index is the angle part index and the columns
+            are the xplet elements.
+        """
+        qubo_kwargs = dict(w_marker=None, c_marker=None)
+
+        xplet = xplets_to_serializable_dict(self)
+        with use_markers(self, **qubo_kwargs) as altered_model:
+            qubo = altered_model.to_qubo()
+
+        # class NumpyTypeEncoder(json.JSONEncoder):
+        #     def default(self, obj):
+        #         if isinstance(obj, np.generic):
+        #             return obj.item()
+        #         elif isinstance(obj, np.ndarray):
+        #             return obj.tolist()
+        #         return json.JSONEncoder.default(self, obj)
+
+        # # This is ugly.. serioulsy, don't look at it too long
+        # qubo = json.loads(json.dumps(qubo, cls=NumpyTypeEncoder))
+        # xplet = json.loads(json.dumps(xplet, cls=NumpyTypeEncoder))
+
+        return qubo, xplet
 
 
 def build_model(doublets, model, add_missing):
