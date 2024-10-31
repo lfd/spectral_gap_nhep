@@ -6,7 +6,7 @@ from qiskit.primitives import StatevectorEstimator as Estimator
 from qiskit.quantum_info import SparsePauliOp, Statevector
 from qiskit.circuit.library import QAOAAnsatz
 from qiskit_algorithms.eigensolvers import NumPyEigensolver
-from scipy.optimize import minimize
+from scipy.optimize import minimize, Bounds, OptimizeResult
 
 log = logging.getLogger(__name__)
 
@@ -335,6 +335,120 @@ def get_FOURIER_params(
         return betas, gammas
 
 
+def spsa(fun, x0, args, tol=None, bounds=None, **options):
+    """
+    Perform the Simultaneous Perturbation Stochastic Approximation (SPSA) optimization.
+
+    Implementation with help from
+    https://www.geeksforgeeks.org/spsa-simultaneous-perturbation-stochastic-approximation-algorithm-using-python/
+
+    Parameters
+    ----------
+    fun : callable
+        The objective function to be minimized.
+    x0 : np.ndarray
+        Initial guess for the parameters.
+    args : tuple
+        Additional arguments to be passed to the objective function.
+    tol : float
+        Tolerance for the optimization process.
+    bounds : list
+        Bounds for the parameters.
+    **options
+        Options for the optimization process.
+        N: number of iterations, defaults to 100
+        alpha: learning rate, defaults to 0.602
+        gamma: amplitude of the perturbation, defaults to 0.101
+        c: amplitude of the perturbation, defaults to 1e-2
+
+
+    Returns
+    -------
+    np.ndarray
+        The optimized parameters.
+    float
+        The value of the objective function at the optimized parameters.
+    """
+
+    w = x0
+    N = options.get("N", 100)
+    alpha = options.get("alpha", 0.602)
+    gamma = options.get("gamma", 0.101)
+    c = options.get("c", 1e-2)
+
+    if bounds is not None:
+        assert isinstance(bounds, list) or isinstance(
+            bounds, Bounds
+        ), "Bounds must be a list or a Bounds object."
+
+    def grad(f_cost, w, c, bounds, args):
+        # bernoulli-like distribution
+        # TODO: add bounds
+        deltak = np.random.choice([-1, 1], size=len(w))
+
+        # simultaneous perturbations
+        ck_deltak = c * deltak
+
+        # gradient approximation
+        DELTA_L = f_cost(w + ck_deltak, *args) - f_cost(w - ck_deltak, *args)
+
+        return (DELTA_L) / (2 * ck_deltak)
+
+    def initialize_hyperparameters(f_cost, w, alpha, N, bounds, args):
+
+        # A is <= 10% of the number of iterations
+        A = N * 0.1
+
+        # order of magnitude of first gradients
+        g0_abs = np.abs(grad(f_cost=f_cost, w=w, c=c, bounds=bounds, args=args).mean())
+
+        # the number 2 in the front is an estimative of
+        # the initial changes of the parameters,
+        # different changes might need other choices
+        a = 2 * ((A + 1) ** alpha) / (g0_abs + 1e-3)
+
+        return a, A
+
+    a, A = initialize_hyperparameters(
+        f_cost=fun, w=w, alpha=alpha, N=N, bounds=bounds, args=args
+    )
+
+    message = ""
+    cost = None
+    success = True
+    try:
+        for k in range(1, N):
+            if tol is not None:
+                cost = fun(w, *args)
+                if np.abs(cost) < tol:
+                    message = f"Tolerance {tol} reached after {k} iterations."
+                    break
+
+            # update ak and ck
+            ak = a / ((k + A) ** (alpha))
+            ck = c / (k ** (gamma))
+
+            # estimate gradient
+            gk = grad(f_cost=fun, w=w, c=ck, bounds=bounds, args=args)
+
+            # update parameters
+            w -= ak * gk
+        message = f"Max. iterations ({N}) reached."
+    except Exception as e:
+        message = f"Terminated after {k} iterations: {e}"
+        success = False
+
+    return OptimizeResult(x=w, fun=cost, nit=k, success=success, message=message)
+
+
+def cust_minimize(*args, **kwargs):
+    if kwargs["method"] == "SPSA":
+        kwargs
+        return spsa(*args, **kwargs)
+    else:
+        return minimize(*args, **kwargs)
+
+
 def solve_QUBO_with_QAOA(
     qubo: np.ndarray,
     p: int,
@@ -414,7 +528,7 @@ def solve_QUBO_with_QAOA(
         cost = result.data.evs
         return cost
 
-    min_result = minimize(
+    min_result = cust_minimize(
         cost_fkt,
         init_params,
         args=(circ, H, estimator, p, q),
