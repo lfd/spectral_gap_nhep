@@ -37,6 +37,30 @@
                 "maxcut"
             ],
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Kedro: qaoa-maxcut",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "kedro",
+            "args": [
+                "run",
+                "--pipeline",
+                "qaoa_maxcut"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Kedro: qaoa-trackrec",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "kedro",
+            "args": [
+                "run",
+                "--pipeline",
+                "qaoa_trackrec"
+            ],
+            "console": "integratedTerminal"
         }
     ]
 }
