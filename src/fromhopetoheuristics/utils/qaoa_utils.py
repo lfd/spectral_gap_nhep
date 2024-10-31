@@ -357,9 +357,9 @@ def spsa(fun, x0, args, tol=None, bounds=None, **options):
         Bounds for the parameters.
     **options
         Options for the optimization process.
-        N: number of iterations, defaults to 100
-        alpha: learning rate, defaults to 0.602
-        gamma: amplitude of the perturbation, defaults to 0.101
+        maxiter: number of iterations, defaults to 1000
+        alpha: learning rate, defaults to 0.5
+        gamma: amplitude of the perturbation, defaults to 0.1
         c: amplitude of the perturbation, defaults to 1e-2
 
 
@@ -372,9 +372,9 @@ def spsa(fun, x0, args, tol=None, bounds=None, **options):
     """
 
     w = x0
-    N = options.get("N", 100)
-    alpha = options.get("alpha", 0.602)
-    gamma = options.get("gamma", 0.101)
+    maxiter = options.get("maxiter", 200)
+    alpha = options.get("alpha", 0.5)
+    gamma = options.get("gamma", 0.1)
     c = options.get("c", 1e-2)
 
     if bounds is not None:
@@ -416,35 +416,44 @@ def spsa(fun, x0, args, tol=None, bounds=None, **options):
         return a, A
 
     a, A = initialize_hyperparameters(
-        f_cost=fun, w=w, alpha=alpha, N=N, bounds=bounds, args=args
+        f_cost=fun, w=w, alpha=alpha, N=maxiter, bounds=bounds, args=args
     )
 
     message = ""
-    cost = None
-    success = True
+    success = np.True_
     try:
-        for k in range(1, N):
-            if tol is not None:
-                cost = fun(w, *args)
-                if np.abs(cost) < tol:
-                    message = f"Tolerance {tol} reached after {k} iterations."
-                    break
+        for k in range(1, maxiter):
 
             # update ak and ck
             ak = a / ((k + A) ** (alpha))
             ck = c / (k ** (gamma))
+
+            if tol is not None:
+                if ak < tol:
+                    message = f"Tolerance {tol} reached after {k} iterations."
+                    status = 0
+                    break
 
             # estimate gradient
             gk = grad(f_cost=fun, w=w, c=ck, bounds=bounds, args=args)
 
             # update parameters
             w -= ak * gk
-        message = f"Max. iterations ({N}) reached."
+        message = f"Max. iterations ({maxiter}) reached."
+        status = 1
     except Exception as e:
-        message = f"Terminated after {k} iterations: {e}"
-        success = False
+        message = f"Terminated with error after {k} iterations: {e}"
+        success = np.False_
+        status = 2
 
-    return OptimizeResult(x=w, fun=cost, nit=k, success=success, message=message)
+    return OptimizeResult(
+        x=w,
+        fun=fun(w, *args) if status < 2 else np.nan,
+        nit=k,
+        success=success,
+        status=status,
+        message=message,
+    )
 
 
 def minimize(*args, **kwargs):
@@ -463,6 +472,7 @@ def solve_QUBO_with_QAOA(
     random_param_init: bool = False,
     initial_params: Optional[np.ndarray] = None,
     optimiser: str = "COBYLA",
+    tolerance: float = 1e-3,
 ) -> Tuple[float, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Solve a QUBO using the QAOA algorithm.
@@ -483,6 +493,8 @@ def solve_QUBO_with_QAOA(
         The initial parameters for the QAOA algorithm. Defaults to None.
     optimiser : str, optional
         The optimiser to use. Defaults to "COBYLA".
+    tolerance : float, optional
+        The tolerance for the optimization algorithm. Defaults to 1e-3.
 
     Returns
     -------
@@ -539,7 +551,7 @@ def solve_QUBO_with_QAOA(
         init_params,
         args=(circ, H, estimator, p, q),
         method=optimiser,
-        tol=1e-3,
+        tol=tolerance,
         bounds=bounds,
     )
     if q == -1:
@@ -628,6 +640,7 @@ def run_QAOA(
     max_p: int = 20,
     q: int = -1,
     optimiser: str = "COBYLA",
+    tolerance: float = 1e-3,
 ) -> List[dict]:
     """
     Run the QAOA algorithm on a given QUBO problem.
@@ -644,6 +657,8 @@ def run_QAOA(
         Number of parameters in the FOURIER strategy, defaults to -1.
     optimiser : str, optional
         The optimiser to use, defaults to "COBYLA".
+    tolerance : float, optional
+        The tolerance for the optimization algorithm, defaults to 1e-3.
 
     Returns
     -------
@@ -666,6 +681,7 @@ def run_QAOA(
             initial_params=init_params,
             random_param_init=True,
             optimiser=optimiser,
+            tolerance=tolerance,
         )
 
         if q == -1:
