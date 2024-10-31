@@ -473,6 +473,7 @@ def solve_QUBO_with_QAOA(
     initial_params: Optional[np.ndarray] = None,
     optimiser: str = "COBYLA",
     tolerance: float = 1e-3,
+    maxiter: int = 1000,
 ) -> Tuple[float, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Solve a QUBO using the QAOA algorithm.
@@ -552,6 +553,7 @@ def solve_QUBO_with_QAOA(
         args=(circ, H, estimator, p, q),
         method=optimiser,
         tol=tolerance,
+        maxiter=maxiter,
         bounds=bounds,
     )
     if q == -1:
@@ -641,6 +643,7 @@ def run_QAOA(
     q: int = -1,
     optimiser: str = "COBYLA",
     tolerance: float = 1e-3,
+    maxiter: int = 1000,
 ) -> List[dict]:
     """
     Run the QAOA algorithm on a given QUBO problem.
@@ -682,6 +685,7 @@ def run_QAOA(
             random_param_init=True,
             optimiser=optimiser,
             tolerance=tolerance,
+            maxiter=maxiter,
         )
 
         if q == -1:

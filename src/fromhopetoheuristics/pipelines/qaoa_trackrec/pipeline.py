@@ -15,6 +15,7 @@ def create_pipeline() -> Pipeline:
                     "q": "params:q",
                     "optimiser": "params:optimiser",
                     "tolerance": "params:tolerance",
+                    "maxiter": "params:maxiter",
                     "geometric_index": "params:geometric_index",
                 },
                 {"results": "qaoa_track_reconstruction_results"},

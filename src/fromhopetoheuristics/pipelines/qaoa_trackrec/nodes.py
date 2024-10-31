@@ -20,6 +20,7 @@ def run_track_reconstruction_qaoa(
     q: int,  # Number of parameters in the FOURIER strategy
     optimiser: str,  # Optimiser to use
     tolerance: float,  # Tolerance for the optimization algorithm
+    maxiter: int,  # Maximum number of iterations
     geometric_index: int,  # Index of the geometric QUBO
 ) -> Dict[str, pd.DataFrame]:  # Returns a dictionary with a single key "results"
     """
@@ -37,10 +38,12 @@ def run_track_reconstruction_qaoa(
         Number of parameters in the FOURIER strategy.
     optimiser : str, optional
         The optimiser to use. Defaults to "COBYLA".
-    tolerance : float, optional
-        The tolerance for the optimization algorithm. Defaults to 1e-3.
-    geometric_index : int, optional
-        The index of the geometric QUBO to use. Defaults to -1.
+    tolerance : float
+        The tolerance for the optimization algorithm.
+    maxiter : int
+        The maximum number of iterations.
+    geometric_index : int
+        The index of the geometric QUBO to use.
 
     Returns
     -------
@@ -75,6 +78,7 @@ def run_track_reconstruction_qaoa(
         max_p=max_p,
         optimiser=optimiser,
         tolerance=tolerance,
+        maxiter=maxiter,
     )
     for res in res_data:
         res.update(res_info)
