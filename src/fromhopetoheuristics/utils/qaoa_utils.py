@@ -7,7 +7,7 @@ from qiskit.quantum_info import SparsePauliOp, Statevector
 from qiskit.circuit.library import QAOAAnsatz
 from qiskit_algorithms.eigensolvers import NumPyEigensolver
 from scipy.optimize import minimize as scipy_minimize
-from scipy.optimize import minimize, Bounds, OptimizeResult
+from scipy.optimize import Bounds, OptimizeResult
 
 log = logging.getLogger(__name__)
 
