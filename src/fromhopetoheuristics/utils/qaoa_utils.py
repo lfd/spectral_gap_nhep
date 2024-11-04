@@ -355,7 +355,7 @@ def spsa(fun, x0, args, options, tol=None, bounds=None):
         Tolerance for the optimization process.
     bounds : list
         Bounds for the parameters.
-    **options
+    **options : dict
         Options for the optimization process.
         maxiter: number of iterations, defaults to 1000
         alpha: learning rate, defaults to 0.5
@@ -374,8 +374,8 @@ def spsa(fun, x0, args, options, tol=None, bounds=None):
 
     w = x0
     maxiter = options.get("maxiter", 200)
-    alpha = options.get("alpha", 0.5)
-    gamma = options.get("gamma", 0.1)
+    alpha = options.get("alpha", 0.4)
+    gamma = options.get("gamma", 0.2)
     c = options.get("c", 1e-2)
     seed = options.get("seed", 1000)
 
@@ -478,6 +478,7 @@ def solve_QUBO_with_QAOA(
     optimiser: str = "COBYLA",
     tolerance: float = 1e-3,
     maxiter: int = 1000,
+    options=None,
 ) -> Tuple[float, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Solve a QUBO using the QAOA algorithm.
@@ -551,6 +552,7 @@ def solve_QUBO_with_QAOA(
         cost = result.data.evs
         return cost
 
+    bounds = None
     min_result = minimize(
         cost_fkt,
         init_params,
@@ -561,7 +563,8 @@ def solve_QUBO_with_QAOA(
         options=dict(
             maxiter=maxiter,
             seed=seed,
-        ),
+        )
+        | options,
     )
     if q == -1:
         v_params, u_params = np.array(()), np.array(())
@@ -651,6 +654,7 @@ def run_QAOA(
     optimiser: str = "COBYLA",
     tolerance: float = 1e-3,
     maxiter: int = 1000,
+    options: Optional[dict] = None,
 ) -> List[dict]:
     """
     Run the QAOA algorithm on a given QUBO problem.
@@ -693,7 +697,10 @@ def run_QAOA(
             optimiser=optimiser,
             tolerance=tolerance,
             maxiter=maxiter,
+            options=options,
         )
+
+        log.info(f"QAOA energy: {res['qaoa_energy']}")
 
         if q == -1:
             init_params = np.concatenate([betas, gammas])
