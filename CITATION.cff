@@ -1,0 +1,32 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Franz"
+  given-names: "Maja"
+  orcid: "https://orcid.org/0000-0002-2801-7192"
+- family-names: "Schönberger"
+  given-names: "Manuel"
+  orcid: "https://orcid.org/0000-0002-6939-7582"
+- family-names: "Strobl"
+  given-names: "Melvin"
+  orcid: "https://orcid.org/0000-0003-0229-9897"
+- family-names: "Kuehn"
+  given-names: "Eileen"
+  # orcid: "https://orcid.org/0000-XXXX-XXXX-XXXX"
+- family-names: "Streit"
+  given-names: "Achim"
+  orcid: "https://orcid.org/0000-0002-5065-469X"
+- family-names: "Zurita"
+  given-names: "Pia"
+  orcid: "https://orcid.org/0000-0002-2756-9550"
+- family-names: "Diefenthaler"
+  given-names: "Markus"
+  orcid: "https://orcid.org/0000-0002-4717-4484"
+- family-names: "Mauerer"
+  given-names: "Wolfgang"
+  orcid: "https://orcid.org/0000-0002-9765-8313"
+title: "From Hope to Heuristic: Realistic Runtime Estimates for Quantum Optimisation in NHEP"
+version: 0.1.0
+# doi: 10.5281/zenodo.1234
+date-released: 2024-10-21
+url: "https://indico.cern.ch/event/1338689/contributions/6010081/"
