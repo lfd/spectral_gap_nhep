@@ -41,6 +41,8 @@ def register_pipelines() -> Dict[str, Pipeline]:
     """
     pipelines = {}
 
+    pipelines["gs"] = create_qaoa_maxcut_pipeline()
+
     pipelines["qaoa_maxcut"] = (
         create_qaoa_maxcut_pipeline() + create_maxcut_anneal_schedule_pipeline()
     )
