@@ -336,7 +336,7 @@ def get_FOURIER_params(
         return betas, gammas
 
 
-def spsa(fun, x0, args, tol=None, bounds=None, **options):
+def spsa(fun, x0, args, options, tol=None, bounds=None):
     """
     Perform the Simultaneous Perturbation Stochastic Approximation (SPSA) optimization.
 
@@ -361,6 +361,7 @@ def spsa(fun, x0, args, tol=None, bounds=None, **options):
         alpha: learning rate, defaults to 0.5
         gamma: amplitude of the perturbation, defaults to 0.1
         c: amplitude of the perturbation, defaults to 1e-2
+        seed: seed for the random number generator
 
 
     Returns
@@ -376,6 +377,9 @@ def spsa(fun, x0, args, tol=None, bounds=None, **options):
     alpha = options.get("alpha", 0.5)
     gamma = options.get("gamma", 0.1)
     c = options.get("c", 1e-2)
+    seed = options.get("seed", 1000)
+
+    rng = np.random.default_rng(seed=seed)
 
     if bounds is not None:
         assert isinstance(bounds, list) or isinstance(
@@ -384,7 +388,7 @@ def spsa(fun, x0, args, tol=None, bounds=None, **options):
 
     def grad(f_cost, w, c, bounds, args):
         # bernoulli-like distribution
-        deltak = np.random.choice([-1, 1], size=len(w))
+        deltak = rng.choice([-1, 1], size=len(w))
 
         # simultaneous perturbations
         ck_deltak = c * deltak
@@ -456,12 +460,12 @@ def spsa(fun, x0, args, tol=None, bounds=None, **options):
     )
 
 
-def minimize(*args, **kwargs):
+def minimize(*args, options, **kwargs):
     if kwargs["method"] == "SPSA":
-        kwargs
-        return spsa(*args, **kwargs)
+        del kwargs["method"]
+        return spsa(*args, options=options, **kwargs)
     else:
-        return scipy_minimize(*args, **kwargs)
+        return scipy_minimize(*args, options=options, **kwargs)
 
 
 def solve_QUBO_with_QAOA(
@@ -553,8 +557,11 @@ def solve_QUBO_with_QAOA(
         args=(circ, H, estimator, p, q),
         method=optimiser,
         tol=tolerance,
-        maxiter=maxiter,
         bounds=bounds,
+        options=dict(
+            maxiter=maxiter,
+            seed=seed,
+        ),
     )
     if q == -1:
         v_params, u_params = np.array(()), np.array(())
