@@ -6,7 +6,8 @@ from qiskit.primitives import StatevectorEstimator as Estimator
 from qiskit.quantum_info import SparsePauliOp, Statevector
 from qiskit.circuit.library import QAOAAnsatz
 from qiskit_algorithms.eigensolvers import NumPyEigensolver
-from scipy.optimize import minimize
+from scipy.optimize import minimize as scipy_minimize
+from scipy.optimize import Bounds, OptimizeResult
 
 log = logging.getLogger(__name__)
 
@@ -335,6 +336,134 @@ def get_FOURIER_params(
         return betas, gammas
 
 
+def spsa(fun, x0, args, tol=None, bounds=None, **options):
+    """
+    Perform the Simultaneous Perturbation Stochastic Approximation (SPSA) optimization.
+
+    Implementation with help from
+    https://www.geeksforgeeks.org/spsa-simultaneous-perturbation-stochastic-approximation-algorithm-using-python/
+
+    Parameters
+    ----------
+    fun : callable
+        The objective function to be minimized.
+    x0 : np.ndarray
+        Initial guess for the parameters.
+    args : tuple
+        Additional arguments to be passed to the objective function.
+    tol : float
+        Tolerance for the optimization process.
+    bounds : list
+        Bounds for the parameters.
+    **options
+        Options for the optimization process.
+        maxiter: number of iterations, defaults to 1000
+        alpha: learning rate, defaults to 0.5
+        gamma: amplitude of the perturbation, defaults to 0.1
+        c: amplitude of the perturbation, defaults to 1e-2
+
+
+    Returns
+    -------
+    np.ndarray
+        The optimized parameters.
+    float
+        The value of the objective function at the optimized parameters.
+    """
+
+    w = x0
+    maxiter = options.get("maxiter", 200)
+    alpha = options.get("alpha", 0.5)
+    gamma = options.get("gamma", 0.1)
+    c = options.get("c", 1e-2)
+
+    if bounds is not None:
+        assert isinstance(bounds, list) or isinstance(
+            bounds, Bounds
+        ), "Bounds must be a list or a Bounds object."
+
+    def grad(f_cost, w, c, bounds, args):
+        # bernoulli-like distribution
+        deltak = np.random.choice([-1, 1], size=len(w))
+
+        # simultaneous perturbations
+        ck_deltak = c * deltak
+
+        # TODO: this may cause the optimizer to get stuck
+        if bounds is not None:
+            for i, bound in enumerate(bounds):
+                ck_deltak[i] = np.clip(ck_deltak[i], bound[0], bound[1])
+
+        # gradient approximation
+        DELTA_L = f_cost(w + ck_deltak, *args) - f_cost(w - ck_deltak, *args)
+
+        return (DELTA_L) / (2 * ck_deltak)
+
+    def initialize_hyperparameters(f_cost, w, alpha, N, bounds, args):
+
+        # A is <= 10% of the number of iterations
+        A = N * 0.1
+
+        # order of magnitude of first gradients
+        g0_abs = np.abs(grad(f_cost=f_cost, w=w, c=c, bounds=bounds, args=args).mean())
+
+        # the number 2 in the front is an estimative of
+        # the initial changes of the parameters,
+        # different changes might need other choices
+        # Added 1e-3 to avoid division by zero
+        a = 2 * ((A + 1) ** alpha) / (g0_abs + 1e-3)
+
+        return a, A
+
+    a, A = initialize_hyperparameters(
+        f_cost=fun, w=w, alpha=alpha, N=maxiter, bounds=bounds, args=args
+    )
+
+    message = ""
+    success = np.True_
+    try:
+        for k in range(1, maxiter):
+
+            # update ak and ck
+            ak = a / ((k + A) ** (alpha))
+            ck = c / (k ** (gamma))
+
+            if tol is not None:
+                if ak < tol:
+                    message = f"Tolerance {tol} reached after {k} iterations."
+                    status = 0
+                    break
+
+            # estimate gradient
+            gk = grad(f_cost=fun, w=w, c=ck, bounds=bounds, args=args)
+
+            # update parameters
+            w -= ak * gk
+        message = f"Max. iterations ({maxiter}) reached."
+        status = 1
+    except Exception as e:
+        message = f"Terminated with error after {k} iterations: {e}"
+        success = np.False_
+        status = 2
+
+    return OptimizeResult(
+        x=w,
+        fun=fun(w, *args) if status < 2 else np.nan,
+        nit=k,
+        success=success,
+        status=status,
+        message=message,
+    )
+
+
+def minimize(*args, **kwargs):
+    if kwargs["method"] == "SPSA":
+        kwargs
+        return spsa(*args, **kwargs)
+    else:
+        return scipy_minimize(*args, **kwargs)
+
+
 def solve_QUBO_with_QAOA(
     qubo: np.ndarray,
     p: int,
@@ -343,6 +472,8 @@ def solve_QUBO_with_QAOA(
     random_param_init: bool = False,
     initial_params: Optional[np.ndarray] = None,
     optimiser: str = "COBYLA",
+    tolerance: float = 1e-3,
+    maxiter: int = 1000,
 ) -> Tuple[float, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Solve a QUBO using the QAOA algorithm.
@@ -363,6 +494,8 @@ def solve_QUBO_with_QAOA(
         The initial parameters for the QAOA algorithm. Defaults to None.
     optimiser : str, optional
         The optimiser to use. Defaults to "COBYLA".
+    tolerance : float, optional
+        The tolerance for the optimization algorithm. Defaults to 1e-3.
 
     Returns
     -------
@@ -419,7 +552,8 @@ def solve_QUBO_with_QAOA(
         init_params,
         args=(circ, H, estimator, p, q),
         method=optimiser,
-        tol=1e-3,
+        tol=tolerance,
+        maxiter=maxiter,
         bounds=bounds,
     )
     if q == -1:
@@ -508,6 +642,8 @@ def run_QAOA(
     max_p: int = 20,
     q: int = -1,
     optimiser: str = "COBYLA",
+    tolerance: float = 1e-3,
+    maxiter: int = 1000,
 ) -> List[dict]:
     """
     Run the QAOA algorithm on a given QUBO problem.
@@ -524,6 +660,8 @@ def run_QAOA(
         Number of parameters in the FOURIER strategy, defaults to -1.
     optimiser : str, optional
         The optimiser to use, defaults to "COBYLA".
+    tolerance : float, optional
+        The tolerance for the optimization algorithm, defaults to 1e-3.
 
     Returns
     -------
@@ -546,6 +684,8 @@ def run_QAOA(
             initial_params=init_params,
             random_param_init=True,
             optimiser=optimiser,
+            tolerance=tolerance,
+            maxiter=maxiter,
         )
 
         if q == -1:

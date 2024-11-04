@@ -20,6 +20,8 @@ def run_maxcut_qaoa(
     maxcut_n_qubits: int = 4,
     maxcut_graph_density: float = 0.7,
     optimiser: str = "COBYLA",
+    tolerance: float = 1e-3,
+    maxiter: int = 1000,
 ) -> Dict[str, pd.DataFrame]:
     """
     Runs the QAOA algorithm on a randomly generated MaxCut problem.
@@ -38,6 +40,10 @@ def run_maxcut_qaoa(
         The density of the graph to use. Defaults to 0.7.
     optimiser: str, optional
         The optimiser to use. Defaults to "COBYLA".
+    tolerance: float, optional
+        The tolerance for the optimization algorithm, defaults to 1e-3.
+    maxiter: int, optional
+        The maximum number of iterations. Defaults to 1000.
 
     Returns
     -------
@@ -66,6 +72,8 @@ def run_maxcut_qaoa(
         max_p=max_p,
         q=q,
         optimiser=optimiser,
+        tolerance=tolerance,
+        maxiter=maxiter,
     )
     for res in res_data:
         res.update(res_info)
