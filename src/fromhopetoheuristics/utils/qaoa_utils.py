@@ -374,9 +374,9 @@ def spsa(fun, x0, args, options, tol=None, bounds=None):
 
     w = x0
     maxiter = options.get("maxiter", 200)
-    alpha = options.get("alpha", 0.4)
-    gamma = options.get("gamma", 0.2)
-    c = options.get("c", 1e-2)
+    alpha = options.get("alpha", 0.722)
+    gamma = options.get("gamma", 0.722)
+    c = options.get("c", 0.08)
     seed = options.get("seed", 1000)
 
     rng = np.random.default_rng(seed=seed)
