@@ -22,6 +22,7 @@ def run_maxcut_qaoa(
     optimiser: str = "COBYLA",
     tolerance: float = 1e-3,
     maxiter: int = 1000,
+    apply_bounds: bool = False,
     options: Optional[dict] = None,
 ) -> Dict[str, pd.DataFrame]:
     """
@@ -45,6 +46,10 @@ def run_maxcut_qaoa(
         The tolerance for the optimization algorithm, defaults to 1e-3.
     maxiter: int, optional
         The maximum number of iterations. Defaults to 1000.
+    apply_bounds : bool, optional
+        Whether parameter bounds should be applied during optimisation.
+    options : dict, optional
+        Additional options for the optimiser. Defaults to empty dict.
 
     Returns
     -------
@@ -75,7 +80,8 @@ def run_maxcut_qaoa(
         optimiser=optimiser,
         tolerance=tolerance,
         maxiter=maxiter,
-        options=options,
+        apply_bounds=apply_bounds,
+        options=options if options else dict(),
     )
     for res in res_data:
         res.update(res_info)

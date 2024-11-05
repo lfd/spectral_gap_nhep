@@ -17,6 +17,8 @@ def create_pipeline() -> Pipeline:
                     "tolerance": "params:tolerance",
                     "maxiter": "params:maxiter",
                     "geometric_index": "params:geometric_index",
+                    "apply_bounds": "params:apply_bounds",
+                    "options": "params:options",
                 },
                 {"results": "qaoa_track_reconstruction_results"},
             ),
