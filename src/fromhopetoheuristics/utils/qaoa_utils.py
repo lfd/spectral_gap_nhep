@@ -1,6 +1,5 @@
 import numpy as np
 import logging
-from typing import Dict, Tuple, Optional, List
 from qiskit import QuantumCircuit
 from qiskit.primitives import StatevectorEstimator as Estimator
 from qiskit.quantum_info import SparsePauliOp, Statevector
@@ -8,6 +7,7 @@ from qiskit.circuit.library import QAOAAnsatz
 from qiskit_algorithms.eigensolvers import NumPyEigensolver
 from scipy.optimize import minimize as scipy_minimize
 from scipy.optimize import Bounds, OptimizeResult
+from typing import Dict, Tuple, Optional, List, Any
 
 log = logging.getLogger(__name__)
 
@@ -336,10 +336,16 @@ def get_FOURIER_params(
         return betas, gammas
 
 
-def spsa(fun, x0, args, options, tol=None, bounds=None):
+def spsa(
+    fun: callable,
+    x0: np.ndarray,
+    args: tuple,
+    options: Dict,
+    tol: Optional[float] = None,
+    bounds: Optional[list] = None,
+) -> OptimizeResult:
     """
     Perform the Simultaneous Perturbation Stochastic Approximation (SPSA) optimization.
-
     Implementation with help from
     https://www.geeksforgeeks.org/spsa-simultaneous-perturbation-stochastic-approximation-algorithm-using-python/
 
@@ -351,11 +357,11 @@ def spsa(fun, x0, args, options, tol=None, bounds=None):
         Initial guess for the parameters.
     args : tuple
         Additional arguments to be passed to the objective function.
-    tol : float
+    tol : Optional[float]
         Tolerance for the optimization process.
-    bounds : list
+    bounds : Optional[list]
         Bounds for the parameters.
-    **options : dict
+    options : Dict
         Options for the optimization process.
         maxiter: number of iterations, defaults to 1000
         alpha: learning rate, defaults to 0.5
@@ -363,15 +369,11 @@ def spsa(fun, x0, args, options, tol=None, bounds=None):
         c: amplitude of the perturbation, defaults to 1e-2
         seed: seed for the random number generator
 
-
     Returns
     -------
-    np.ndarray
-        The optimized parameters.
-    float
-        The value of the objective function at the optimized parameters.
+    OptimizeResult
+        The result of the optimization process.
     """
-
     w = x0
     maxiter = options.get("maxiter", 200)
     alpha = options.get("alpha", 0.722)
@@ -471,14 +473,14 @@ def minimize(*args, options, **kwargs):
 def solve_QUBO_with_QAOA(
     qubo: np.ndarray,
     p: int,
-    q: int = -1,
-    seed: int = 12345,
-    random_param_init: bool = False,
+    q: int,
+    seed: int,
+    random_param_init: bool,
     initial_params: Optional[np.ndarray] = None,
     optimiser: str = "COBYLA",
     tolerance: float = 1e-3,
     maxiter: int = 1000,
-    options: dict = dict(),
+    options: Dict[str, Any] = {},
 ) -> Tuple[float, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Solve a QUBO using the QAOA algorithm.
@@ -504,7 +506,7 @@ def solve_QUBO_with_QAOA(
     maxiter : int, optional
         Number of maximum iterations for the optimization algorithm. Defaults
         to 1000.
-    options : dict, optional
+    options : Dict, optional
         Additional options for the optimiser. Defaults to empty dict.
 
     Returns
@@ -654,12 +656,12 @@ def annealing_schedule_from_QAOA_params(
 def run_QAOA(
     qubo: np.ndarray,
     seed: int,
-    max_p: int = 20,
-    q: int = -1,
-    optimiser: str = "COBYLA",
-    tolerance: float = 1e-3,
-    maxiter: int = 1000,
-    options: dict = dict(),
+    max_p: int,
+    q: int,
+    optimiser: str,
+    tolerance: float,
+    maxiter: int,
+    options: Dict,
 ) -> List[dict]:
     """
     Run the QAOA algorithm on a given QUBO problem.
@@ -681,7 +683,7 @@ def run_QAOA(
     maxiter : int, optional
         Number of maximum iterations for the optimization algorithm. Defaults
         to 1000.
-    options : dict, optional
+    options : Dict, optional
         Additional options for the optimiser. Defaults to empty dict.
 
     Returns
@@ -696,7 +698,7 @@ def run_QAOA(
     for p in range(1, max_p + 1):
         log.info(f"Running QAOA for q = {q}, p = {p}/{max_p}")
 
-        res: dict = {"p": p}
+        res: Dict = {"p": p}
         res["qaoa_energy"], betas, gammas, us, vs = solve_QUBO_with_QAOA(
             qubo,
             p,
