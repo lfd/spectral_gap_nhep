@@ -501,6 +501,11 @@ def solve_QUBO_with_QAOA(
         The optimiser to use. Defaults to "COBYLA".
     tolerance : float, optional
         The tolerance for the optimization algorithm. Defaults to 1e-3.
+    maxiter : int, optional
+        Number of maximum iterations for the optimization algorithm. Defaults
+        to 1000.
+    options : dict, optional
+        Additional options for the optimiser. Defaults to empty dict.
 
     Returns
     -------
@@ -673,6 +678,11 @@ def run_QAOA(
         The optimiser to use, defaults to "COBYLA".
     tolerance : float, optional
         The tolerance for the optimization algorithm, defaults to 1e-3.
+    maxiter : int, optional
+        Number of maximum iterations for the optimization algorithm. Defaults
+        to 1000.
+    options : dict, optional
+        Additional options for the optimiser. Defaults to empty dict.
 
     Returns
     -------
