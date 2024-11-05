@@ -19,6 +19,7 @@ def create_pipeline() -> Pipeline:
                     "optimiser": "params:optimiser",
                     "tolerance": "params:tolerance",
                     "maxiter": "params:maxiter",
+                    "options": "params:options",
                 },
                 {"results": "qaoa_maxcut_results"},
             )

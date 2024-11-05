@@ -6,7 +6,7 @@ from fromhopetoheuristics.utils.qaoa_utils import (
     run_QAOA,
 )
 
-from typing import Dict
+from typing import Dict, Optional
 
 import logging
 
@@ -22,6 +22,7 @@ def run_maxcut_qaoa(
     optimiser: str = "COBYLA",
     tolerance: float = 1e-3,
     maxiter: int = 1000,
+    options: Optional[dict] = None,
 ) -> Dict[str, pd.DataFrame]:
     """
     Runs the QAOA algorithm on a randomly generated MaxCut problem.
@@ -74,6 +75,7 @@ def run_maxcut_qaoa(
         optimiser=optimiser,
         tolerance=tolerance,
         maxiter=maxiter,
+        options=options,
     )
     for res in res_data:
         res.update(res_info)
