@@ -733,6 +733,7 @@ def run_QAOA(
 
     return results
 
+
 def normalise_params(
     betas: np.ndarray, gammas: np.ndarray
 ) -> Tuple[np.ndarray, np.ndarray]:
@@ -759,6 +760,6 @@ def normalise_params(
     gammas[neg_indices] *= -1
 
     # Normalise
-    betas %= np.pi/2
+    betas %= 0.5 * np.pi
     gammas %= np.pi
     return betas, gammas
