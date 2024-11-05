@@ -6,8 +6,8 @@ from fromhopetoheuristics.utils.qaoa_utils import (
     run_QAOA,
 )
 
-from typing import Dict, Optional
-
+import numpy as np
+from typing import Dict, Any, List
 import logging
 
 log = logging.getLogger(__name__)
@@ -17,13 +17,13 @@ def run_maxcut_qaoa(
     seed: int,
     max_p: int,
     q: int,
-    maxcut_n_qubits: int = 4,
-    maxcut_graph_density: float = 0.7,
-    optimiser: str = "COBYLA",
-    tolerance: float = 1e-3,
-    maxiter: int = 1000,
-    apply_bounds: bool = False,
-    options: Optional[dict] = None,
+    maxcut_n_qubits: int,
+    maxcut_graph_density: float,
+    optimiser: str,
+    tolerance: float,
+    maxiter: int,
+    apply_bounds: bool,
+    options: Dict[str, Any],
 ) -> Dict[str, pd.DataFrame]:
     """
     Runs the QAOA algorithm on a randomly generated MaxCut problem.
@@ -36,20 +36,20 @@ def run_maxcut_qaoa(
         The number of layers of the QAOA circuit.
     q: int
         The number of parameters in the FOURIER strategy.
-    maxcut_n_qubits: int, optional
-        The number of qubits to use. Defaults to 4.
-    maxcut_graph_density: float, optional
-        The density of the graph to use. Defaults to 0.7.
-    optimiser: str, optional
-        The optimiser to use. Defaults to "COBYLA".
-    tolerance: float, optional
-        The tolerance for the optimization algorithm, defaults to 1e-3.
-    maxiter: int, optional
-        The maximum number of iterations. Defaults to 1000.
-    apply_bounds : bool, optional
+    maxcut_n_qubits: int
+        The number of qubits to use.
+    maxcut_graph_density: float
+        The density of the graph to use.
+    optimiser: str
+        The optimiser to use.
+    tolerance: float
+        The tolerance for the optimization algorithm.
+    maxiter: int
+        The maximum number of iterations.
+    apply_bounds : bool
         Whether parameter bounds should be applied during optimisation.
-    options : dict, optional
-        Additional options for the optimiser. Defaults to empty dict.
+    options: Dict[str, Any]
+        Additional options for the optimiser.
 
     Returns
     -------
@@ -59,20 +59,22 @@ def run_maxcut_qaoa(
         the different points in the annealing schedule, and the rows are the
         different possible states of the quantum computer.
     """
-    results = []
-    res_info = {}
+    results: List[Dict[str, Any]] = []
+    res_info: Dict[str, Any] = {}
     log.info(
         f"Running QAOA maxcut for n={maxcut_n_qubits} "
         f"with density={maxcut_graph_density}"
     )
 
-    qubo = provide_random_maxcut_QUBO(maxcut_n_qubits, maxcut_graph_density, seed)
+    qubo: np.ndarray = provide_random_maxcut_QUBO(
+        maxcut_n_qubits, maxcut_graph_density, seed
+    )
 
     res_info["min_energy"], res_info["opt_var_assignment"] = (
         compute_min_energy_solution(qubo)
     )
 
-    res_data = run_QAOA(
+    res_data: List[Dict[str, Any]] = run_QAOA(
         qubo,
         seed,
         max_p=max_p,
@@ -87,5 +89,5 @@ def run_maxcut_qaoa(
         res.update(res_info)
         results.append(res)
 
-    results = pd.DataFrame.from_records(results)
+    results: pd.DataFrame = pd.DataFrame.from_records(results)
     return {"results": results}
