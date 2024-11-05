@@ -60,6 +60,15 @@ def main():
                 [result["alpha"], result["gamma"], result["c"], result["mean_energy"]]
             )
 
+    # read results and find parameters corresponding to minimum energy
+    with open("hp_results.csv", "r") as f:
+        reader = csv.reader(f)
+        data = list(reader)
+        best = min(data[1:], key=lambda x: float(x[3]))
+        print(
+            f"Optimum: alpha = {best[0]}, gamma = {best[1]}, c = {best[2]} -> {best[3]}"
+        )
+
 
 if __name__ == "__main__":
     main()
