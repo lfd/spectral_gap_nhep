@@ -271,10 +271,10 @@ def initialise_QAOA_parameters(
             f"Random number generator is required for initialisation"
             f"strategy {initialisation}"
         )
-        if fourier: # initialise in [0, 1]
+        if fourier:  # initialise in [0, 1]
             remaining_betas = rng.random(n_remaining)
             remaining_gammas = rng.random(n_remaining)
-        else: # initialise in [-pi/2, pi/2] for beta and [-pi, pi] for gamma
+        else:  # initialise in [-pi/2, pi/2] for beta and [-pi, pi] for gamma
             remaining_betas = rng.random(n_remaining) * np.pi - 0.5 * np.pi
             remaining_gammas = rng.random(n_remaining) * 2 * np.pi - np.pi
     else:
@@ -762,7 +762,7 @@ def run_QAOA(
 
         log.info(f"QAOA energy: {res['qaoa_energy']}")
 
-        if not "all" in initialisation:
+        if "all" not in initialisation:
             if q == -1:
                 init_params = np.concatenate([betas, gammas])
             else:
