@@ -266,15 +266,9 @@ def initialise_QAOA_parameters(
 
     init_params = np.concatenate([beta_init, gamma_init])
 
-    if fourier:
-        if p < 5:
-            bounds = [(-1 / p, 1 / p)] * 2 * p
-        else:
-            bounds = [(-0.25, 0.25)] * 2 * p
-    else:
-        bounds_beta = (-0.5 * np.pi, 0.5 * np.pi)
-        bounds_gamma = (-np.pi, np.pi)
-        bounds = [bounds_beta] * p + [bounds_gamma] * p
+    bounds_beta = (-0.5 * np.pi, 0.5 * np.pi)
+    bounds_gamma = (-np.pi, np.pi)
+    bounds = [bounds_beta] * p + [bounds_gamma] * p
 
     return init_params, bounds
 
