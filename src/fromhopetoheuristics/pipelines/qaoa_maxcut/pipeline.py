@@ -20,6 +20,7 @@ def create_pipeline() -> Pipeline:
                     "tolerance": "params:tolerance",
                     "maxiter": "params:maxiter",
                     "apply_bounds": "params:apply_bounds",
+                    "initialisation": "params:initialisation",
                     "options": "params:options",
                 },
                 {"results": "qaoa_maxcut_results"},

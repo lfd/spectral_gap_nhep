@@ -225,52 +225,89 @@ def compute_min_energy_solution(qubo: np.ndarray) -> Tuple[float, str]:
 
 def initialise_QAOA_parameters(
     p: int,
-    random_init: bool = False,
-    seed: int = 12345,
+    initialisation: str,
+    rng: Optional[np.random.Generator] = None,
     initial_params: Optional[np.ndarray] = None,
     fourier: bool = False,
-) -> Tuple[np.ndarray, List[Tuple[float, float]]]:
+) -> np.ndarray:
     """
     Constructs a list of initialisation parameters for QAOA
 
-    Args:
-        p (int): Number of QAOA layers
-        random_init (bool, optional): Whether to initialise randomly, defaults to False
-        seed (int, optional): random_seed, defaults to 12345
-        initial_params (Optional[np.ndarray], optional): previous parameter
-            initialisations that should be re-used, defaults to None
-        fourier (bool, optional): if fourier strategy is used
+    Parameters
+    ----------
+    p : int
+        Number of QAOA layers
+    initialisation : str
+        Initialisation strategy for QAOA parameters.
+    rng : Optional[np.random.Generator], optional
+        The random number generator for random initialisation. Defaults to
+        None.
+    initial_params : Optional[np.ndarray], optional
+        Previous parameter initialisations that should be re-used. Defaults to
+        None.
+    fourier : bool, optional
+        Whether fourier strategy is used. Defaults to False.
 
-    Returns:
-        Tuple[np.ndarray, List[Tuple[float, float]]]: List of initial parameters
-            List of initial parameters, List of bounds of the parameter space
+    Returns
+    -------
+    np.ndarray
+        List of initial parameters
     """
-    if initial_params is not None:
+    if initial_params is None or "all" in initialisation:
+        n_remaining = p
+        prev_betas, prev_gammas = np.array([]), np.array([])
+    else:
         n_prev = len(initial_params) // 2
+        n_remaining = p - n_prev
         prev_betas = initial_params[:n_prev]
         prev_gammas = initial_params[n_prev:]
-        remaining_betas = np.repeat(0.0, p - n_prev)
-        remaining_gammas = np.repeat(0.0, p - n_prev)
-        beta_init = np.concatenate([prev_betas, remaining_betas])
-        gamma_init = np.concatenate([prev_gammas, remaining_gammas])
-    elif random_init:
-        rng = np.random.default_rng(seed=seed)
-        beta_init = rng.random(p) * np.pi - np.pi * 0.5
-        gamma_init = rng.random(p) * 2 * np.pi - np.pi
-    elif fourier:
-        beta_init = np.zeros(p)
-        gamma_init = np.zeros(p)
+    print(prev_betas, prev_gammas, p)
+
+    if "zeros" in initialisation or "first" in initialisation and p > 1:
+        remaining_betas = np.zeros(n_remaining)
+        remaining_gammas = np.zeros(n_remaining)
+    elif "random" in initialisation:
+        assert rng is not None, (
+            f"Random number generator is required for initialisation"
+            f"strategy {initialisation}"
+        )
+        if fourier: # initialise in [0, 1]
+            remaining_betas = rng.random(n_remaining)
+            remaining_gammas = rng.random(n_remaining)
+        else: # initialise in [-pi/2, pi/2] for beta and [-pi, pi] for gamma
+            remaining_betas = rng.random(n_remaining) * np.pi - 0.5 * np.pi
+            remaining_gammas = rng.random(n_remaining) * 2 * np.pi - np.pi
     else:
-        beta_init = np.repeat(0.5 * np.pi, p)
-        gamma_init = np.zeros(p)
+        raise ValueError(f"Invalid initialisation strategy: {initialisation}")
+
+    beta_init = np.concatenate([prev_betas, remaining_betas])
+    gamma_init = np.concatenate([prev_gammas, remaining_gammas])
 
     init_params = np.concatenate([beta_init, gamma_init])
+
+    return init_params
+
+
+def get_parameter_bounds(p: int) -> List[Tuple[float, float]]:
+    """
+    Computes parameter bounds for QAOA
+
+    Parameters
+    ----------
+    p : int
+        The number of layers of the QAOA circuit.
+
+    Returns
+    -------
+    List[Tuple[float, float]]
+        List of bounds of the parameter space, Tuples with (min, max)
+    """
 
     bounds_beta = (-0.5 * np.pi, 0.5 * np.pi)
     bounds_gamma = (-np.pi, np.pi)
     bounds = [bounds_beta] * p + [bounds_gamma] * p
 
-    return init_params, bounds
+    return bounds
 
 
 def get_FOURIER_params(
@@ -469,8 +506,9 @@ def solve_QUBO_with_QAOA(
     p: int,
     q: int,
     seed: int,
-    random_param_init: bool,
+    initialisation: str,
     initial_params: Optional[np.ndarray] = None,
+    parameter_rng: Optional[np.random.Generator] = None,
     optimiser: str = "COBYLA",
     tolerance: float = 1e-3,
     maxiter: int = 1000,
@@ -490,10 +528,13 @@ def solve_QUBO_with_QAOA(
         The number of parameters in the FOURIER strategy. Defaults to -1.
     seed : int, optional
         The seed for the random number generator. Defaults to 12345.
-    random_param_init : bool, optional
-        Whether to generate the initial parameters randomly. Defaults to False.
+    initialisation : str
+        Initialisation strategy for QAOA parameters.
     initial_params : Optional[np.ndarray], optional
         The initial parameters for the QAOA algorithm. Defaults to None.
+    parameter_rng : Optional[np.random.Generator], optional
+        The random number generator for random initialisation. Defaults to
+        None.
     optimiser : str, optional
         The optimiser to use. Defaults to "COBYLA".
     tolerance : float, optional
@@ -522,14 +563,13 @@ def solve_QUBO_with_QAOA(
     H, o = hamiltonian_from_qubo(qubo)
     circ = QAOAAnsatz(cost_operator=H, reps=p)
     estimator = Estimator(seed=seed)
-    if q == -1:
-        init_params, bounds = initialise_QAOA_parameters(
-            p, random_param_init, seed, initial_params, fourier=False
-        )
-    else:
-        init_params, bounds = initialise_QAOA_parameters(
-            q, random_param_init, seed, initial_params, fourier=True
-        )
+    init_params = initialise_QAOA_parameters(
+        p if q == -1 else q,
+        initialisation,
+        parameter_rng,
+        initial_params,
+        fourier=q > 1,
+    )
 
     def cost_fkt(
         params: np.ndarray,
@@ -557,7 +597,7 @@ def solve_QUBO_with_QAOA(
         cost = result.data.evs
         return cost
 
-    bounds = bounds if apply_bounds else None
+    bounds = get_parameter_bounds(p if q == -1 else q) if apply_bounds else None
     min_result = minimize(
         cost_fkt,
         init_params,
@@ -660,6 +700,7 @@ def run_QAOA(
     tolerance: float,
     maxiter: int,
     apply_bounds: bool,
+    initialisation: str,
     options: Dict,
 ) -> List[dict]:
     """
@@ -684,6 +725,8 @@ def run_QAOA(
         to 1000.
     apply_bounds : bool
         Whether parameter bounds should be applied during optimisation.
+    initialisation: str
+        Initialisation strategy for QAOA parameters.
     options : Dict, optional
         Additional options for the optimiser. Defaults to empty dict.
 
@@ -696,6 +739,8 @@ def run_QAOA(
     results: List[dict] = []
 
     init_params: Optional[np.ndarray] = None
+    parameter_rng: np.random.Generator = np.random.default_rng(seed)
+
     for p in range(1, max_p + 1):
         log.info(f"Running QAOA for q = {q}, p = {p}/{max_p}")
 
@@ -706,7 +751,8 @@ def run_QAOA(
             q if q <= p else p,
             seed=seed,
             initial_params=init_params,
-            random_param_init=True,
+            initialisation=initialisation,
+            parameter_rng=parameter_rng,
             optimiser=optimiser,
             tolerance=tolerance,
             maxiter=maxiter,
@@ -716,10 +762,11 @@ def run_QAOA(
 
         log.info(f"QAOA energy: {res['qaoa_energy']}")
 
-        if q == -1:
-            init_params = np.concatenate([betas, gammas])
-        else:
-            init_params = np.concatenate([vs, us])
+        if not "all" in initialisation:
+            if q == -1:
+                init_params = np.concatenate([betas, gammas])
+            else:
+                init_params = np.concatenate([vs, us])
 
         res.update({f"beta{i+1:02d}": b for i, b in enumerate(betas)})
         res.update({f"gamma{i+1:02d}": g for i, g in enumerate(gammas)})
