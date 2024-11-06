@@ -261,7 +261,6 @@ def initialise_QAOA_parameters(
         n_remaining = p - n_prev
         prev_betas = initial_params[:n_prev]
         prev_gammas = initial_params[n_prev:]
-    print(prev_betas, prev_gammas, p)
 
     if "zeros" in initialisation or "first" in initialisation and p > 1:
         remaining_betas = np.zeros(n_remaining)
