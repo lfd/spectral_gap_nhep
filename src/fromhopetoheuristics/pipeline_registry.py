@@ -31,6 +31,9 @@ from fromhopetoheuristics.pipelines.export.pipeline import (
     create_trackrecon_viz_pipeline,
     create_maxcut_export_pipeline,
 )
+from fromhopetoheuristics.pipelines.hyperparameter_study.pipeline import (
+    create_pipeline as create_hyperparameter_study_pipeline,
+)
 
 
 def register_pipelines() -> Dict[str, Pipeline]:
@@ -73,5 +76,8 @@ def register_pipelines() -> Dict[str, Pipeline]:
         + create_adiabatic_trackrec_pipeline()
         + create_trackrecon_viz_pipeline()
     )
+
+    pipelines["hyperparameter_study"] = create_hyperparameter_study_pipeline()
+
     pipelines["__default__"] = pipelines["trackrec"] + pipelines["maxcut"]
     return pipelines
