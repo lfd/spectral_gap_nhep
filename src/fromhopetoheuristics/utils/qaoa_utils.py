@@ -266,15 +266,9 @@ def initialise_QAOA_parameters(
 
     init_params = np.concatenate([beta_init, gamma_init])
 
-    if fourier:
-        if p < 5:
-            bounds = [(-1 / p, 1 / p)] * 2 * p
-        else:
-            bounds = [(-0.25, 0.25)] * 2 * p
-    else:
-        bounds_beta = (-0.5 * np.pi, 0.5 * np.pi)
-        bounds_gamma = (-np.pi, np.pi)
-        bounds = [bounds_beta] * p + [bounds_gamma] * p
+    bounds_beta = (-0.5 * np.pi, 0.5 * np.pi)
+    bounds_gamma = (-np.pi, np.pi)
+    bounds = [bounds_beta] * p + [bounds_gamma] * p
 
     return init_params, bounds
 
@@ -480,6 +474,7 @@ def solve_QUBO_with_QAOA(
     optimiser: str = "COBYLA",
     tolerance: float = 1e-3,
     maxiter: int = 1000,
+    apply_bounds: bool = False,
     options: Dict[str, Any] = {},
 ) -> Tuple[float, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
@@ -506,6 +501,8 @@ def solve_QUBO_with_QAOA(
     maxiter : int, optional
         Number of maximum iterations for the optimization algorithm. Defaults
         to 1000.
+    apply_bounds : bool, optional
+        Whether parameter bounds should be applied during optimisation.
     options : Dict, optional
         Additional options for the optimiser. Defaults to empty dict.
 
@@ -549,6 +546,7 @@ def solve_QUBO_with_QAOA(
                 params[len(params) // 2 :],
             )
             betas, gammas = get_FOURIER_params(v_params, u_params, p, q)
+            betas, gammas = normalise_params(betas, gammas)
             qaoa_params = np.concatenate([betas, gammas])
         else:
             qaoa_params = params
@@ -559,7 +557,7 @@ def solve_QUBO_with_QAOA(
         cost = result.data.evs
         return cost
 
-    bounds = None
+    bounds = bounds if apply_bounds else None
     min_result = minimize(
         cost_fkt,
         init_params,
@@ -661,6 +659,7 @@ def run_QAOA(
     optimiser: str,
     tolerance: float,
     maxiter: int,
+    apply_bounds: bool,
     options: Dict,
 ) -> List[dict]:
     """
@@ -683,6 +682,8 @@ def run_QAOA(
     maxiter : int, optional
         Number of maximum iterations for the optimization algorithm. Defaults
         to 1000.
+    apply_bounds : bool
+        Whether parameter bounds should be applied during optimisation.
     options : Dict, optional
         Additional options for the optimiser. Defaults to empty dict.
 
@@ -709,6 +710,7 @@ def run_QAOA(
             optimiser=optimiser,
             tolerance=tolerance,
             maxiter=maxiter,
+            apply_bounds=apply_bounds,
             options=options,
         )
 
@@ -726,3 +728,34 @@ def run_QAOA(
         results.append(res)
 
     return results
+
+
+def normalise_params(
+    betas: np.ndarray, gammas: np.ndarray
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Normalises QAOA Parameters according to bounds and symmetries:
+    Resulting parameters are in [0, pi] for gamma and in [0, pi/2] for beta.
+
+    Parameters
+    ----------
+    betas : np.ndarray
+        Beta parameters
+    gammas : np.ndarray
+        Gamma parameters
+
+    Returns
+    -------
+    Tuple[np.ndarray, np.ndarray]
+        (normalised betas, normalised gammas)
+    """
+
+    # Ensure positive gamma (point symmetry)
+    neg_indices = gammas < 0
+    betas[neg_indices] *= -1
+    gammas[neg_indices] *= -1
+
+    # Normalise
+    betas %= 0.5 * np.pi
+    gammas %= np.pi
+    return betas, gammas

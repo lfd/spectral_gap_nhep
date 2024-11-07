@@ -22,6 +22,7 @@ def run_maxcut_qaoa(
     optimiser: str,
     tolerance: float,
     maxiter: int,
+    apply_bounds: bool,
     options: Dict[str, Any],
 ) -> Dict[str, pd.DataFrame]:
     """
@@ -45,6 +46,8 @@ def run_maxcut_qaoa(
         The tolerance for the optimization algorithm.
     maxiter: int
         The maximum number of iterations.
+    apply_bounds : bool
+        Whether parameter bounds should be applied during optimisation.
     options: Dict[str, Any]
         Additional options for the optimiser.
 
@@ -79,6 +82,7 @@ def run_maxcut_qaoa(
         optimiser=optimiser,
         tolerance=tolerance,
         maxiter=maxiter,
+        apply_bounds=apply_bounds,
         options=options,
     )
     for res in res_data:

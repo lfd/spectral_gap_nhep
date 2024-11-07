@@ -22,6 +22,7 @@ def run_track_reconstruction_qaoa(
     tolerance: float,
     maxiter: int,
     geometric_index: int,
+    apply_bounds: bool,
     options: Dict[str, Any],
 ) -> Dict[str, pd.DataFrame]:
     """
@@ -45,6 +46,8 @@ def run_track_reconstruction_qaoa(
         The maximum number of iterations.
     geometric_index : int
         The index of the geometric QUBO to use.
+    apply_bounds : bool
+        Whether parameter bounds should be applied during optimisation.
     options : Dict[str, Any]
         Additional options for the optimiser.
 
@@ -82,6 +85,7 @@ def run_track_reconstruction_qaoa(
         optimiser=optimiser,
         tolerance=tolerance,
         maxiter=maxiter,
+        apply_bounds=apply_bounds,
         options=options,
     )
     for res in res_data:
