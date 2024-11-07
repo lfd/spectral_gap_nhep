@@ -83,7 +83,7 @@ def run_maxcut_qaoa(
         tolerance=tolerance,
         maxiter=maxiter,
         apply_bounds=apply_bounds,
-        options=options if options else dict(),
+        options=options,
     )
     for res in res_data:
         res.update(res_info)
