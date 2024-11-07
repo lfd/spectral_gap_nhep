@@ -9,6 +9,7 @@ optimiser: "SPSA" #SPSA, COBYLA, COBYQA, BFGS
 tolerance: 1e-1 # in SPSA this controlls ak, choose around 0.1
 maxiter: 200
 apply_bounds: true
+initialisation: "random" # "random", "first_random", "all_zeros", "all_random"
 options:
     alpha: 0.722
     gamma: 0.722
