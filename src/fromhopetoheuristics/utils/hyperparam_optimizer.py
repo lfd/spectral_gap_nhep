@@ -20,7 +20,6 @@ class Hyperparam_Optimizer:
         n_jobs: int,
         selective_optimization: bool,
         resume_study: bool,
-        pool_process,
         pruner,
         pruner_startup_trials,
         pruner_warmup_steps,
@@ -60,19 +59,16 @@ class Hyperparam_Optimizer:
         self.optimization_metric = optimization_metric
         self.timeout = timeout
         self.selective_optimization = selective_optimization
-        self.pool_process = pool_process
 
         self.enabled_hyperparameters = enabled_hyperparameters
 
         self.studies = []
         self.n_jobs = n_jobs
 
-        n_studies = self.n_jobs if self.pool_process else 1
-
         direction = "minimize"  # TODO: replace if required
 
-        for n_it in range(n_studies):
-            resume_study = resume_study or (n_studies > 1 and n_it != 0)
+        for n_it in range(self.n_jobs):
+            resume_study = resume_study or (self.n_jobs > 1 and n_it != 0)
 
             self.studies.append(
                 o.create_study(
@@ -109,28 +105,11 @@ class Hyperparam_Optimizer:
         )
 
     def update_variable_parameters(self, trial, parameters, prefix=""):
-        raise NotImplementedError("need to be revised")
         updated_variable_parameters = dict()
         choice = None  # indicate that this level is not a choice
 
         for parameter, value in parameters.items():
-            # the following section removes any reserved strings from the parameter name and draws a choice if possible
-            if "_range_quant" in parameter:
-                if not self.toggle_classical_quant and self.selective_optimization:
-                    continue  # continue if its a quantum parameter and we are classical
-                param_name = parameter.replace("_range_quant", "")
-            elif "_range" in parameter:
-                if self.toggle_classical_quant and self.selective_optimization:
-                    continue  # continue if its a classical parameter and we are quantum
-                param_name = parameter.replace("_range", "")
-            elif "_choice" in parameter:
-                param_name = parameter.replace("_choice", "")
-                assert type(value) == dict
-                # if we have the choice; go and ask the trial what to do
-                choice = trial.suggest_categorical(param_name, value.keys())
-            else:
-                # there is nothing fancy going on, copy the parameter name as is
-                param_name = parameter
+            param_name = parameter
 
             # now, check if the hyperparameter is nested, i.e. there is another level below
             if isinstance(value, Dict):
@@ -204,6 +183,7 @@ class Hyperparam_Optimizer:
                     )
 
             else:
+                # if we don't find the scheme, go for categorical
                 updated_variable_parameters[param_name] = trial.suggest_categorical(
                     prefix + param_name, value
                 )

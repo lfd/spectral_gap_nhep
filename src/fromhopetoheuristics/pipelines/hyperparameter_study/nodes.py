@@ -1,4 +1,5 @@
 from typing import Dict, List
+import subprocess
 
 from fromhopetoheuristics.utils.hyperparam_optimizer import Hyperparam_Optimizer
 
@@ -15,7 +16,6 @@ def create_hyperparam_optimizer(
     path: str,
     sampler: str,
     sampler_seed: int,
-    pool_process: bool,
     pruner_strategy: str,
     pruner_startup_trials: int,
     pruner_warmup_steps: int,
@@ -44,7 +44,6 @@ def create_hyperparam_optimizer(
         n_jobs=n_jobs,
         selective_optimization=selective_optimization,
         resume_study=resume_study,
-        pool_process=pool_process,
         pruner=pruner_strategy,
         pruner_startup_trials=pruner_startup_trials,
         pruner_warmup_steps=pruner_warmup_steps,
@@ -56,6 +55,15 @@ def create_hyperparam_optimizer(
     hyperparam_optimizer.set_fixed_parameters({})
 
     def objective(trial, parameters, report_callback, early_stop_callback):
+        subprocess.run(
+            [
+                "kedro",
+                "run",
+                "--pipeline",
+                "trackrec",
+                f"--params={','.join([f'{k}={v}' for k, v in parameters.items()])}",
+            ]
+        )
         raise NotImplementedError("Objective method must be set!")
 
     hyperparam_optimizer.objective = objective

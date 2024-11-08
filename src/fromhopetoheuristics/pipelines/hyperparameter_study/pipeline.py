@@ -17,7 +17,6 @@ def create_pipeline() -> Pipeline:
                     "path": "params:optuna.path",
                     "sampler": "params:optuna.sampler",
                     "sampler_seed": "params:optuna.sampler_seed",
-                    "pool_process": "params:optuna.pool_process",
                     "pruner_strategy": "params:optuna.pruner_strategy",
                     "pruner_startup_trials": "params:optuna.pruner_startup_trials",
                     "pruner_warmup_steps": "params:optuna.pruner_warmup_steps",

@@ -31,7 +31,7 @@ optuna:
     n_trials: 400
     timeout: 10800 #30h
     # this allows to control which parameters are considered during optimization. Leave empty to enable all
-    enabled_hyperparameters: [optimizer_choice]
+    enabled_hyperparameters: ["optimiser", "initialisation"]
     # default the loss function value, but can also be any metric that is returned by the training method
     optimization_metric: Val_Accuracy
 
@@ -44,7 +44,6 @@ optuna:
     # Optuna/Sampling
     sampler: RandomSampler # TPESampler, RandomSampler
     sampler_seed: # should be None, if n_jobs=1 and separate processes are triggered from console
-    pool_process: False # alternative pool processing
 
     # Optuna/Pruning
     pruner_strategy: # MedianPruner, None
