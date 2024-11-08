@@ -84,12 +84,18 @@ def create_hyperparam_optimizer(
         log.info(f"Running trial {trial._trial_id} with parameters {parameters}.")
 
         parameters["hyperhyper_trial_id"] = trial._trial_id
+        # subprocess.run(
+        #     [
+        #         "kedro",
+        #         "run",
+        #         "--pipeline qaoa_trackrec",
+        #         f"--params={','.join([f'{k}={v}' for k, v in parameters.items()])}",
+        #     ]
+        # )
         subprocess.run(
             [
-                "kedro",
-                "run",
-                "--pipeline",
-                "qaoa_trackrec",
+                "./slurm.sh",
+                "--pipeline qaoa_trackrec",
                 f"--params={','.join([f'{k}={v}' for k, v in parameters.items()])}",
             ]
         )
