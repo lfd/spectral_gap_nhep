@@ -1,5 +1,5 @@
 import optuna as o
-from typing import List, Dict
+from typing import List, Dict, Optional, Any
 
 import plotly.graph_objects as go
 
@@ -15,18 +15,36 @@ class Hyperparam_Optimizer:
         path: str,
         n_trials: int,
         timeout: int,
-        enabled_hyperparameters,
-        optimization_metric: List,
+        enabled_hyperparameters: List[str],
+        optimization_metric: List[str],
         n_jobs: int,
-        selective_optimization: bool,
         resume_study: bool,
-        pruner,
-        pruner_startup_trials,
-        pruner_warmup_steps,
-        pruner_interval_steps,
-        pruner_min_trials,
-    ):
-        # storage = self.initialize_storage(host, port, path, password)
+        pruner: Optional[str],
+        pruner_startup_trials: int,
+        pruner_warmup_steps: int,
+        pruner_interval_steps: int,
+        pruner_min_trials: int,
+    ) -> None:
+        """
+        Initialize the Hyperparam_Optimizer class.
+
+        Args:
+            name (str): The name of the study to be stored in the database.
+            sampler (str): The sampler to be used for the study.
+            seed (int): The seed for the random sampler.
+            path (str): The path to the database file.
+            n_trials (int): The number of trials to run for the study.
+            timeout (int): The timeout for the study in seconds.
+            enabled_hyperparameters (List[str]): The hyperparameters to be optimized.
+            optimization_metric (List[str]): The optimization metric to be used.
+            n_jobs (int): The number of jobs to run in parallel.
+            resume_study (bool): Whether to resume the study from the database.
+            pruner (Optional[str]): The pruner to be used for the study.
+            pruner_startup_trials (int): The number of trials before pruning starts.
+            pruner_warmup_steps (int): The number of trials to be used for warmup.
+            pruner_interval_steps (int): The interval between pruning conditions.
+            pruner_min_trials (int): The minimum number of trials to be used for pruning.
+        """
 
         if pruner is None:
             self.pruner = None
@@ -58,7 +76,6 @@ class Hyperparam_Optimizer:
         self.n_trials = n_trials
         self.optimization_metric = optimization_metric
         self.timeout = timeout
-        self.selective_optimization = selective_optimization
 
         self.enabled_hyperparameters = enabled_hyperparameters
 
@@ -104,7 +121,45 @@ class Hyperparam_Optimizer:
             filter(self.select_hyperparams, parameters.items())
         )
 
-    def update_variable_parameters(self, trial, parameters, prefix=""):
+    def update_variable_parameters(
+        self, trial: o.trial.Trial, parameters: Dict[str, Any], prefix: str = ""
+    ) -> Dict[str, Any]:
+        """
+        Updates the variable hyperparameters based on the trial suggestions.
+        There is a special postfix keyword for the hyperparameters: "_choice"
+        This keyword allows nested hyperparameters that depend on the
+        categorical decision.
+        So e.g. one could have the following structure:
+
+        optimizer_choice
+            A:
+                A.1
+                A.2
+            B:
+                B.1
+                B.2
+
+        where you cannot combine A.1 and B.1, in a single study because A, B
+        might be optimizers and their sub-parameters are options.
+        This code then detects "optimizer_choice" and only selects either
+        A with its sub-parameters or B with its sub-parameters depending
+        on a categorical suggestion of the current trial instance.
+
+        Besides that, Hyperparametes can have the following "types":
+        - continous values: [START, END, ['log'|'linear']]
+        - discrete values: [A, B, C, ...]
+        The former is used for either int or float suggestion based on the type
+        of the hyperparameter. The latter is used for categorical suggestion.
+        Note that continous values allow specific log or linear scaling.
+
+        Args:
+            trial: The Optuna trial object.
+            parameters: A dictionary of hyperparameters to be optimized.
+            prefix: A string to prepend to each parameter name for uniqueness.
+
+        Returns:
+            A dictionary with updated hyperparameters.
+        """
         updated_variable_parameters = dict()
         choice = None  # indicate that this level is not a choice
 
