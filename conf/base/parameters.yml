@@ -22,6 +22,8 @@ maxcut_graph_density: 0.7
 
 geometric_index: 27 # angle part index
 
+hyperhyper_trial_id: null # hyperparameter trial id (hyperparameter search only)
+
 optuna:
     hyperparameters:
         optimiser: ["SPSA", "COBYLA", "COBYQA", "BFGS"]

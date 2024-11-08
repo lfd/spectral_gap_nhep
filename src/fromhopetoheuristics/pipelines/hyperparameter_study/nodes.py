@@ -1,5 +1,7 @@
 from typing import Dict, List
 import subprocess
+import pandas as pd
+import os
 
 from fromhopetoheuristics.utils.hyperparam_optimizer import Hyperparam_Optimizer
 
@@ -80,12 +82,14 @@ def create_hyperparam_optimizer(
         """
         # TODO: eventually this will be a slurm script that we can provide an id
         # use the `trial._trial_id` for that purpose
+        parameters["hyperhyper_trial_id"] = trial._trial_id
+
         subprocess.run(
             [
                 "kedro",
                 "run",
                 "--pipeline",
-                "trackrec",
+                "qaoa_trackrec",
                 f"--params={','.join([f'{k}={v}' for k, v in parameters.items()])}",
             ]
         )
@@ -95,8 +99,10 @@ def create_hyperparam_optimizer(
         # Because I'm not sure how well it goes with the output files if we run the experiments in parallel...
         # Note that we can trigger this hyperparameter experiment as often as we want,
         # optuna will take care of syncing those experiments based on the common database and the experiment name
+        objective_val = get_objective_for_trial(trial._trial_id)
+        log.info(f"Trial {trial._trial_id} received objective value {objective_val}.")
 
-        return 0.0
+        return objective_val
 
     hyperparam_optimizer.objective = objective
 
@@ -117,3 +123,13 @@ def run_optuna(
     #     log.exception("Error while logging study")
 
     return {}
+
+def get_objective_for_trial(trial_id) -> float:
+    tmp_file_name = f".hyperhyper{trial_id}.json"
+    results = pd.read_json(tmp_file_name)
+    os.remove(tmp_file_name)
+
+    last5 = results.loc[results['p'] > results.shape[0] - 5]
+    objective_val = last5["qaoa_energy"].mean()
+    return objective_val
+

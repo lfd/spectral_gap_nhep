@@ -1,4 +1,3 @@
-import numpy as np
 from typing import Optional, List, Dict, Any
 
 from fromhopetoheuristics.utils.qaoa_utils import (
@@ -25,6 +24,7 @@ def run_track_reconstruction_qaoa(
     apply_bounds: bool,
     initialisation: str,
     options: Dict[str, Any],
+    hyperhyper_trial_id: Optional[str] = None,
 ) -> Dict[str, pd.DataFrame]:
     """
     Runs the QAOA algorithm on a given list of QUBO matrices.
@@ -53,6 +53,8 @@ def run_track_reconstruction_qaoa(
         Initialisation strategy for QAOA parameters
     options : Dict[str, Any]
         Additional options for the optimiser.
+    hyperhyper_trial_id : Optional[str]
+        Temporary output file for hyperparameter optimisation
 
     Returns
     -------
@@ -97,4 +99,10 @@ def run_track_reconstruction_qaoa(
         results.append(res)
 
     results = pd.DataFrame.from_records(results)
+
+    if hyperhyper_trial_id is not None:
+        tmp_file_name = f".hyperhyper{hyperhyper_trial_id}.json"
+        results.to_json(tmp_file_name)
+
     return {"results": results}
+
