@@ -35,10 +35,9 @@ optuna:
     # this allows to control which parameters are considered during optimization. Leave empty to enable all
     enabled_hyperparameters: ["optimiser", "initialisation"]
     # default the loss function value, but can also be any metric that is returned by the training method
-    optimization_metric: Val_Accuracy
+    optimization_metric: "qaoa_energy" # qaoa_energy, min_energy
 
     path: "studies/fhth.db" # this path must be available to all processes
-    selective_optimization: False # if true, only optimize classical params
     resume_study: True
     n_jobs: 1
     run_id: "001"

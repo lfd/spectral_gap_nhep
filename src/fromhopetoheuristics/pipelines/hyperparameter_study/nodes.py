@@ -23,7 +23,6 @@ def create_hyperparam_optimizer(
     pruner_warmup_steps: int,
     pruner_interval_steps: int,
     pruner_min_trials: int,
-    selective_optimization: bool,
     resume_study: bool,
     n_jobs: int,
     run_id: str,
@@ -44,7 +43,6 @@ def create_hyperparam_optimizer(
         optimization_metric=optimization_metric,
         path=path,
         n_jobs=n_jobs,
-        selective_optimization=selective_optimization,
         resume_study=resume_study,
         pruner=pruner_strategy,
         pruner_startup_trials=pruner_startup_trials,
@@ -82,8 +80,10 @@ def create_hyperparam_optimizer(
         """
         # TODO: eventually this will be a slurm script that we can provide an id
         # use the `trial._trial_id` for that purpose
-        parameters["hyperhyper_trial_id"] = trial._trial_id
 
+        log.info(f"Running trial {trial._trial_id} with parameters {parameters}.")
+
+        parameters["hyperhyper_trial_id"] = trial._trial_id
         subprocess.run(
             [
                 "kedro",
@@ -99,10 +99,23 @@ def create_hyperparam_optimizer(
         # Because I'm not sure how well it goes with the output files if we run the experiments in parallel...
         # Note that we can trigger this hyperparameter experiment as often as we want,
         # optuna will take care of syncing those experiments based on the common database and the experiment name
-        objective_val = get_objective_for_trial(trial._trial_id)
-        log.info(f"Trial {trial._trial_id} received objective value {objective_val}.")
+        def get_objective_for_trial(trial_id) -> float:
+            tmp_file_name = f".hyperhyper{trial_id}.json"
+            results = pd.read_json(tmp_file_name)
+            os.remove(tmp_file_name)
 
-        return objective_val
+            last5 = results.loc[results["p"] > results.shape[0] - 5]
+            return {
+                "qaoa_energy": last5["qaoa_energy"].mean(),
+                "min_energy": last5["min_energy"].mean(),
+            }
+
+        objective_vals = get_objective_for_trial(trial._trial_id)
+        log.info(
+            f"Trial {trial._trial_id} received objective value(s) {objective_vals}."
+        )
+
+        return objective_vals
 
     hyperparam_optimizer.objective = objective
 
@@ -123,13 +136,3 @@ def run_optuna(
     #     log.exception("Error while logging study")
 
     return {}
-
-def get_objective_for_trial(trial_id) -> float:
-    tmp_file_name = f".hyperhyper{trial_id}.json"
-    results = pd.read_json(tmp_file_name)
-    os.remove(tmp_file_name)
-
-    last5 = results.loc[results['p'] > results.shape[0] - 5]
-    objective_val = last5["qaoa_energy"].mean()
-    return objective_val
-
