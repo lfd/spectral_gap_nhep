@@ -28,13 +28,9 @@ def create_hyperparam_optimizer(
     run_id: str,
     hyperparameters: Dict,
 ) -> Hyperparam_Optimizer:
-    if run_id is None:
-        name = mlflow.active_run().info.run_id
-    else:
-        name = run_id
 
     hyperparam_optimizer = Hyperparam_Optimizer(
-        name=name,
+        name=run_id,
         sampler=sampler,
         seed=sampler_seed,
         n_trials=n_trials,
@@ -60,19 +56,20 @@ def create_hyperparam_optimizer(
         """This function is the optimization target that is called by Optuna
         for each trial. It runs the experiment with the given parameters
         and reports the result to Optuna.
-        Note that the `report_callback` and early_stop_callback is optional. It's just important
-        that this objective returns a float value that corresponds to our
-        optimization metric.
+        Note that the `report_callback` and early_stop_callback is optional.
+        It's just important that this objective returns a float value
+        that corresponds to our optimization metric.
         Parameters are those hyperparameters that are left after filtering with
         `enabled_hyperparameters`.
 
         Args:
             trial: The Optuna trial object.
             parameters: The hyperparameters for this trial.
-            report_callback: The callback function to report the result to Optuna. This is only
-                necessary for statistics and if we have pruning enabled.
+            report_callback: The callback function to report the result to Optuna.
+                This is only necessary for statistics and if we have pruning enabled.
             early_stop_callback: The callback function to stop the trial early
-                if the result is not promising, based on the pruner chosen. This function
+                if the result is not promising, based on the pruner chosen.
+                This function
                 returns "True" if the trial should be pruned and else "False".
 
         Returns:
@@ -100,11 +97,6 @@ def create_hyperparam_optimizer(
             ]
         )
 
-        # TODO: here we should find a way to retrieve our optimization value from this subprocess
-        # We could either do so by checking the files (as in `qnd_hyper`)or, ideally get the value straight from the output of the subprocess.
-        # Because I'm not sure how well it goes with the output files if we run the experiments in parallel...
-        # Note that we can trigger this hyperparameter experiment as often as we want,
-        # optuna will take care of syncing those experiments based on the common database and the experiment name
         def get_objective_for_trial(trial_id) -> float:
             tmp_file_name = f".hyperhyper{trial_id}.json"
             results = pd.read_json(tmp_file_name)

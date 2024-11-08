@@ -105,4 +105,3 @@ def run_track_reconstruction_qaoa(
         results.to_json(tmp_file_name)
 
     return {"results": results}
-

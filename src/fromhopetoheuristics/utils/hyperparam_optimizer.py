@@ -43,7 +43,8 @@ class Hyperparam_Optimizer:
             pruner_startup_trials (int): The number of trials before pruning starts.
             pruner_warmup_steps (int): The number of trials to be used for warmup.
             pruner_interval_steps (int): The interval between pruning conditions.
-            pruner_min_trials (int): The minimum number of trials to be used for pruning.
+            pruner_min_trials (int): The minimum number of trials
+            to be used for pruning.
         """
 
         if pruner is None:
@@ -166,21 +167,28 @@ class Hyperparam_Optimizer:
         for parameter, value in parameters.items():
             if "_choice" in parameter:
                 param_name = parameter.replace("_choice", "")
-                assert type(value) == dict
+                assert isinstance(value, Dict)
                 # if we have the choice; go and ask the trial what to do
                 choice = trial.suggest_categorical(param_name, value.keys())
             else:
                 param_name = parameter
 
-            # now, check if the hyperparameter is nested, i.e. there is another level below
+            # now, check if the hyperparameter is nested,
+            # i.e. there is another level below
             if isinstance(value, Dict):
                 # this is a nested parameter, check if we had the choice
                 if choice is not None:
-                    # we want to skip through this choice (i.e. not iterate at this level)
+                    # we want to skip through this choice
+                    # (i.e. not iterate at this level)
                     # therefore create a new dict
                     updated_variable_parameters[param_name] = {}
-                    # and assign the result as a new dict to the only key in this dict (this is just to preserve the structure given by the config)
-                    # note that we preselect value[choice] and modify the prefix such that it includes the choice (to not get duplicates later when running trial.suggest(..))
+                    # and assign the result as a new dict to the only key in
+                    # this dict (this is just to preserve the structure
+                    # given by the config)
+                    # note that we preselect value[choice] and
+                    # modify the prefix such that it includes
+                    # the choice (to not get duplicates later
+                    # when running trial.suggest(..))
                     updated_variable_parameters[param_name][choice] = (
                         self.update_variable_parameters(
                             trial,
@@ -189,25 +197,32 @@ class Hyperparam_Optimizer:
                         )
                     )
                 else:
-                    # the easy case; just go one level deeper and pass as prefix the current prefix (in case we are multilevel) as well as the current parameter name
+                    # the easy case; just go one level deeper and
+                    # pass as prefix the current prefix
+                    # (in case we are multilevel) as well
+                    # as the current parameter name
                     updated_variable_parameters[param_name] = (
                         self.update_variable_parameters(
                             trial, value, prefix=f"{prefix}{param_name}_"
                         )
                     )
 
-                # as this is just a "virtual" level, there is no reason the check the following
+                # as this is just a "virtual" level, there is
+                # no reason the check the following
                 continue
-            # ok, so this is not nested, and therefore can only be a list (i.e. a _range hyperparameter)
+            # ok, so this is not nested, and therefore can
+            # only be a list (i.e. a _range hyperparameter)
             elif not isinstance(value, List):
                 raise RuntimeError(
-                    "Provides parameter is not a dictionary or a list. Cannot infer hyperparameters."
+                    "Provides parameter is not a dictionary or a list.\
+                     Cannot infer hyperparameters."
                 )
 
             # ----
             # here ends the recursive call from previous section
 
-            # if we have three values (-> no bool) and they are not categorical (str) and the last one is a str (linear/log)
+            # if we have three values (-> no bool) and
+            # they are not categorical (str) and the last one is a str (linear/log)
             if (
                 len(value) == 3
                 and not isinstance(value[0], str)
@@ -240,7 +255,10 @@ class Hyperparam_Optimizer:
                     )
                 else:
                     raise ValueError(
-                        f"Unexpected type of range for trial suggestion for parameter {param_name}. Expected one of 'float' or 'int', got [{type(low)}, {type(high)}]."
+                        f"Unexpected type of range for trial suggestion\
+                        for parameter {param_name}.\
+                        Expected one of 'float' or 'int', \
+                        got [{type(low)}, {type(high)}]."
                     )
 
             else:
@@ -263,11 +281,11 @@ class Hyperparam_Optimizer:
         )
         parameters = self.fixed_parameters | updated_variable_parameters
 
-        report_callback = lambda metrics, step: trial.report(
-            metrics[self.optimization_metric], step=step
-        )
+        def report_callback(metrics, step):
+            trial.report(metrics[self.optimization_metric], step=step)
 
-        early_stop_callback = trial.should_prune if self.pruner else lambda: False
+        def early_stop_callback():
+            return trial.should_prune if self.pruner else False
 
         metric = self.objective(
             trial=trial,
