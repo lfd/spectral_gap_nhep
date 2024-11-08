@@ -25,7 +25,7 @@ geometric_index: 27 # angle part index
 optuna:
     hyperparameters:
         optimiser: ["SPSA", "COBYLA", "COBYQA", "BFGS"]
-        initialisation: ["random", "first_random", "all_zeros", "all_random"]
+        initialisation: ["random", "first_random"]
 
     # number of trials within one study. Multiple processes with resume_study=True will add to this number
     n_trials: 400
