@@ -191,9 +191,10 @@ class Hyperparam_Optimizer:
         return updated_variable_parameters
 
     def minimize(self, idx: int):
-        self.studies[idx].optimize(
+        result = self.studies[idx].optimize(
             self.run_trial, n_trials=self.n_trials, n_jobs=self.n_jobs
         )
+        self.studies[idx].tell(result)
 
     def run_trial(self, trial):
         updated_variable_parameters = self.update_variable_parameters(
