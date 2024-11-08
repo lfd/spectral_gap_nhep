@@ -109,7 +109,13 @@ class Hyperparam_Optimizer:
         choice = None  # indicate that this level is not a choice
 
         for parameter, value in parameters.items():
-            param_name = parameter
+            if "_choice" in parameter:
+                param_name = parameter.replace("_choice", "")
+                assert type(value) == dict
+                # if we have the choice; go and ask the trial what to do
+                choice = trial.suggest_categorical(param_name, value.keys())
+            else:
+                param_name = parameter
 
             # now, check if the hyperparameter is nested, i.e. there is another level below
             if isinstance(value, Dict):
