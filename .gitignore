@@ -2,6 +2,7 @@ data/fixme
 .viz/
 results
 session_store.db
+studies/fhth.db
 ##########################
 # KEDRO PROJECT
 

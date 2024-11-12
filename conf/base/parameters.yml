@@ -21,3 +21,34 @@ maxcut_n_qubits: 4
 maxcut_graph_density: 0.7
 
 geometric_index: 27 # angle part index
+
+hyperhyper_trial_id: null # hyperparameter trial id (hyperparameter search only)
+
+optuna:
+    hyperparameters:
+        optimiser: ["SPSA", "COBYLA", "COBYQA", "BFGS"]
+        initialisation: ["random", "first_random"]
+
+    # number of trials within one study. Multiple processes with resume_study=True will add to this number
+    n_trials: 400
+    timeout: 10800 #30h
+    # this allows to control which parameters are considered during optimization. Leave empty to enable all
+    enabled_hyperparameters: ["optimiser", "initialisation"]
+    # default the loss function value, but can also be any metric that is returned by the training method
+    optimization_metric: "qaoa_energy" # qaoa_energy, min_energy
+
+    path: "studies/fhth.db" # this path must be available to all processes
+    resume_study: True
+    n_jobs: 1
+    run_id: "001"
+
+    # Optuna/Sampling
+    sampler: RandomSampler # TPESampler, RandomSampler
+    sampler_seed: # should be None, if n_jobs=1 and separate processes are triggered from console
+
+    # Optuna/Pruning
+    pruner_strategy: # MedianPruner, None
+    pruner_startup_trials: 10 # number of trials that should run before pruning starts
+    pruner_warmup_steps: 10 # after which epoch should we prune?
+    pruner_interval_steps: 1 # check pruning condition every...
+    pruner_min_trials: 10 # minimum number of trials reported at a step to judge for pruning

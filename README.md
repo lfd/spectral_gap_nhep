@@ -81,6 +81,15 @@ Besides that, we make use of two submodules:
 - `hepqpr-qallse`: Currently, all the data loading and QUBO formulation is done using this submodule
 - `trackml-library`: Not in use currently
 
+## Hyperparameter Optimization
+
+This project uses Optuna for hyperparameter optimization.
+You can take a look at the experiments by running
+```
+optuna-dashboard sqlite:///storage/fhth.db
+```
+supposing that the path to the sqlite database where Optuna stores its results is `storage/fhth.db`.
+
 ## 🚧 Contributing
 
 Contributions are highly welcome! Take a look at our [Contribution Guidelines](https://github.com/cirKITers/qml-essentials/blob/main/CONTRIBUTING.md).

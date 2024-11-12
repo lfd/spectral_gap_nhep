@@ -20,6 +20,7 @@ def create_pipeline() -> Pipeline:
                     "apply_bounds": "params:apply_bounds",
                     "initialisation": "params:initialisation",
                     "options": "params:options",
+                    "hyperhyper_trial_id": "params:hyperhyper_trial_id",
                 },
                 {"results": "qaoa_track_reconstruction_results"},
             ),

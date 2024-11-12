@@ -61,6 +61,18 @@
                 "qaoa_trackrec"
             ],
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Kedro: hyperparameter_study",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "kedro",
+            "args": [
+                "run",
+                "--pipeline",
+                "hyperparameter_study"
+            ],
+            "console": "integratedTerminal"
         }
     ]
 }
