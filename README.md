@@ -19,7 +19,7 @@ git clone --recurse-submodules git@github.com:lfd/spectral_gap_nhep.git
 ```
 
 If you have poetry installed, run `poetry install`.
-With pip, make sure to include the dependencies in the submodule `trackml-library` (pandas and numpy) and `hepqpr-qallse` (pandas, numpy, plotly).
+With pip, make sure to include the dependencies in the submodule `hepqpr-qallse` (pandas, numpy, plotly).
 
 
 <!-- To get the data, head over to the [Kaggle TrackML Particle Tracking Challenge](https://www.kaggle.com/c/trackml-particle-identification/data) and download e.g. the `train_sample.zip` file which is a reduced version of the overall dataset.
@@ -79,7 +79,6 @@ The following list gives a brief explanation of the most important locations in 
 
 Besides that, we make use of two submodules:
 - `hepqpr-qallse`: Currently, all the data loading and QUBO formulation is done using this submodule
-- `trackml-library`: Not in use currently
 
 ## Hyperparameter Optimization
 
