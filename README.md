@@ -15,7 +15,7 @@ To work with smaller sized QUBOs, we only focus on hit-triplets present in a spe
 
 When cloning, make sure to get the submodule:
 ```
-git clone --recurse-submodules git@github.com:majafranz/spectral_gap_nhep.git
+git clone --recurse-submodules git@github.com:lfd/spectral_gap_nhep.git
 ```
 
 If you have poetry installed, run `poetry install`.
@@ -92,7 +92,7 @@ supposing that the path to the sqlite database where Optuna stores its results i
 
 ## 🚧 Contributing
 
-Contributions are highly welcome! Take a look at our [Contribution Guidelines](https://github.com/cirKITers/qml-essentials/blob/main/CONTRIBUTING.md).
+Contributions are highly welcome! Take a look at our [Contribution Guidelines](https://github.com/lfd/spectral_gap_nhep/blob/main/CONTRIBUTING.md).
 
 ---
 
