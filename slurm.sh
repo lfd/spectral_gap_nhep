@@ -23,11 +23,11 @@
 #
 # output path
 #SBATCH --output="logs/slurm/slurm-%j-%x.out"
-
+d
 module load devel/python/3.11.7_intel_2021.4.0
 
 # Space for two arguments: pipeline and params
-~/fhth/.venv/bin/python -m kedro run $1 $2
+~/spectral_gap_nhep/.venv/bin/python -m kedro run $1 $2
 
 # Done
 exit 0

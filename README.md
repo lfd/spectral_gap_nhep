@@ -86,7 +86,7 @@ Besides that, we make use of two submodules:
 This project uses Optuna for hyperparameter optimization.
 You can take a look at the experiments by running
 ```
-optuna-dashboard sqlite:///storage/fhth.db
+optuna-dashboard sqlite:///studies/fhth.db
 ```
 supposing that the path to the sqlite database where Optuna stores its results is `storage/fhth.db`.
 
