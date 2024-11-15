@@ -22,15 +22,6 @@ If you have poetry installed, run `poetry install`.
 With pip, make sure to include the dependencies in the submodule `hepqpr-qallse` (pandas, numpy, plotly).
 
 
-<!-- To get the data, head over to the [Kaggle TrackML Particle Tracking Challenge](https://www.kaggle.com/c/trackml-particle-identification/data) and download e.g. the `train_sample.zip` file which is a reduced version of the overall dataset.
-Extract the data into a `dataset` folder, such that the structure is as follows:
-```bash
-\data\01_raw\event*-hits.csv
-\data\01_raw\event*-particles.csv
-\data\01_raw\event*-truth.csv
-```
-Head over to the [TrackML Library Repo](https://github.com/stroblme/trackml-library) for more details. -->
-
 ### Quickstart
 
 After installing all the dependencies, simply execute
@@ -83,11 +74,18 @@ Besides that, we make use of two submodules:
 ## Hyperparameter Optimization
 
 This project uses Optuna for hyperparameter optimization.
-You can take a look at the experiments by running
+There is a dedicated kedro pipeline that takes care of the hyperparameter optimization and submission of jobs to a SLURM cluster.
+```
+kedro run --pipeline hyperparameter_study
+```
+
+If you don't have a SLURM cluster available, head to `pipelines/hyperparameter_study/nodes.py` switch the subprocess command such that it spawns a single kedro job instead of a submission to the cluster.
+
+Supposing everything goes well, you can take a look at the experiments by running
 ```
 optuna-dashboard sqlite:///studies/fhth.db
 ```
-supposing that the path to the sqlite database where Optuna stores its results is `storage/fhth.db`.
+supposing that the path to the sqlite database where Optuna stores its results is `studies/fhth.db`.
 
 ## 🚧 Contributing
 
