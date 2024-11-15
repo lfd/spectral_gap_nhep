@@ -3,11 +3,11 @@ num_angle_parts: 64
 
 seed: 1000 #TODO: consider different seeds
 
-max_p: 5
+max_p: 25
 q: -1
 optimiser: "SPSA" #SPSA, COBYLA, COBYQA, BFGS
-tolerance: 1e-1 # in SPSA this controlls ak, choose around 0.1
-maxiter: 200
+tolerance: 1e-3 # in SPSA this controlls ak, choose around 0.1
+maxiter: 1000
 apply_bounds: true
 initialisation: "random" # "random", "first_random", "all_zeros", "all_random"
 options:
