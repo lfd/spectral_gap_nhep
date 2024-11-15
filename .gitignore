@@ -3,6 +3,7 @@ data/fixme
 results
 session_store.db
 studies/fhth.db
+logs
 ##########################
 # KEDRO PROJECT
 
