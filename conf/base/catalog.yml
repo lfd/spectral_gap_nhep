@@ -89,17 +89,6 @@ qubos:
     kedro-viz:
       layer: Export
 
-xplets:
-  type: fromhopetoheuristics.datasets.composed_dataset.ComposedDataset
-  filepath: data/03_qubos/xplet.pickle
-  versioned: true
-  dataset:
-    type: pickle.PickleDataset
-    resolver: pickle_dataset
-  metadata:
-    kedro-viz:
-      layer: Export
-
 adiabatic_track_reconstruction_results:
   type: pandas.CSVDataset
   filepath: data/04_adiabatic/adiabatic_track_reconstruction_results.csv
