@@ -192,7 +192,8 @@ def dict_QUBO_to_matrix(dict_qubo: Dict[Tuple[str, str], float]) -> np.ndarray:
     qubo_matrix = np.zeros((n_vars, n_vars))
 
     for k, v in dict_qubo.items():
-        qubo_matrix[names.index(k[0])][names.index(k[1])] = v
+        qubo_matrix[names.index(k[0])][names.index(k[1])] = 0.5*v
+        qubo_matrix[names.index(k[1])][names.index(k[0])] = 0.5*v
 
     return qubo_matrix
 
