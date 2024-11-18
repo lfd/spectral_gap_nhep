@@ -81,12 +81,13 @@ def create_hyperparam_optimizer(
         log.info(f"Running trial {trial._trial_id} with parameters {parameters}.")
 
         parameters["hyperhyper_trial_id"] = trial._trial_id
+        kedro_params = ",".join([f"{k}={v}" for k, v in parameters.items()])
         # subprocess.run(
         #     [
         #         "kedro",
         #         "run",
         #         "--pipeline qaoa_trackrec",
-        #         f"--params={','.join([f'{k}={v}' for k, v in parameters.items()])}",
+        #         f"--params={kedro_params}",
         #     ]
         # )
         subprocess.run(
@@ -97,7 +98,7 @@ def create_hyperparam_optimizer(
                 "--wait",  # ensure that we wait until the job is finished
                 "./slurm.sh",  # our submission script
                 "--pipeline qaoa_trackrec",  # evaluation pipeline
-                f"--params={','.join([f'{k}={v}' for k, v in parameters.items()])}",  # kedro parameters
+                f"--params={kedro_params}",  # kedro parameters
             ]
         )
 
