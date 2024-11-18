@@ -48,9 +48,9 @@ def hamiltonian_from_ising(
 
     # Add linear terms to the Hamiltonian
     if h is not None:
-        term: List[str] = ["I"] * len(J)
         for i, angle in enumerate(h):
-            if angle > 0:
+            if angle != 0:
+                term: List[str] = ["I"] * len(J)
                 term[i] = "Z"
                 t = "".join(term)
                 terms.append((t, angle))
@@ -192,7 +192,8 @@ def dict_QUBO_to_matrix(dict_qubo: Dict[Tuple[str, str], float]) -> np.ndarray:
     qubo_matrix = np.zeros((n_vars, n_vars))
 
     for k, v in dict_qubo.items():
-        qubo_matrix[names.index(k[0])][names.index(k[1])] = v
+        qubo_matrix[names.index(k[0])][names.index(k[1])] = 0.5 * v
+        qubo_matrix[names.index(k[1])][names.index(k[0])] = 0.5 * v
 
     return qubo_matrix
 

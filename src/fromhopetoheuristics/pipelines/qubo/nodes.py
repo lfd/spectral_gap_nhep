@@ -52,7 +52,6 @@ def build_qubos(
         indices
     """
     qubos = {}
-    xplets = {}
     log.info(f"Generating {num_angle_parts} QUBOs")
 
     # FIXME: only generate for one index
@@ -69,13 +68,13 @@ def build_qubos(
         model = QallseSplit(data_wrapper, **extra_config)
         build_model(doublets=doublets, model=model, add_missing=False)
 
-        qubos[i], xplets[i] = model.serialize()
+        qubos[i] = model.to_qubo()
         if geometric_index == -1:
             log.info(f"Generated QUBO {i+1}/{num_angle_parts}")
         else:
             log.info(f"Generated QUBO {i}")
 
-    return {"qubos": qubos, "xplets": xplets}
+    return {"qubos": qubos}
 
 
 def solve_qubos(
