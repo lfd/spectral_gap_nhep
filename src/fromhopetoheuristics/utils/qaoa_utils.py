@@ -48,9 +48,9 @@ def hamiltonian_from_ising(
 
     # Add linear terms to the Hamiltonian
     if h is not None:
-        term: List[str] = ["I"] * len(J)
         for i, angle in enumerate(h):
-            if angle > 0:
+            if angle != 0:
+                term: List[str] = ["I"] * len(J)
                 term[i] = "Z"
                 t = "".join(term)
                 terms.append((t, angle))
