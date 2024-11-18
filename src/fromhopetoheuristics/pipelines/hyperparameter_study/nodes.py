@@ -91,13 +91,13 @@ def create_hyperparam_optimizer(
         # )
         subprocess.run(
             [
-                "sbatch", # slurm
+                "sbatch",  # slurm
                 "--job-name",
-                f"sgnhep{trial._trial_id}", # identify the job in the queue
-                "--wait", # ensure that we wait until the job is finished
-                "./slurm.sh", # our submission script
-                "--pipeline qaoa_trackrec", # evaluation pipeline
-                f"--params={','.join([f'{k}={v}' for k, v in parameters.items()])}", # kedro parameters
+                f"sgnhep{trial._trial_id}",  # identify the job in the queue
+                "--wait",  # ensure that we wait until the job is finished
+                "./slurm.sh",  # our submission script
+                "--pipeline qaoa_trackrec",  # evaluation pipeline
+                f"--params={','.join([f'{k}={v}' for k, v in parameters.items()])}",  # kedro parameters
             ]
         )
 
