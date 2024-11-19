@@ -2427,9 +2427,10 @@ develop = false
 
 [package.dependencies]
 dwave-neal = "^0.6.0"
-numpy = "^2.1.2"
+numpy = "^2.1.3"
 pandas = "^2.2.3"
 plotly = "^5.24.1"
+trackml = {path = "trackml"}
 
 [package.source]
 type = "directory"
@@ -2949,13 +2950,13 @@ tests = ["cython", "littleutils", "pygments", "pytest", "typeguard"]
 
 [[package]]
 name = "starlette"
-version = "0.41.2"
+version = "0.41.3"
 description = "The little ASGI library that shines."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "starlette-0.41.2-py3-none-any.whl", hash = "sha256:fbc189474b4731cf30fcef52f18a8d070e3f3b46c6a04c97579e85e6ffca942d"},
-    {file = "starlette-0.41.2.tar.gz", hash = "sha256:9834fd799d1a87fd346deb76158668cfa0b0d56f85caefe8268e2d97c3468b62"},
+    {file = "starlette-0.41.3-py3-none-any.whl", hash = "sha256:44cedb2b7c77a9de33a8b74b2b90e9f50d11fcf25d8270ea525ad71a25374ff7"},
+    {file = "starlette-0.41.3.tar.gz", hash = "sha256:0e4ab3d16522a255be6b28260b938eae2482f98ce5cc934cb08dce8dc3ba5835"},
 ]
 
 [package.dependencies]
@@ -2980,13 +2981,13 @@ pbr = ">=2.0.0"
 
 [[package]]
 name = "strawberry-graphql"
-version = "0.248.1"
+version = "0.250.0"
 description = "A library for creating GraphQL APIs"
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "strawberry_graphql-0.248.1-py3-none-any.whl", hash = "sha256:04e0b966ff7972e668095824358766496d432fa61b38833bcb8d1b3115d88753"},
-    {file = "strawberry_graphql-0.248.1.tar.gz", hash = "sha256:d05870ada9f0ff3d536813834e7deb14f3b93a97f551d88be887c301b0c000ab"},
+    {file = "strawberry_graphql-0.250.0-py3-none-any.whl", hash = "sha256:9fb76ce38c6905c68b73b114df138886073a72a46d116e08fae1d1747cd98b41"},
+    {file = "strawberry_graphql-0.250.0.tar.gz", hash = "sha256:6f087c1fd3c3a276f99cc84e59f5db94f53b5769b2a729e788b7987d74cbe3fb"},
 ]
 
 [package.dependencies]
@@ -3161,6 +3162,23 @@ slack = ["slack-sdk"]
 telegram = ["requests"]
 
 [[package]]
+name = "trackml"
+version = "0.3.0"
+description = ""
+optional = false
+python-versions = "^3.11"
+files = []
+develop = false
+
+[package.dependencies]
+numpy = "^2.1.2"
+pandas = "^2.2.3"
+
+[package.source]
+type = "directory"
+url = "hepqpr-qallse/trackml"
+
+[[package]]
 name = "traitlets"
 version = "5.14.3"
 description = "Traitlets Python configuration system"
@@ -3188,13 +3206,13 @@ files = [
 
 [[package]]
 name = "types-setuptools"
-version = "75.4.0.20241115"
+version = "75.5.0.20241119"
 description = "Typing stubs for setuptools"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "types-setuptools-75.4.0.20241115.tar.gz", hash = "sha256:f55b9a10f683de68bd52216ff16aa624e7ece858714d351f410ccd1eb25b99dc"},
-    {file = "types_setuptools-75.4.0.20241115-py3-none-any.whl", hash = "sha256:9d99a63b356e9f1d4893670d3756208533f4e34bf968904bbcccd603aa447a0a"},
+    {file = "types-setuptools-75.5.0.20241119.tar.gz", hash = "sha256:2b1ec21346656aeb4f43fa6b70b223b4fa726e324c509a05f35611209f134014"},
+    {file = "types_setuptools-75.5.0.20241119-py3-none-any.whl", hash = "sha256:6e7f1937a8b70cc5c724facc619da721b86d47ac673e3eb739e44d36afd260fc"},
 ]
 
 [[package]]
