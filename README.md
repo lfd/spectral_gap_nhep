@@ -1,12 +1,16 @@
 # From Hope To Heuristics
 **Realistic Runtime Estimates for Quantum Optimisation in NHEP**
 
+## :book: Project Description
+
+This is the repository for our contribution to [CHEP24](https://indico.cern.ch/event/1338689/contributions/6010081/) consisting of two key aspects:
+Firstly, we estimate runtimes and scalability for common NHEP problems addressed via QUBO formulations by identifying minimum energy solutions of intermediate Hamiltonian operators encountered during the annealing process. 
+Secondly, we investigate how the classical parameter space in the QAOA, together with approximation techniques such as a Fourier-analysis based heuristic, proposed by Zhou et al. (2018), can help to achieve (future) quantum advantage, considering a trade-off between computational complexity and solution quality.
+Those approaches are evaluated on two benchmark problems: the Maxcut problem and the track reconstruction problem.
+
 ## Approach
 
-For the QUBO formulation we build on the [HEPQPR.Qallse](https://github.com/derlin/hepqpr-qallse) project.
-
-<!-- TODO: add description -->
-
+For the QUBO formulation of the track reconstruction problem, we build on the [HEPQPR.Qallse](https://github.com/derlin/hepqpr-qallse) project.
 To work with smaller sized QUBOs, we only focus on hit-triplets present in a specified angle, similar to the approach presented by [Schwägerl et al.](https://arxiv.org/pdf/2303.13249).
 
 ## :rocket: Getting Started
@@ -32,6 +36,10 @@ kedro run
 ```
 
 This will run the default pipeline which consists of all individual pipelines described in the following section.
+You can get an interactive overview of the pipeline in your browser by running
+```
+kedro viz
+```
 
 ### Pipelines
 
