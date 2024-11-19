@@ -17,9 +17,11 @@ When cloning, make sure to get the submodule:
 ```
 git clone --recurse-submodules git@github.com:lfd/spectral_gap_nhep.git
 ```
+This will clone [our fork of hepqr-qallse](https://github.com/lfd/hepqpr-qallse) and [our fork of trackml](https://github.com/lfd/trackml) recursively.
+The latter is needed by hepqr-qallse but is not shipped via pip.
 
 If you have poetry installed, run `poetry install`.
-With pip, make sure to include the dependencies in the submodule `hepqpr-qallse` (pandas, numpy, plotly).
+With pip, make sure to include the dependencies in the submodule `hepqpr-qallse` (pandas, numpy, plotly) and `trackml` (pandas, numpy).
 
 
 ### Quickstart
