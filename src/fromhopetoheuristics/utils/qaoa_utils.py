@@ -227,7 +227,7 @@ def compute_min_energy_solution(qubo: np.ndarray) -> Tuple[float, str]:
 def initialise_QAOA_parameters(
     p: int,
     initialisation: str,
-    rng: Optional[np.random.Generator] = None,
+    rng: np.random.Generator,
     initial_params: Optional[np.ndarray] = None,
     fourier: bool = False,
     r: int = 0,
@@ -241,9 +241,8 @@ def initialise_QAOA_parameters(
         Number of QAOA layers
     initialisation : str
         Initialisation strategy for QAOA parameters.
-    rng : Optional[np.random.Generator], optional
-        The random number generator for random initialisation. Defaults to
-        None.
+    rng : np.random.Generator,
+        The random number generator for random initialisation.
     initial_params : Optional[np.ndarray], optional
         Previous parameter initialisations that should be re-used. Defaults to
         None.
@@ -258,9 +257,6 @@ def initialise_QAOA_parameters(
     np.ndarray
         List of initial parameters
     """
-    assert (
-        r == 0 or fourier
-    ), f"Random perturbations are invalid for standard QAOA, got r={r}"
     if initial_params is None or "all" in initialisation:
         n_remaining = p
         prev_betas, prev_gammas = np.tile([], (r + 1, 1)), np.tile(
@@ -276,10 +272,6 @@ def initialise_QAOA_parameters(
         remaining_betas = np.zeros(n_remaining)
         remaining_gammas = np.zeros(n_remaining)
     elif "random" in initialisation:
-        assert rng is not None, (
-            f"Random number generator is required for initialisation"
-            f"strategy {initialisation}"
-        )
         if fourier:  # initialise in [0, 1]
             remaining_betas = rng.random((1, n_remaining))
             remaining_gammas = rng.random((1, n_remaining))
@@ -291,19 +283,14 @@ def initialise_QAOA_parameters(
     remaining_betas = np.tile(remaining_betas, (r + 1, 1))
     remaining_gammas = np.tile(remaining_gammas, (r + 1, 1))
 
-    if fourier:
-        assert rng is not None, (
-            "Random number generator is required for FOURIER initialisation "
-            "with r > 0"
+    if initial_params is None:
+        remaining_betas, remaining_gammas = compute_random_param_perturbations(
+            remaining_betas, remaining_gammas, r, rng
         )
-        if initial_params is None:
-            remaining_betas, remaining_gammas = compute_random_param_perturbations(
-                remaining_betas, remaining_gammas, r, rng
-            )
-        else:
-            prev_betas, prev_gammas = compute_random_param_perturbations(
-                prev_betas, prev_gammas, r, rng
-            )
+    else:
+        prev_betas, prev_gammas = compute_random_param_perturbations(
+            prev_betas, prev_gammas, r, rng
+        )
 
     beta_init = np.concatenate([prev_betas, remaining_betas], axis=1)
     gamma_init = np.concatenate([prev_gammas, remaining_gammas], axis=1)
@@ -535,8 +522,8 @@ def solve_QUBO_with_QAOA(
     r: int,
     seed: int,
     initialisation: str,
+    parameter_rng: np.random.Generator,
     initial_params: Optional[np.ndarray] = None,
-    parameter_rng: Optional[np.random.Generator] = None,
     optimiser: str = "COBYLA",
     tolerance: float = 1e-3,
     maxiter: int = 1000,
@@ -560,11 +547,10 @@ def solve_QUBO_with_QAOA(
         The seed for the random number generator.
     initialisation : str
         Initialisation strategy for QAOA parameters.
+    parameter_rng : np.random.Generator
+        The random number generator for random initialisation.
     initial_params : Optional[np.ndarray], optional
         The initial parameters for the QAOA algorithm. Defaults to None.
-    parameter_rng : Optional[np.random.Generator], optional
-        The random number generator for random initialisation. Defaults to
-        None.
     optimiser : str, optional
         The optimiser to use. Defaults to "COBYLA".
     tolerance : float, optional
@@ -630,10 +616,10 @@ def solve_QUBO_with_QAOA(
 
     bounds = get_parameter_bounds(p if q == -1 else q) if apply_bounds else None
 
-    qaoa_energy = np.inf
+    best_qaoa_energy = np.inf
     v_params, u_params = np.array(()), np.array(())
     betas, gammas = init_params[:p], init_params[p:]
-    for x in init_params:
+    for i, x in enumerate(init_params):
         min_result = minimize(
             cost_fkt,
             x,
@@ -647,9 +633,13 @@ def solve_QUBO_with_QAOA(
             )
             | options,
         )
-        if min_result.fun < qaoa_energy:
-            qaoa_energy = min_result.fun
-
+        qaoa_energy = min_result.fun + o
+        if qaoa_energy < best_qaoa_energy:
+            log.info(
+                f"Current best parameter set is at index {i} with energy "
+                f"{qaoa_energy}",
+            )
+            best_qaoa_energy = qaoa_energy
             if q == -1:
                 v_params, u_params = np.array(()), np.array(())
                 betas, gammas = min_result.x[:p], min_result.x[p:]
@@ -657,8 +647,7 @@ def solve_QUBO_with_QAOA(
                 v_params, u_params = min_result.x[:q], min_result.x[q:]
                 betas, gammas = get_FOURIER_params(v_params, u_params, p, q)
 
-    energy = qaoa_energy + o
-    return energy, betas, gammas, u_params, v_params
+    return best_qaoa_energy, betas, gammas, u_params, v_params
 
 
 def times_from_QAOA_params(betas: np.ndarray, gammas: np.ndarray) -> np.ndarray:
@@ -787,7 +776,7 @@ def run_QAOA(
     parameter_rng: np.random.Generator = np.random.default_rng(seed)
 
     for p in range(1, max_p + 1):
-        log.info(f"Running QAOA for q = {q}, p = {p}/{max_p}")
+        log.info(f"Running QAOA for q = {q}, p = {p}/{max_p}, R = {r}")
 
         res: Dict = {"p": p}
         res["qaoa_energy"], betas, gammas, us, vs = solve_QUBO_with_QAOA(
@@ -797,8 +786,8 @@ def run_QAOA(
             r,
             seed=seed,
             initial_params=init_params,
-            initialisation=initialisation,
             parameter_rng=parameter_rng,
+            initialisation=initialisation,
             optimiser=optimiser,
             tolerance=tolerance,
             maxiter=maxiter,
@@ -855,8 +844,8 @@ def normalise_params(
 
 
 def compute_random_param_perturbations(
-    prev_v: np.ndarray,
-    prev_u: np.ndarray,
+    prev_beta: np.ndarray,
+    prev_gamma: np.ndarray,
     r: int,
     rng: np.random.Generator,
     alpha: float = 0.6,
@@ -867,10 +856,10 @@ def compute_random_param_perturbations(
 
     Parameters
     ----------
-    prev_v : np.ndarray
-        v-parameters from which to compute the perturbations.
-    prev_u : np.ndarray
-        u-parameters from which to compute the perturbations.
+    prev_beta : np.ndarray
+        beta-parameters from which to compute the perturbations.
+    prev_gamma : np.ndarray
+        gamma-parameters from which to compute the perturbations.
     r : int
         Number of perturbations.
     rng : np.random.Generator
@@ -882,16 +871,16 @@ def compute_random_param_perturbations(
     -------
     Tuple[np.ndarray, np.ndarray]
         (
-            original v parameters and perturbations with shape
-                [r+1, num_v_params],
-            original u parameters and perturbations with shape
-                [r+1, num_u_params]
+            original beta parameters and perturbations with shape
+                [r+1, num_beta_params],
+            original gamma parameters and perturbations with shape
+                [r+1, num_gamma_params]
         )
     """
-    random_perturbations_v = np.tile(prev_v[0], (r + 1, 1))
-    random_perturbations_u = np.tile(prev_u[0], (r + 1, 1))
+    random_perturbations_beta = np.tile(prev_beta[0], (r + 1, 1))
+    random_perturbations_gamma = np.tile(prev_gamma[0], (r + 1, 1))
 
     for i in range(1, r + 1):
-        random_perturbations_v[i] += alpha * rng.normal(0, np.abs(prev_v[0]))
-        random_perturbations_u[i] += alpha * rng.normal(0, np.abs(prev_u[0]))
-    return random_perturbations_v, random_perturbations_u
+        random_perturbations_beta[i] += alpha * rng.normal(0, np.abs(prev_beta[0]))
+        random_perturbations_gamma[i] += alpha * rng.normal(0, np.abs(prev_gamma[0]))
+    return random_perturbations_beta, random_perturbations_gamma
