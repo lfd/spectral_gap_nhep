@@ -291,14 +291,19 @@ def initialise_QAOA_parameters(
     remaining_betas = np.tile(remaining_betas, (r + 1, 1))
     remaining_gammas = np.tile(remaining_gammas, (r + 1, 1))
 
-    if fourier and p > 1:
+    if fourier:
         assert rng is not None, (
             "Random number generator is required for FOURIER initialisation "
             "with r > 0"
         )
-        prev_betas, prev_gammas = compute_random_param_perturbations(
-            prev_betas, prev_gammas, r, rng
-        )
+        if initial_params is None:
+            remaining_betas, remaining_gammas = compute_random_param_perturbations(
+                remaining_betas, remaining_gammas, r, rng
+            )
+        else:
+            prev_betas, prev_gammas = compute_random_param_perturbations(
+                prev_betas, prev_gammas, r, rng
+            )
 
     beta_init = np.concatenate([prev_betas, remaining_betas], axis=1)
     gamma_init = np.concatenate([prev_gammas, remaining_gammas], axis=1)
