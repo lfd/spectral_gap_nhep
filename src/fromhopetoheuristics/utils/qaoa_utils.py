@@ -259,7 +259,7 @@ def initialise_QAOA_parameters(
         List of initial parameters
     """
     assert (
-        r != 0 or not fourier
+        r == 0 or fourier
     ), f"Random perturbations are invalid for standard QAOA, got r={r}"
     if initial_params is None or "all" in initialisation:
         n_remaining = p
