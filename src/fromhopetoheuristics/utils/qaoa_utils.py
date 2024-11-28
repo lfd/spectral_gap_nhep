@@ -230,6 +230,7 @@ def initialise_QAOA_parameters(
     rng: Optional[np.random.Generator] = None,
     initial_params: Optional[np.ndarray] = None,
     fourier: bool = False,
+    r: int = 0,
 ) -> np.ndarray:
     """
     Constructs a list of initialisation parameters for QAOA
@@ -248,20 +249,28 @@ def initialise_QAOA_parameters(
         None.
     fourier : bool, optional
         Whether fourier strategy is used. Defaults to False.
+    r : int, optional
+        The number of random perturbations for the FOURIER strategy. Defaults
+        to 0.
 
     Returns
     -------
     np.ndarray
         List of initial parameters
     """
+    assert (
+        r != 0 or not fourier
+    ), f"Random perturbations are invalid for standard QAOA, got r={r}"
     if initial_params is None or "all" in initialisation:
         n_remaining = p
-        prev_betas, prev_gammas = np.array([]), np.array([])
+        prev_betas, prev_gammas = np.tile([], (r + 1, 1)), np.tile(
+            [], (r + 1, 1)
+        )
     else:
         n_prev = len(initial_params) // 2
         n_remaining = p - n_prev
-        prev_betas = initial_params[:n_prev]
-        prev_gammas = initial_params[n_prev:]
+        prev_betas = np.tile(initial_params[:n_prev], (r + 1, 1))
+        prev_gammas = np.tile(initial_params[n_prev:], (r + 1, 1))
 
     if "zeros" in initialisation or "first" in initialisation and p > 1:
         remaining_betas = np.zeros(n_remaining)
@@ -272,18 +281,29 @@ def initialise_QAOA_parameters(
             f"strategy {initialisation}"
         )
         if fourier:  # initialise in [0, 1]
-            remaining_betas = rng.random(n_remaining)
-            remaining_gammas = rng.random(n_remaining)
+            remaining_betas = rng.random((1, n_remaining))
+            remaining_gammas = rng.random((1, n_remaining))
         else:  # initialise in [-pi/2, pi/2] for beta and [-pi, pi] for gamma
-            remaining_betas = rng.random(n_remaining) * np.pi - 0.5 * np.pi
-            remaining_gammas = rng.random(n_remaining) * 2 * np.pi - np.pi
+            remaining_betas = rng.random((1, n_remaining)) * np.pi - 0.5 * np.pi
+            remaining_gammas = rng.random((1, n_remaining)) * 2 * np.pi - np.pi
     else:
         raise ValueError(f"Invalid initialisation strategy: {initialisation}")
+    remaining_betas = np.tile(remaining_betas, (r + 1, 1))
+    remaining_gammas = np.tile(remaining_gammas, (r + 1, 1))
 
-    beta_init = np.concatenate([prev_betas, remaining_betas])
-    gamma_init = np.concatenate([prev_gammas, remaining_gammas])
+    if fourier and p > 1:
+        assert rng is not None, (
+            "Random number generator is required for FOURIER initialisation "
+            "with r > 0"
+        )
+        prev_betas, prev_gammas = compute_random_param_perturbations(
+            prev_betas, prev_gammas, r, rng
+        )
 
-    init_params = np.concatenate([beta_init, gamma_init])
+    beta_init = np.concatenate([prev_betas, remaining_betas], axis=1)
+    gamma_init = np.concatenate([prev_gammas, remaining_gammas], axis=1)
+
+    init_params = np.concatenate([beta_init, gamma_init], axis=1)
 
     return init_params
 
@@ -442,7 +462,9 @@ def spsa(
         A = N * 0.1
 
         # order of magnitude of first gradients
-        g0_abs = np.abs(grad(f_cost=f_cost, w=w, c=c, bounds=bounds, args=args).mean())
+        g0_abs = np.abs(
+            grad(f_cost=f_cost, w=w, c=c, bounds=bounds, args=args).mean()
+        )
 
         # the number 2 in the front is an estimative of
         # the initial changes of the parameters,
@@ -505,6 +527,7 @@ def solve_QUBO_with_QAOA(
     qubo: np.ndarray,
     p: int,
     q: int,
+    r: int,
     seed: int,
     initialisation: str,
     initial_params: Optional[np.ndarray] = None,
@@ -524,10 +547,12 @@ def solve_QUBO_with_QAOA(
         A QUBO matrix.
     p : int
         The number of layers of the QAOA circuit.
-    q : int, optional
-        The number of parameters in the FOURIER strategy. Defaults to -1.
-    seed : int, optional
-        The seed for the random number generator. Defaults to 12345.
+    q : int
+        The number of parameters in the FOURIER strategy.
+    r : int
+        The number of random perturbations for the FOURIER strategy.
+    seed : int
+        The seed for the random number generator.
     initialisation : str
         Initialisation strategy for QAOA parameters.
     initial_params : Optional[np.ndarray], optional
@@ -569,6 +594,7 @@ def solve_QUBO_with_QAOA(
         parameter_rng,
         initial_params,
         fourier=q > 0,
+        r=r,
     )
 
     def cost_fkt(
@@ -598,27 +624,35 @@ def solve_QUBO_with_QAOA(
         return cost
 
     bounds = get_parameter_bounds(p if q == -1 else q) if apply_bounds else None
-    min_result = minimize(
-        cost_fkt,
-        init_params,
-        args=(circ, H, estimator, p, q),
-        method=optimiser,
-        tol=tolerance,
-        bounds=bounds,
-        options=dict(
-            maxiter=maxiter,
-            seed=seed,
-        )
-        | options,
-    )
-    if q == -1:
-        v_params, u_params = np.array(()), np.array(())
-        betas, gammas = min_result.x[:p], min_result.x[p:]
-    else:
-        v_params, u_params = min_result.x[:q], min_result.x[q:]
-        betas, gammas = get_FOURIER_params(v_params, u_params, p, q)
 
-    energy = min_result.fun + o
+    qaoa_energy = np.inf
+    v_params, u_params = np.array(()), np.array(())
+    betas, gammas = init_params[:p], init_params[p:]
+    for x in init_params:
+        min_result = minimize(
+            cost_fkt,
+            x,
+            args=(circ, H, estimator, p, q),
+            method=optimiser,
+            tol=tolerance,
+            bounds=bounds,
+            options=dict(
+                maxiter=maxiter,
+                seed=seed,
+            )
+            | options,
+        )
+        if min_result.fun < qaoa_energy:
+            qaoa_energy = min_result.fun
+
+            if q == -1:
+                v_params, u_params = np.array(()), np.array(())
+                betas, gammas = min_result.x[:p], min_result.x[p:]
+            else:
+                v_params, u_params = min_result.x[:q], min_result.x[q:]
+                betas, gammas = get_FOURIER_params(v_params, u_params, p, q)
+
+    energy = qaoa_energy + o
     return energy, betas, gammas, u_params, v_params
 
 
@@ -640,7 +674,9 @@ def times_from_QAOA_params(betas: np.ndarray, gammas: np.ndarray) -> np.ndarray:
     """
     p: int = len(betas)  # Number of QAOA layers
     time: float = 0.0  # Initialize total time
-    time_midpoints: np.ndarray = np.zeros(p + 1)  # Array to store time midpoints
+    time_midpoints: np.ndarray = np.zeros(
+        p + 1
+    )  # Array to store time midpoints
     for i in range(p):
         time_segment: float = np.abs(gammas[i]) + np.abs(
             betas[i]
@@ -682,7 +718,9 @@ def annealing_schedule_from_QAOA_params(
         # ensure that time is increasing monotonically, if not, skip
         if times[i] < last_added_time:
             continue
-        anneal_fraction = np.abs(gammas[i]) / (np.abs(gammas[i]) + np.abs(betas[i]))
+        anneal_fraction = np.abs(gammas[i]) / (
+            np.abs(gammas[i]) + np.abs(betas[i])
+        )
         anneal_schedule.append((times[i], anneal_fraction))
         last_added_time = times[i]
 
@@ -696,6 +734,7 @@ def run_QAOA(
     seed: int,
     max_p: int,
     q: int,
+    r: int,
     optimiser: str,
     tolerance: float,
     maxiter: int,
@@ -712,23 +751,24 @@ def run_QAOA(
         The QUBO matrix to be solved.
     seed : int
         Random seed for reproducibility.
-    max_p : int, optional
-        Maximum number of QAOA layers to run, defaults to 20.
-    q : int, optional
-        Number of parameters in the FOURIER strategy, defaults to -1.
-    optimiser : str, optional
-        The optimiser to use, defaults to "COBYLA".
-    tolerance : float, optional
-        The tolerance for the optimization algorithm, defaults to 1e-3.
-    maxiter : int, optional
-        Number of maximum iterations for the optimization algorithm. Defaults
-        to 1000.
+    max_p : int
+        Maximum number of QAOA layers to run.
+    q : int
+        Number of parameters in the FOURIER strategy.
+    r : int
+        The number of random perturbations for the FOURIER strategy.
+    optimiser : str
+        The optimiser to use.
+    tolerance : float
+        The tolerance for the optimization algorithm.
+    maxiter : int
+        Number of maximum iterations for the optimization algorithm.
     apply_bounds : bool
         Whether parameter bounds should be applied during optimisation.
     initialisation: str
         Initialisation strategy for QAOA parameters.
-    options : Dict, optional
-        Additional options for the optimiser. Defaults to empty dict.
+    options : Dict
+        Additional options for the optimiser.
 
     Returns
     -------
@@ -749,6 +789,7 @@ def run_QAOA(
             qubo,
             p,
             q if q <= p else p,
+            r,
             seed=seed,
             initial_params=init_params,
             initialisation=initialisation,
@@ -806,3 +847,19 @@ def normalise_params(
     betas %= 0.5 * np.pi
     gammas %= np.pi
     return betas, gammas
+
+
+def compute_random_param_perturbations(
+    prev_v: np.ndarray,
+    prev_u: np.ndarray,
+    r: int,
+    rng: np.random.Generator,
+    alpha: float = 0.6,
+) -> Tuple[np.ndarray, np.ndarray]:
+    random_perturbations_v = np.tile(prev_v[0], (r + 1, 1))
+    random_perturbations_u = np.tile(prev_u[0], (r + 1, 1))
+
+    for i in range(1, r + 1):
+        random_perturbations_v[i] += alpha * rng.normal(0, np.abs(prev_v[0]))
+        random_perturbations_u[i] += alpha * rng.normal(0, np.abs(prev_u[0]))
+    return random_perturbations_v, random_perturbations_u
