@@ -861,6 +861,33 @@ def compute_random_param_perturbations(
     rng: np.random.Generator,
     alpha: float = 0.6,
 ) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Computes parameters with random perturbations as described in
+    https://journals.aps.org/prx/pdf/10.1103/PhysRevX.10.021067, Apx. B2)
+
+    Parameters
+    ----------
+    prev_v : np.ndarray
+        v-parameters from which to compute the perturbations.
+    prev_u : np.ndarray
+        u-parameters from which to compute the perturbations.
+    r : int
+        Number of perturbations.
+    rng : np.random.Generator
+        Random number generator.
+    alpha : float, optional
+        Perturbation strength. Defaults to 0.6.
+
+    Returns
+    -------
+    Tuple[np.ndarray, np.ndarray]
+        (
+            original v parameters and perturbations with shape
+                [r+1, num_v_params],
+            original u parameters and perturbations with shape
+                [r+1, num_u_params]
+        )
+    """
     random_perturbations_v = np.tile(prev_v[0], (r + 1, 1))
     random_perturbations_u = np.tile(prev_u[0], (r + 1, 1))
 
