@@ -568,7 +568,7 @@ def solve_QUBO_with_QAOA(
         initialisation,
         parameter_rng,
         initial_params,
-        fourier=q > 1,
+        fourier=q > 0,
     )
 
     def cost_fkt(
