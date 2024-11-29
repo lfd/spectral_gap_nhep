@@ -85,7 +85,7 @@ def run_maxcut_qaoa(
         seed,
         max_p=max_p,
         q=q,
-        r=num_random_perturbations,
+        n_pert=num_random_perturbations,
         optimiser=optimiser,
         tolerance=tolerance,
         maxiter=maxiter,

@@ -89,7 +89,7 @@ def run_track_reconstruction_qaoa(
         qubo=qubo,
         seed=seed,
         q=q,
-        r=num_random_perturbations,
+        n_pert=num_random_perturbations,
         max_p=max_p,
         optimiser=optimiser,
         tolerance=tolerance,

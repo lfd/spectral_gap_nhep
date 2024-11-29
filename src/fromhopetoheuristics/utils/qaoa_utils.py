@@ -230,7 +230,7 @@ def initialise_QAOA_parameters(
     rng: np.random.Generator,
     initial_params: Optional[np.ndarray] = None,
     fourier: bool = False,
-    r: int = 0,
+    n_pert: int = 0,
 ) -> np.ndarray:
     """
     Constructs a list of initialisation parameters for QAOA
@@ -248,7 +248,7 @@ def initialise_QAOA_parameters(
         None.
     fourier : bool, optional
         Whether fourier strategy is used. Defaults to False.
-    r : int, optional
+    n_pert : int, optional
         The number of random perturbations for the FOURIER strategy. Defaults
         to 0.
 
@@ -259,14 +259,14 @@ def initialise_QAOA_parameters(
     """
     if initial_params is None or "all" in initialisation:
         n_remaining = p
-        prev_betas, prev_gammas = np.tile([], (r + 1, 1)), np.tile(
-            [], (r + 1, 1)
+        prev_betas, prev_gammas = np.tile([], (n_pert + 1, 1)), np.tile(
+            [], (n_pert + 1, 1)
         )
     else:
         n_prev = len(initial_params) // 2
         n_remaining = p - n_prev
-        prev_betas = np.tile(initial_params[:n_prev], (r + 1, 1))
-        prev_gammas = np.tile(initial_params[n_prev:], (r + 1, 1))
+        prev_betas = np.tile(initial_params[:n_prev], (n_pert + 1, 1))
+        prev_gammas = np.tile(initial_params[n_prev:], (n_pert + 1, 1))
 
     if "zeros" in initialisation or "first" in initialisation and p > 1:
         remaining_betas = np.zeros(n_remaining)
@@ -280,16 +280,16 @@ def initialise_QAOA_parameters(
             remaining_gammas = rng.random((1, n_remaining)) * 2 * np.pi - np.pi
     else:
         raise ValueError(f"Invalid initialisation strategy: {initialisation}")
-    remaining_betas = np.tile(remaining_betas, (r + 1, 1))
-    remaining_gammas = np.tile(remaining_gammas, (r + 1, 1))
+    remaining_betas = np.tile(remaining_betas, (n_pert + 1, 1))
+    remaining_gammas = np.tile(remaining_gammas, (n_pert + 1, 1))
 
     if initial_params is None:
         remaining_betas, remaining_gammas = compute_random_param_perturbations(
-            remaining_betas, remaining_gammas, r, rng
+            remaining_betas, remaining_gammas, n_pert, rng
         )
     else:
         prev_betas, prev_gammas = compute_random_param_perturbations(
-            prev_betas, prev_gammas, r, rng
+            prev_betas, prev_gammas, n_pert, rng
         )
 
     beta_init = np.concatenate([prev_betas, remaining_betas], axis=1)
@@ -454,9 +454,7 @@ def spsa(
         A = N * 0.1
 
         # order of magnitude of first gradients
-        g0_abs = np.abs(
-            grad(f_cost=f_cost, w=w, c=c, bounds=bounds, args=args).mean()
-        )
+        g0_abs = np.abs(grad(f_cost=f_cost, w=w, c=c, bounds=bounds, args=args).mean())
 
         # the number 2 in the front is an estimative of
         # the initial changes of the parameters,
@@ -519,7 +517,7 @@ def solve_QUBO_with_QAOA(
     qubo: np.ndarray,
     p: int,
     q: int,
-    r: int,
+    n_pert: int,
     seed: int,
     initialisation: str,
     parameter_rng: np.random.Generator,
@@ -541,7 +539,7 @@ def solve_QUBO_with_QAOA(
         The number of layers of the QAOA circuit.
     q : int
         The number of parameters in the FOURIER strategy.
-    r : int
+    n_pert : int
         The number of random perturbations for the FOURIER strategy.
     seed : int
         The seed for the random number generator.
@@ -585,7 +583,7 @@ def solve_QUBO_with_QAOA(
         parameter_rng,
         initial_params,
         fourier=q > 0,
-        r=r,
+        n_pert=n_pert,
     )
 
     def cost_fkt(
@@ -668,9 +666,7 @@ def times_from_QAOA_params(betas: np.ndarray, gammas: np.ndarray) -> np.ndarray:
     """
     p: int = len(betas)  # Number of QAOA layers
     time: float = 0.0  # Initialize total time
-    time_midpoints: np.ndarray = np.zeros(
-        p + 1
-    )  # Array to store time midpoints
+    time_midpoints: np.ndarray = np.zeros(p + 1)  # Array to store time midpoints
     for i in range(p):
         time_segment: float = np.abs(gammas[i]) + np.abs(
             betas[i]
@@ -712,9 +708,7 @@ def annealing_schedule_from_QAOA_params(
         # ensure that time is increasing monotonically, if not, skip
         if times[i] < last_added_time:
             continue
-        anneal_fraction = np.abs(gammas[i]) / (
-            np.abs(gammas[i]) + np.abs(betas[i])
-        )
+        anneal_fraction = np.abs(gammas[i]) / (np.abs(gammas[i]) + np.abs(betas[i]))
         anneal_schedule.append((times[i], anneal_fraction))
         last_added_time = times[i]
 
@@ -728,7 +722,7 @@ def run_QAOA(
     seed: int,
     max_p: int,
     q: int,
-    r: int,
+    n_pert: int,
     optimiser: str,
     tolerance: float,
     maxiter: int,
@@ -749,7 +743,7 @@ def run_QAOA(
         Maximum number of QAOA layers to run.
     q : int
         Number of parameters in the FOURIER strategy.
-    r : int
+    n_pert : int
         The number of random perturbations for the FOURIER strategy.
     optimiser : str
         The optimiser to use.
@@ -776,14 +770,14 @@ def run_QAOA(
     parameter_rng: np.random.Generator = np.random.default_rng(seed)
 
     for p in range(1, max_p + 1):
-        log.info(f"Running QAOA for q = {q}, p = {p}/{max_p}, R = {r}")
+        log.info(f"Running QAOA for q = {q}, p = {p}/{max_p}, R = {n_pert}")
 
         res: Dict = {"p": p}
         res["qaoa_energy"], betas, gammas, us, vs = solve_QUBO_with_QAOA(
             qubo,
             p,
             q if q <= p else p,
-            r,
+            n_pert,
             seed=seed,
             initial_params=init_params,
             parameter_rng=parameter_rng,
@@ -846,7 +840,7 @@ def normalise_params(
 def compute_random_param_perturbations(
     prev_beta: np.ndarray,
     prev_gamma: np.ndarray,
-    r: int,
+    n_pert: int,
     rng: np.random.Generator,
     alpha: float = 0.6,
 ) -> Tuple[np.ndarray, np.ndarray]:
@@ -860,7 +854,7 @@ def compute_random_param_perturbations(
         beta-parameters from which to compute the perturbations.
     prev_gamma : np.ndarray
         gamma-parameters from which to compute the perturbations.
-    r : int
+    n_pert : int
         Number of perturbations.
     rng : np.random.Generator
         Random number generator.
@@ -877,10 +871,10 @@ def compute_random_param_perturbations(
                 [r+1, num_gamma_params]
         )
     """
-    random_perturbations_beta = np.tile(prev_beta[0], (r + 1, 1))
-    random_perturbations_gamma = np.tile(prev_gamma[0], (r + 1, 1))
+    random_perturbations_beta = np.tile(prev_beta[0], (n_pert + 1, 1))
+    random_perturbations_gamma = np.tile(prev_gamma[0], (n_pert + 1, 1))
 
-    for i in range(1, r + 1):
+    for i in range(1, n_pert + 1):
         random_perturbations_beta[i] += alpha * rng.normal(0, np.abs(prev_beta[0]))
         random_perturbations_gamma[i] += alpha * rng.normal(0, np.abs(prev_gamma[0]))
     return random_perturbations_beta, random_perturbations_gamma
