@@ -7,8 +7,7 @@ from fromhopetoheuristics.utils.data_structures import (
     ExtendedTriplet,
 )
 
-from typing import Tuple
-import json
+from typing import Tuple, List
 import logging
 
 log = logging.getLogger(__name__)
@@ -20,12 +19,52 @@ class SplitConfig(D0Config):
 
 
 class QallseSplit(QallseD0):
+    """
+    A QallseSplit is a QallseD0 model that is split into multiple parts based on
+    the angle in the XY plane of the first hit of each doublet. This is done by
+    overriding the `_create_doublets` and `_create_triplets` methods to apply
+    early cuts to the doublets and triplets based on the angle part of the first
+    hit. The angle part is determined by the `geometric_index` parameter of
+    the `config` attribute.
+
+    Attributes
+    ----------
+    config : SplitConfig
+        The configuration for the QallseSplit model.
+
+    Methods
+    -------
+    _create_doublets(initial_doublets)
+        Generate Doublet structures from the initial doublets, calling
+        `_is_invalid_doublet` to apply early cuts.
+    _create_triplets()
+        Generate Triplet structures from Doublets, calling
+        `_is_invalid_triplet` to apply early cuts.
+    _is_invalid_triplet(triplet)
+        Check if a Triplet is invalid based on the angle part of the first hit.
+    _get_base_config()
+        Return the base configuration for the QallseSplit model.
+    serialize()
+        Serialize the model and their associated xplets.
+    """
+
     config = SplitConfig()
 
-    def _create_doublets(self, initial_doublets):
-        # Generate Doublet structures from the initial doublets,
-        # calling _is_invalid_doublet to apply early cuts
-        doublets = []
+    def _create_doublets(self, initial_doublets: List[Tuple[int, int]]) -> None:
+        """
+        Generate Doublet structures from the initial doublets, calling
+        _is_invalid_doublet to apply early cuts.
+
+        Parameters
+        ----------
+        initial_doublets : List[Tuple[int, int]]
+            A list of tuples containing start and end hit IDs.
+
+        Returns
+        -------
+        None
+        """
+        doublets: List[ExtendedDoublet] = []
         for start_id, end_id in initial_doublets:
             start, end = self.hits[start_id], self.hits[end_id]
             d = ExtendedDoublet(start, end)
@@ -37,10 +76,16 @@ class QallseSplit(QallseD0):
         self.logger.info(f"created {len(doublets)} doublets.")
         self.doublets = doublets
 
-    def _create_triplets(self):
-        # Generate Triplet structures from Doublets,
-        # calling _is_invalid_triplet to apply early cuts
-        triplets = []
+    def _create_triplets(self) -> None:
+        """
+        Generate Triplet structures from Doublets, calling
+        _is_invalid_triplet to apply early cuts.
+
+        Returns
+        -------
+        None
+        """
+        triplets: List[ExtendedTriplet] = []
         for d1 in self.doublets:
             for d2 in d1.h2.outer:
                 t = ExtendedTriplet(d1, d2)
@@ -51,7 +96,20 @@ class QallseSplit(QallseD0):
         self.logger.info(f"created {len(triplets)} triplets.")
         self.triplets = triplets
 
-    def _is_invalid_triplet(self, triplet: ExtendedTriplet):
+    def _is_invalid_triplet(self, triplet: ExtendedTriplet) -> bool:
+        """
+        Check if a triplet is invalid with respect to the geometric index.
+
+        Parameters
+        ----------
+        triplet : ExtendedTriplet
+            The triplet to check
+
+        Returns
+        -------
+        bool
+            True if invalid, False otherwise.
+        """
         if super()._is_invalid_triplet(triplet):
             return True
 
@@ -95,9 +153,25 @@ class QallseSplit(QallseD0):
         return qubo, xplet
 
 
-def build_model(doublets, model, add_missing):
+def build_model(
+    doublets: List[ExtendedDoublet], model: QallseSplit, add_missing: bool
+) -> None:
+    """
+    Prepares and builds the QUBO model from the given doublets.
 
-    # prepare doublets
+    Parameters
+    ----------
+    doublets : List[ExtendedDoublet]
+        A list of extended doublets to be used in the model.
+    model : QallseSplit
+        The QallseSplit model to build the QUBO.
+    add_missing : bool
+        Flag indicating whether to add missing doublets.
+
+    Returns
+    -------
+    None
+    """
     if add_missing:
         log.info("Cheat on, adding missing doublets.")
         doublets = model.dataw.add_missing_doublets(doublets)
@@ -107,5 +181,4 @@ def build_model(doublets, model, add_missing):
             f"Precision: {p * 100:.4f}%, Recall:{r * 100:.4f}%, Missing: {len(ms)}"
         )
 
-    # build the qubo
     model.build_model(doublets=doublets)
