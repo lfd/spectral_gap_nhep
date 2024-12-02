@@ -92,18 +92,6 @@ class QallseSplit(QallseD0):
         with use_markers(self, **qubo_kwargs) as altered_model:
             qubo = altered_model.to_qubo()
 
-        # class NumpyTypeEncoder(json.JSONEncoder):
-        #     def default(self, obj):
-        #         if isinstance(obj, np.generic):
-        #             return obj.item()
-        #         elif isinstance(obj, np.ndarray):
-        #             return obj.tolist()
-        #         return json.JSONEncoder.default(self, obj)
-
-        # # This is ugly.. serioulsy, don't look at it too long
-        # qubo = json.loads(json.dumps(qubo, cls=NumpyTypeEncoder))
-        # xplet = json.loads(json.dumps(xplet, cls=NumpyTypeEncoder))
-
         return qubo, xplet
 
 
