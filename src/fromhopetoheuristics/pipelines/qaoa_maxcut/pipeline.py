@@ -14,6 +14,7 @@ def create_pipeline() -> Pipeline:
                     "seed": "params:seed",
                     "max_p": "params:max_p",
                     "q": "params:q",
+                    "num_random_perturbations": "params:num_random_perturbations",
                     "maxcut_n_qubits": "params:maxcut_n_qubits",
                     "maxcut_graph_density": "params:maxcut_graph_density",
                     "optimiser": "params:optimiser",

@@ -13,6 +13,7 @@ def create_pipeline() -> Pipeline:
                     "seed": "params:seed",
                     "max_p": "params:max_p",
                     "q": "params:q",
+                    "num_random_perturbations": "params:num_random_perturbations",
                     "optimiser": "params:optimiser",
                     "tolerance": "params:tolerance",
                     "maxiter": "params:maxiter",

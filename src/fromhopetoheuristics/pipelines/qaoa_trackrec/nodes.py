@@ -17,6 +17,7 @@ def run_track_reconstruction_qaoa(
     seed: int,
     max_p: int,
     q: int,
+    num_random_perturbations: int,
     optimiser: str,
     tolerance: float,
     maxiter: int,
@@ -39,6 +40,8 @@ def run_track_reconstruction_qaoa(
         Maximum number of layers in the QAOA circuit.
     q : int
         Number of parameters in the FOURIER strategy.
+    num_random_perturbations : int
+        The number of random perturbations for the FOURIER strategy.
     optimiser : str
         The optimiser to use.
     tolerance : float
@@ -86,6 +89,7 @@ def run_track_reconstruction_qaoa(
         qubo=qubo,
         seed=seed,
         q=q,
+        n_pert=num_random_perturbations,
         max_p=max_p,
         optimiser=optimiser,
         tolerance=tolerance,
