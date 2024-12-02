@@ -17,6 +17,7 @@ def run_maxcut_qaoa(
     seed: int,
     max_p: int,
     q: int,
+    num_random_perturbations: int,
     maxcut_n_qubits: int,
     maxcut_graph_density: float,
     optimiser: str,
@@ -37,6 +38,8 @@ def run_maxcut_qaoa(
         The number of layers of the QAOA circuit.
     q: int
         The number of parameters in the FOURIER strategy.
+    num_random_perturbations : int
+        The number of random perturbations for the FOURIER strategy.
     maxcut_n_qubits: int
         The number of qubits to use.
     maxcut_graph_density: float
@@ -82,6 +85,7 @@ def run_maxcut_qaoa(
         seed,
         max_p=max_p,
         q=q,
+        n_pert=num_random_perturbations,
         optimiser=optimiser,
         tolerance=tolerance,
         maxiter=maxiter,
