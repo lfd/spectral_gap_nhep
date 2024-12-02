@@ -2,15 +2,13 @@ from typing import Dict, List, Optional, Callable
 import subprocess
 import pandas as pd
 import os
+import optuna
 
 from fromhopetoheuristics.utils.hyperparam_optimizer import Hyperparam_Optimizer
 
 import logging
 
 log = logging.getLogger(__name__)
-
-
-from typing import Dict, List
 
 
 def create_hyperparam_optimizer(
@@ -54,7 +52,7 @@ def create_hyperparam_optimizer(
     hyperparam_optimizer.set_fixed_parameters({})
 
     def objective(
-        trial: o.trial.Trial,
+        trial: optuna.trial.Trial,
         parameters: Dict[str, float],
         report_callback: Optional[Callable[[Dict[str, float], int], None]] = None,
         early_stop_callback: Optional[Callable[[], bool]] = None,

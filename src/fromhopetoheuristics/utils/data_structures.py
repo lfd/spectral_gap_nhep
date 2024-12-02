@@ -20,7 +20,8 @@ class ExtendedDoublet(Doublet):
 
         Notes
         -----
-        The angle in the XY plane between this doublet and the Y axis is stored in `xy_angle`.
+        The angle in the XY plane between this doublet and the Y axis
+        is stored in `xy_angle`.
         """
         super().__init__(hit_start, hit_end)
 

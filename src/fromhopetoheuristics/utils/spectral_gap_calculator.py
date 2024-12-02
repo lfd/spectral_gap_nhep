@@ -68,8 +68,8 @@ def calculate_spectral_gap(
         num_dec_pos: The number of decimal positions to round the eigenvalues to
 
     Returns:
-        A tuple of three floats, the ground state energy, the first excited state energy,
-        and the spectral gap
+        A tuple of three floats, the ground state energy,
+        the first excited state energy, and the spectral gap
     """
     num_qubits = len(qubo)
     H = build_hamiltonian(qubo, fraction, num_qubits)
