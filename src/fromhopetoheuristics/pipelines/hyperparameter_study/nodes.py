@@ -1,7 +1,8 @@
-from typing import Dict, List
+from typing import Dict, List, Optional, Callable
 import subprocess
 import pandas as pd
 import os
+import optuna
 
 from fromhopetoheuristics.utils.hyperparam_optimizer import Hyperparam_Optimizer
 
@@ -11,10 +12,10 @@ log = logging.getLogger(__name__)
 
 
 def create_hyperparam_optimizer(
-    n_trials: str,
+    n_trials: int,
     timeout: int,
-    enabled_hyperparameters: List,
-    optimization_metric: List,
+    enabled_hyperparameters: List[str],
+    optimization_metric: List[str],
     path: str,
     sampler: str,
     sampler_seed: int,
@@ -26,8 +27,8 @@ def create_hyperparam_optimizer(
     resume_study: bool,
     n_jobs: int,
     run_id: str,
-    hyperparameters: Dict,
-) -> Hyperparam_Optimizer:
+    hyperparameters: Dict[str, List[float]],
+) -> Dict[str, Hyperparam_Optimizer]:
 
     hyperparam_optimizer = Hyperparam_Optimizer(
         name=run_id,
@@ -51,7 +52,10 @@ def create_hyperparam_optimizer(
     hyperparam_optimizer.set_fixed_parameters({})
 
     def objective(
-        trial, parameters, report_callback=None, early_stop_callback=None
+        trial: optuna.trial.Trial,
+        parameters: Dict[str, float],
+        report_callback: Optional[Callable[[Dict[str, float], int], None]] = None,
+        early_stop_callback: Optional[Callable[[], bool]] = None,
     ) -> float:
         """This function is the optimization target that is called by Optuna
         for each trial. It runs the experiment with the given parameters
@@ -102,7 +106,7 @@ def create_hyperparam_optimizer(
             ]
         )
 
-        def get_objective_for_trial(trial_id) -> float:
+        def get_objective_for_trial(trial_id: int) -> float:
             tmp_file_name = f".hyperhyper{trial_id}.json"
             results = pd.read_json(tmp_file_name)
             os.remove(tmp_file_name)
@@ -125,17 +129,16 @@ def create_hyperparam_optimizer(
     return {"hyperparam_optimizer": hyperparam_optimizer}
 
 
-def run_optuna(
-    hyperparam_optimizer: Hyperparam_Optimizer,
-):
-    hyperparam_optimizer.minimize(idx=0)
+def run_optuna(hyperparam_optimizer: Hyperparam_Optimizer) -> None:
+    """
+    Run the hyperparameter optimization study.
 
-    # try:
-    #     hyperparam_optimizer.log_study(
-    #         selected_parallel_params=optuna_selected_parallel_params,
-    #         selected_slice_params=optuna_selected_slice_params,
-    #     )
-    # except Exception as e:
-    #     log.exception("Error while logging study")
+    Args:
+        hyperparam_optimizer: The hyperparameter optimizer to run.
+
+    Returns:
+        None
+    """
+    hyperparam_optimizer.minimize(idx=0)
 
     return {}

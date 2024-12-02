@@ -1,10 +1,6 @@
 import optuna as o
 from typing import List, Dict, Optional, Any
 
-import plotly.graph_objects as go
-
-from fromhopetoheuristics.utils.design import design
-
 
 class Hyperparam_Optimizer:
     def __init__(
@@ -106,6 +102,22 @@ class Hyperparam_Optimizer:
         raise NotImplementedError("Objective method must be set!")
 
     def select_hyperparams(self, pair):
+        """
+        Given a hyperparameter pair, this function returns True if the
+        hyperparameter is enabled for optimization and False otherwise.
+
+        If enabled_hyperparameters is empty, then all hyperparameters are enabled.
+
+        Parameters
+        ----------
+        pair:
+            A tuple consisting of the hyperparameter name and its value.
+
+        Returns
+        -------
+        bool
+            True if the hyperparameter is enabled, False otherwise.
+        """
         key, _ = pair
         return (
             len(self.enabled_hyperparameters) == 0
@@ -113,11 +125,45 @@ class Hyperparam_Optimizer:
         )
 
     def set_variable_parameters(self, parameters: Dict):
+        """
+        Set the variable hyperparameters for optimization.
+
+        This method is used to set the hyperparameters that should be optimized.
+        The hyperparameters are filtered based on the enabled_hyperparameters
+        set in the constructor. If enabled_hyperparameters is empty, then all
+        hyperparameters are enabled.
+
+        Parameters
+        ----------
+        parameters : Dict
+            A dictionary of hyperparameters to optimize.
+
+        Returns
+        -------
+        None
+        """
         self.variable_parameters = dict(
             filter(self.select_hyperparams, parameters.items())
         )
 
     def set_fixed_parameters(self, parameters: Dict):
+        """
+        Set the fixed hyperparameters for optimization.
+
+        This method sets the hyperparameters that are fixed and not subject to
+        optimization. The hyperparameters are filtered based on the
+        enabled_hyperparameters set in the constructor. If enabled_hyperparameters
+        is empty, then all hyperparameters are considered fixed.
+
+        Parameters
+        ----------
+        parameters : Dict
+            A dictionary of hyperparameters to be fixed.
+
+        Returns
+        -------
+        None
+        """
         self.fixed_parameters = dict(
             filter(self.select_hyperparams, parameters.items())
         )
@@ -270,12 +316,36 @@ class Hyperparam_Optimizer:
         return updated_variable_parameters
 
     def minimize(self, idx: int):
+        """
+        Run the optimization of a study.
+
+        Parameters
+        ----------
+        idx : int
+            The index of the study to run.
+
+        Returns
+        -------
+        None
+        """
         result = self.studies[idx].optimize(
             self.run_trial, n_trials=self.n_trials, n_jobs=self.n_jobs
         )
         self.studies[idx].tell(result)
 
     def run_trial(self, trial):
+        """
+        This function is the optimization target that is called by Optuna
+        for the given trial using the variable parameters and fixed parameters
+        set before.
+        It calls the objective function and thus requires it being implemented.
+
+        Args:
+            trial: The Optuna trial object.
+
+        Returns:
+            The result of the experiment.
+        """
         updated_variable_parameters = self.update_variable_parameters(
             trial, self.variable_parameters
         )

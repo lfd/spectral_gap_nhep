@@ -12,10 +12,11 @@ Start of by..
 ## Setup
 
 Contributing to this project requires some more dependencies besides the "standard" packages.
-Those are specified in the groups `dev` and `docs`.
+Those are specified in the groups `dev`.
 ```
-poetry install --with dev,docs
+poetry install --with dev
 ```
+These dependencies are essentially flake8, black, pre-commit and licensecheck which we use for quality assurance and code formatting.
 
 Additionally, we have pre-commit hooks in place, which can be installed as follows: 
 ```
@@ -25,24 +26,3 @@ poetry run pre-commit install
 
 Currently the only purpose of the hook is to run Black on commit which will do some code formatting for you.
 However be aware, that this might reject your commit and you have to re-do the commit.
-
-## Testing
-
-We do our testing with Pytest. Corresponding tests can be triggered as follows:
-```
-poetry run pytest
-```
-There are Github action pipelines in place, that will do linting and testing once you open a pull request.
-However, it's a good idea to run tests and linting (either Black or Flake8) locally before pushing.
-
-## Documentation
-
-We use MkDocs for our documentation. To run a server locally, run:
-```
-poetry run mkdocs serve
-```
-This will automatically trigger a rebuild each time you make changes.
-See the [MkDocs Documentation](https://cirkiters.github.io/qml-essentials/usage/) for more details.
-
-Publishing (and building) the documentation is done automagically using Github actions.
-This action is triggered when a new release is made.

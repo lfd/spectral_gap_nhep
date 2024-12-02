@@ -1,12 +1,16 @@
 # From Hope To Heuristics
 **Realistic Runtime Estimates for Quantum Optimisation in NHEP**
 
+## :book: Project Description
+
+This is the repository for our contribution to [CHEP24](https://indico.cern.ch/event/1338689/contributions/6010081/) consisting of two key aspects:
+Firstly, we estimate runtimes and scalability for common NHEP problems addressed via QUBO formulations by identifying minimum energy solutions of intermediate Hamiltonian operators encountered during the annealing process. 
+Secondly, we investigate how the classical parameter space in the QAOA, together with approximation techniques such as a Fourier-analysis based heuristic, proposed by Zhou et al. (2018), can help to achieve (future) quantum advantage, considering a trade-off between computational complexity and solution quality.
+Those approaches are evaluated on two benchmark problems: the Maxcut problem and the track reconstruction problem.
+
 ## Approach
 
-For the QUBO formulation we build on the [HEPQPR.Qallse](https://github.com/derlin/hepqpr-qallse) project.
-
-<!-- TODO: add description -->
-
+For the QUBO formulation of the track reconstruction problem, we build on the [HEPQPR.Qallse](https://github.com/derlin/hepqpr-qallse) project.
 To work with smaller sized QUBOs, we only focus on hit-triplets present in a specified angle, similar to the approach presented by [Schwägerl et al.](https://arxiv.org/pdf/2303.13249).
 
 ## :rocket: Getting Started
@@ -17,19 +21,12 @@ When cloning, make sure to get the submodule:
 ```
 git clone --recurse-submodules git@github.com:lfd/spectral_gap_nhep.git
 ```
+This will clone [our fork of hepqr-qallse](https://github.com/lfd/hepqpr-qallse) and [our fork of trackml](https://github.com/lfd/trackml) recursively.
+The latter is needed by hepqr-qallse but is not shipped via pip.
 
 If you have poetry installed, run `poetry install`.
-With pip, make sure to include the dependencies in the submodule `trackml-library` (pandas and numpy) and `hepqpr-qallse` (pandas, numpy, plotly).
+With pip, make sure to include the dependencies in the submodule `hepqpr-qallse` (pandas, numpy, plotly) and `trackml` (pandas, numpy).
 
-
-<!-- To get the data, head over to the [Kaggle TrackML Particle Tracking Challenge](https://www.kaggle.com/c/trackml-particle-identification/data) and download e.g. the `train_sample.zip` file which is a reduced version of the overall dataset.
-Extract the data into a `dataset` folder, such that the structure is as follows:
-```bash
-\data\01_raw\event*-hits.csv
-\data\01_raw\event*-particles.csv
-\data\01_raw\event*-truth.csv
-```
-Head over to the [TrackML Library Repo](https://github.com/stroblme/trackml-library) for more details. -->
 
 ### Quickstart
 
@@ -39,6 +36,10 @@ kedro run
 ```
 
 This will run the default pipeline which consists of all individual pipelines described in the following section.
+You can get an interactive overview of the pipeline in your browser by running
+```
+kedro viz
+```
 
 ### Pipelines
 
@@ -79,16 +80,22 @@ The following list gives a brief explanation of the most important locations in 
 
 Besides that, we make use of two submodules:
 - `hepqpr-qallse`: Currently, all the data loading and QUBO formulation is done using this submodule
-- `trackml-library`: Not in use currently
 
 ## Hyperparameter Optimization
 
 This project uses Optuna for hyperparameter optimization.
-You can take a look at the experiments by running
+There is a dedicated kedro pipeline that takes care of the hyperparameter optimization and submission of jobs to a SLURM cluster.
+```
+kedro run --pipeline hyperparameter_study
+```
+
+If you don't have a SLURM cluster available, head to `pipelines/hyperparameter_study/nodes.py` switch the subprocess command such that it spawns a single kedro job instead of a submission to the cluster.
+
+Supposing everything goes well, you can take a look at the experiments by running
 ```
 optuna-dashboard sqlite:///studies/fhth.db
 ```
-supposing that the path to the sqlite database where Optuna stores its results is `storage/fhth.db`.
+supposing that the path to the sqlite database where Optuna stores its results is `studies/fhth.db`.
 
 ## 🚧 Contributing
 
