@@ -275,9 +275,9 @@ def initialise_QAOA_parameters(
         if fourier:  # initialise in [0, 1]
             remaining_betas = rng.random((1, n_remaining))
             remaining_gammas = rng.random((1, n_remaining))
-        else:  # initialise in [-pi/2, pi/2] for beta and [-pi, pi] for gamma
-            remaining_betas = rng.random((1, n_remaining)) * np.pi - 0.5 * np.pi
-            remaining_gammas = rng.random((1, n_remaining)) * 2 * np.pi - np.pi
+        else:  # initialise in [0, pi] for beta and [0, 2*pi] for gamma
+            remaining_betas = rng.random((1, n_remaining)) * np.pi
+            remaining_gammas = rng.random((1, n_remaining)) * 2 * np.pi
     else:
         raise ValueError(f"Invalid initialisation strategy: {initialisation}")
     remaining_betas = np.tile(remaining_betas, (n_pert + 1, 1))
@@ -327,6 +327,7 @@ def get_FOURIER_params(
     u_params: np.ndarray,
     p: int,
     q: int = -1,
+    bounds: Optional[List[Tuple[float, float]]] = None,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Compute the parameters from the FOURIER strategy to the QAOA parameters.
@@ -558,6 +559,7 @@ def solve_QUBO_with_QAOA(
         to 1000.
     apply_bounds : bool, optional
         Whether parameter bounds should be applied during optimisation.
+        Defaults to False.
     options : Dict, optional
         Additional options for the optimiser. Defaults to empty dict.
 
@@ -593,6 +595,7 @@ def solve_QUBO_with_QAOA(
         estimator: Estimator,
         p: int,
         q: int = -1,
+        apply_bounds: bool = True,
     ) -> float:
 
         if q != -1:
@@ -601,7 +604,7 @@ def solve_QUBO_with_QAOA(
                 params[len(params) // 2 :],
             )
             betas, gammas = get_FOURIER_params(v_params, u_params, p, q)
-            betas, gammas = normalise_params(betas, gammas)
+            betas, gammas = normalise_params(betas, gammas, apply_bounds)
             qaoa_params = np.concatenate([betas, gammas])
         else:
             qaoa_params = params
@@ -612,16 +615,16 @@ def solve_QUBO_with_QAOA(
         cost = result.data.evs
         return cost
 
-    bounds = get_parameter_bounds(p if q == -1 else q) if apply_bounds else None
+    bounds = get_parameter_bounds(p) if apply_bounds and q == -1 else None
 
     best_qaoa_energy = np.inf
     v_params, u_params = np.array(()), np.array(())
-    betas, gammas = init_params[:p], init_params[p:]
+    betas, gammas = init_params[:,:p], init_params[:, p:]
     for i, x in enumerate(init_params):
         min_result = minimize(
             cost_fkt,
             x,
-            args=(circ, H, estimator, p, q),
+            args=(circ, H, estimator, p, q, apply_bounds),
             method=optimiser,
             tol=tolerance,
             bounds=bounds,
@@ -681,7 +684,7 @@ def times_from_QAOA_params(betas: np.ndarray, gammas: np.ndarray) -> np.ndarray:
 
 
 def annealing_schedule_from_QAOA_params(
-    betas: np.ndarray, gammas: np.ndarray
+    betas: np.ndarray, gammas: np.ndarray, apply_bounds: bool = False
 ) -> List[Tuple[float, float]]:
     """
     Derive Annealing schedule from QAOA parameters according to Zhou et al.
@@ -693,6 +696,9 @@ def annealing_schedule_from_QAOA_params(
         Beta parameters
     gammas : np.ndarray
         Gamma parameters
+    apply_bounds : bool, optional
+        Whether parameter bounds should be applied during optimisation.
+        Defaults to False.
 
     Returns
     -------
@@ -701,16 +707,12 @@ def annealing_schedule_from_QAOA_params(
         the form (anneal_time, anneal_fraction).
     """
     p = len(betas)
+    betas, gammas = normalise_params(betas, gammas, apply_bounds)
     times = times_from_QAOA_params(betas, gammas)
     anneal_schedule = [(0.0, 0.0)]
-    last_added_time = 0.0
     for i in range(p):
-        # ensure that time is increasing monotonically, if not, skip
-        if times[i] < last_added_time:
-            continue
         anneal_fraction = np.abs(gammas[i]) / (np.abs(gammas[i]) + np.abs(betas[i]))
         anneal_schedule.append((times[i], anneal_fraction))
-        last_added_time = times[i]
 
     # at the end of the anneal schedule, the annealing fraction is 1
     anneal_schedule.append((times[p], 1.0))
@@ -807,11 +809,13 @@ def run_QAOA(
 
 
 def normalise_params(
-    betas: np.ndarray, gammas: np.ndarray
+    betas: np.ndarray,
+    gammas: np.ndarray,
+    apply_bounds: bool = False,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Normalises QAOA Parameters according to bounds and symmetries:
-    Resulting parameters are in [0, pi] for gamma and in [0, pi/2] for beta.
+    Resulting parameters are in [0, 2*pi] for gamma and in [0, pi] for beta.
 
     Parameters
     ----------
@@ -819,21 +823,28 @@ def normalise_params(
         Beta parameters
     gammas : np.ndarray
         Gamma parameters
+    apply_bounds : bool, optional
+        Whether to apply bounds. Defaults to False
 
     Returns
     -------
     Tuple[np.ndarray, np.ndarray]
         (normalised betas, normalised gammas)
     """
+    neg_gamma_indices = gammas < 0
+    if apply_bounds:
+        gammas[neg_gamma_indices] = 0
+        gammas[gammas > 2*np.pi] = 2 * np.pi
+        betas[betas < 0] = 0
+        betas[betas > np.pi] = np.pi
+    else:
+        # Ensure positive gamma (point symmetry)
+        betas[neg_gamma_indices] *= -1
+        gammas[neg_gamma_indices] *= -1
 
-    # Ensure positive gamma (point symmetry)
-    neg_indices = gammas < 0
-    betas[neg_indices] *= -1
-    gammas[neg_indices] *= -1
-
-    # Normalise
-    betas %= 0.5 * np.pi
-    gammas %= np.pi
+        # Normalise
+        betas %= np.pi
+        gammas %= 2 * np.pi
     return betas, gammas
 
 

@@ -13,6 +13,7 @@ log = logging.getLogger(__name__)
 
 def create_anneal_schedule(
     results: pd.DataFrame,
+    apply_bounds: bool,
 ) -> Dict[str, pd.DataFrame]:
     """
     Create an annealing schedule from the results of a QAOA run.
@@ -21,6 +22,8 @@ def create_anneal_schedule(
     ----------
     results: pd.DataFrame
         The results of a QAOA run.
+    apply_bounds : bool
+        Whether parameter bounds should be applied during optimisation.
 
     Returns
     -------
@@ -40,7 +43,9 @@ def create_anneal_schedule(
     betas = np.array([last_results[b] for b in beta_colnames]).flatten()
     gammas = np.array([last_results[g] for g in gamma_colnames]).flatten()
 
-    anneal_schedule = annealing_schedule_from_QAOA_params(betas, gammas)
+    anneal_schedule = annealing_schedule_from_QAOA_params(
+        betas, gammas, apply_bounds
+    )
 
     results = pd.DataFrame.from_records(
         anneal_schedule, columns=["anneal_time", "anneal_fraction"]
