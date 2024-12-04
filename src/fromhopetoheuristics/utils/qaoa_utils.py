@@ -275,9 +275,9 @@ def initialise_QAOA_parameters(
         if fourier:  # initialise in [0, 1]
             remaining_betas = rng.random((1, n_remaining))
             remaining_gammas = rng.random((1, n_remaining))
-        else:  # initialise in [0, pi] for beta and [0, 2*pi] for gamma
-            remaining_betas = rng.random((1, n_remaining)) * np.pi
-            remaining_gammas = rng.random((1, n_remaining)) * 2 * np.pi
+        else:  # initialise in [-pi/2, pi/2] for beta and [0, pi] for gamma
+            remaining_betas = rng.random((1, n_remaining)) * np.pi - 0.5 * np.pi
+            remaining_gammas = rng.random((1, n_remaining)) * np.pi
     else:
         raise ValueError(f"Invalid initialisation strategy: {initialisation}")
     remaining_betas = np.tile(remaining_betas, (n_pert + 1, 1))
@@ -815,7 +815,7 @@ def normalise_params(
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Normalises QAOA Parameters according to bounds and symmetries:
-    Resulting parameters are in [0, 2*pi] for gamma and in [0, pi] for beta.
+    Resulting parameters are in [0, pi] for gamma and in [-0.5*pi, 0.5*pi] for beta.
 
     Parameters
     ----------
@@ -832,16 +832,16 @@ def normalise_params(
         (normalised betas, normalised gammas)
     """
     neg_gamma_indices = gammas < 0
-    if apply_bounds:
-        gammas[neg_gamma_indices] = 0
-        gammas[gammas > 2*np.pi] = 2 * np.pi
-        betas[betas < 0] = 0
-        betas[betas > np.pi] = np.pi
-    else:
-        # Ensure positive gamma (point symmetry)
-        betas[neg_gamma_indices] *= -1
-        gammas[neg_gamma_indices] *= -1
 
+    # Ensure positive gamma (point symmetry)
+    betas[neg_gamma_indices] *= -1
+    gammas[neg_gamma_indices] *= -1
+
+    if apply_bounds:
+        gammas[gammas > np.pi] = np.pi
+        betas[betas < -0.5 * np.pi] = -0.5 * np.pi
+        betas[betas > 0.5 * np.pi] = 0.5 * np.pi
+    else:
         # Normalise
         betas %= np.pi
         gammas %= 2 * np.pi
