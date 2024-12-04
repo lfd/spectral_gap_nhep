@@ -619,7 +619,7 @@ def solve_QUBO_with_QAOA(
 
     best_qaoa_energy = np.inf
     v_params, u_params = np.array(()), np.array(())
-    betas, gammas = init_params[:,:p], init_params[:, p:]
+    betas, gammas = init_params[:, :p], init_params[:, p:]
     for i, x in enumerate(init_params):
         min_result = minimize(
             cost_fkt,
