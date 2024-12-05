@@ -10,6 +10,7 @@ def create_maxcut_pipeline() -> Pipeline:
                 create_anneal_schedule,
                 {
                     "results": "qaoa_maxcut_results",
+                    "apply_bounds": "params:apply_bounds",
                 },
                 {"results": "anneal_schedule_maxcut_results"},
             ),
@@ -24,6 +25,7 @@ def create_trackrecon_pipeline() -> Pipeline:
                 create_anneal_schedule,
                 {
                     "results": "qaoa_track_reconstruction_results",
+                    "apply_bounds": "params:apply_bounds",
                 },
                 {"results": "anneal_schedule_track_reconstruction_results"},
             ),
