@@ -327,7 +327,6 @@ def get_FOURIER_params(
     u_params: np.ndarray,
     p: int,
     q: int = -1,
-    bounds: Optional[List[Tuple[float, float]]] = None,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Compute the parameters from the FOURIER strategy to the QAOA parameters.
