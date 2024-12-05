@@ -594,8 +594,8 @@ def solve_QUBO_with_QAOA(
         hamiltonian: SparsePauliOp,
         estimator: Estimator,
         p: int,
-        q: int = -1,
-        apply_bounds: bool = True,
+        q: int,
+        apply_bounds: bool,
     ) -> float:
 
         if q != -1:
