@@ -842,7 +842,7 @@ def normalise_params(
         betas[betas < -0.5 * np.pi] = -0.5 * np.pi
         betas[betas > 0.5 * np.pi] = 0.5 * np.pi
     else:
-        # Normalise
+        # Circular Bounds
         betas %= np.pi
         gammas %= 2 * np.pi
     return betas, gammas
