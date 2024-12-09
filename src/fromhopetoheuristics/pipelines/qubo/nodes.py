@@ -63,7 +63,7 @@ def build_qubos(
     for i in angle_parts:
         extra_config = {
             "geometric_index": i,
-            "xy_angle_parts ": num_angle_parts,
+            "xy_angle_parts": num_angle_parts,
         }
         model = QallseSplit(data_wrapper, **extra_config)
         build_model(doublets=doublets, model=model, add_missing=False)
