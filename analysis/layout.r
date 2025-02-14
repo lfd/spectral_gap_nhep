@@ -1,11 +1,11 @@
 BASE.SIZE <- 8
 INCH.PER.CM <- 1 / 2.54
-WIDTH <- 13.998 * INCH.PER.CM
-HEIGHT <- 7.28972 * INCH.PER.CM * 0.95
+WIDTH <- 12.99815 * INCH.PER.CM
+HEIGHT <- 21.01431 * INCH.PER.CM
 OUTDIR_PDF <- "img-pdf/"
 OUTDIR_TIKZ <- "img-tikz/"
 COLOURS.LIST <- c("black", "#E69F00", "#999999", "#009371", "#beaed4", "#ed665a", "#1f78b4", "#009371")
-POINT.SIZE <- 0.5
+POINT.SIZE <- 0.4
 LINE.SIZE <- 1
 
 theme_paper_base <- function() {

@@ -8,6 +8,11 @@ library(patchwork)
 library(rjson)
 source("layout.r")
 
+options(tikzLatexPackages = c(
+    getOption("tikzLatexPackages"),
+    "\\usepackage{amsmath}"
+))
+
 tikz <- FALSE
 if (!tikz) {
     POINT.SIZE <- 0.2
@@ -16,10 +21,10 @@ if (!tikz) {
 
 create_save_locations(tikz)
 
-param_path <- "../data/00_parameters/trackrecon_parameters.json"
-qaoa_path <- "../data/05_qaoa/qaoa_track_reconstruction_results.csv"
-as_path <- "../data/06_schedules/anneal_schedule_track_reconstruction_results.csv"
-energy_path <- "../data/04_adiabatic/adiabatic_track_reconstruction_results.csv"
+param_path <- "proceedings_results/00_parameters/trackrecon_parameters.json"
+qaoa_path <- "proceedings_results/05_qaoa/qaoa_track_reconstruction_results.csv"
+as_path <- "proceedings_results/06_schedules/anneal_schedule_track_reconstruction_results.csv"
+energy_path <- "proceedings_results/04_adiabatic/adiabatic_track_reconstruction_results.csv"
 
 apply_version_to_df <- function(df, file) {
     df$version <- str_extract(
@@ -77,6 +82,7 @@ d_params <- lapply(setNames(nm = param_file_list), read_json_and_apply_version) 
 d_qaoa <- load_data(qaoa_file_list, d_params)
 d_as <- load_data(as_file_list, d_params)
 d_energy <- load_data(energy_file_list, d_params)
+d_energy <- d_energy[!duplicated(d_energy[, setdiff(names(d_energy), "version")]), ]
 
 qubit_labeller <- function(layer) {
     if (tikz) {
@@ -91,18 +97,18 @@ index_labeller <- function(layer) {
 }
 
 q_labeller <- function(layer) {
-    ifelse(layer != "RI", paste0("q = ", layer), layer)
+    ifelse(layer == -1, "RI", ifelse(layer == "Optimum", "Optimum", paste0(ifelse(tikz, "$q_\\text{max} = $", "q = "), layer)))
 }
 
 d_energy <- d_energy %>%
-    group_by(geometric_index, seed, num_angle_parts) %>%
+    group_by(geometric_index, seed, num_angle_parts, data_fraction) %>%
     mutate(
         min_gap_frac = min(ifelse(gap == min(gap), fraction, 1)),
         min_gap = min(gap)
     ) %>%
     ungroup()
 
-d_energy_selected <- d_energy %>% filter(geometric_index == 2)
+d_energy_selected <- d_energy %>% filter(geometric_index == 27 & data_fraction == 0.1)
 d_energy_selected_msg <- d_energy_selected %>% filter(fraction == min_gap_frac)
 d_energy_selected_msg$mid <- d_energy_selected_msg$gs + 0.5 * d_energy_selected_msg$gap
 
@@ -134,7 +140,8 @@ g <- ggplot(d_energy_selected, aes(x = fraction)) +
         mapping = aes(y = gs, colour = "Ground State")
     ) +
     theme_paper_base() +
-    scale_x_continuous("Anneal Fraction",
+    scale_x_continuous(
+        ifelse(tikz, "$s$", "s"),
         breaks = seq(0, 1, by = 0.2), limits = c(0, 1)
     ) +
     scale_y_continuous("Energy") +
@@ -199,13 +206,14 @@ g_inset <- ggplot(d_energy_selected, aes(x = fraction)) +
         mapping = aes(y = gs, colour = "Ground State")
     ) +
     theme_paper_base() +
-    scale_x_continuous("Anneal Fraction",
-        limits = c(0.4, 0.6),
-        breaks = seq(0.4, 0.55, by = 0.05),
+    scale_x_continuous(
+        ifelse(tikz, "$s$", "s"),
+        limits = c(0.8, 0.95),
+        breaks = seq(0.0, 1.0, by = 0.05),
     ) +
     scale_y_continuous("Energy",
-        limits = c(-4.6, -3.8),
-        breaks = seq(-4.6, -3, by = 0.1),
+        limits = c(-2.1, -1.55),
+        breaks = seq(-3, -1, by = 0.2),
     ) +
     scale_colour_manual("",
         values = c(
@@ -225,10 +233,10 @@ g_inset <- ggplot(d_energy_selected, aes(x = fraction)) +
         axis.title.y = element_blank(),
     )
 
-g <- g + inset_element(g_inset, 0.4, 0.05, 0.95, 0.6)
+g <- g + inset_element(g_inset, 0.45, 0.05, 0.95, 0.6)
 
 save_name <- str_c("energy_selected")
-create_plot(g, save_name, 0.5, 1, tikz)
+create_plot(g, save_name, 0.5, 0.24, tikz)
 
 g <- ggplot(d_energy_selected, aes(x = fraction, y = gap)) +
     geom_line(
@@ -244,10 +252,8 @@ g <- ggplot(d_energy_selected, aes(x = fraction, y = gap)) +
         colour = "Minimum Spectral Gap"
     ), linewidth = LINE.SIZE) +
     theme_paper_base() +
-    scale_x_continuous("Anneal Fraction",
-        breaks = seq(0, 1, by = 0.5)
-    ) +
-    scale_x_continuous("Anneal Fraction",
+    scale_x_continuous(
+        ifelse(tikz, "$s$", "s"),
         breaks = seq(0, 1, by = 0.2), limits = c(0, 1)
     ) +
     scale_y_continuous("Spectral Gap", breaks = seq(0, 2, by = 0.5)) +
@@ -286,13 +292,14 @@ g_inset <- ggplot(d_energy_selected, aes(x = fraction, y = gap)) +
         colour = "Minimum Spectral Gap"
     ), linewidth = LINE.SIZE) +
     theme_paper_base() +
-    scale_x_continuous("Anneal Fraction",
-        limits = c(0.4, 0.6),
-        breaks = seq(0.4, 0.55, by = 0.05),
+    scale_x_continuous(
+        ifelse(tikz, "$s$", "s"),
+        limits = c(0.8, 0.95),
+        breaks = seq(0.0, 1.0, by = 0.05),
     ) +
     scale_y_continuous("Energy",
-        limits = c(0.34, 0.52),
-        breaks = seq(0, 0.5, by = 0.1),
+        limits = c(0.32, 0.37),
+        breaks = seq(0, 0.5, by = 0.02),
     ) +
     scale_colour_manual("",
         values = c(
@@ -323,15 +330,26 @@ g_inset <- ggplot(d_energy_selected, aes(x = fraction, y = gap)) +
 g <- g + inset_element(g_inset, 0.4, 0.5, 0.95, 0.95)
 
 save_name <- str_c("gap_selected")
-create_plot(g, save_name, 0.5, 0.75, tikz)
+create_plot(g, save_name, 0.5, 0.24, tikz)
+
+d_energy$qubit_range <- ifelse(
+    d_energy$num_qubits <= 7,
+    "3-7",
+    ifelse(d_energy$num_qubits <= 13, "8-13",
+        ifelse(d_energy$num_qubits <= 18, "14-18", "19-23")
+    )
+)
+d_energy$qubit_range <- factor(d_energy$qubit_range, levels = c("3-7", "8-13", "14-18", "19-23"))
 
 c <- d_energy %>%
+    group_by(qubit_range) %>%
     filter(fraction == 0) %>%
     count()
 print(c)
 
 
 d_energy_stats <- d_energy %>%
+    group_by(qubit_range) %>%
     summarise(
         frac_min = min(min_gap_frac),
         frac_avg = mean(min_gap_frac),
@@ -345,7 +363,7 @@ d_energy_stats$frac_lower_bound <- d_energy_stats$frac_avg - d_energy_stats$frac
 d_energy_stats$frac_upper_bound <- d_energy_stats$frac_avg + d_energy_stats$frac_sd
 
 d_energy_avgs <- d_energy %>%
-    group_by(fraction) %>%
+    group_by(fraction, qubit_range) %>%
     summarise(
         gap_avg = mean(gap),
         gap_median = median(gap),
@@ -383,6 +401,10 @@ g <- ggplot(d_energy_avgs, mapping = aes(x = fraction)) +
         linewidth = LINE.SIZE,
         mapping = aes(y = gap_avg, colour = "Spectral Gap")
     ) +
+    geom_point(
+        size = POINT.SIZE,
+        mapping = aes(y = gap_avg, colour = "Spectral Gap")
+    ) +
     geom_vline(aes(
         xintercept = frac_avg,
         colour = "Minimum Spectral Gap"
@@ -411,7 +433,10 @@ g <- ggplot(d_energy_avgs, mapping = aes(x = fraction)) +
         alpha = 0.4,
     ) +
     theme_paper_base() +
-    scale_x_continuous("Anneal Fraction", breaks = seq(0, 1, by = 0.2), limits = c(0, 1.1)) +
+    scale_x_continuous(
+        ifelse(tikz, "$s$", "s"),
+        breaks = seq(0, 1, by = 0.2), limits = c(0, 1.1)
+    ) +
     scale_y_continuous("Spectral Gap") +
     scale_colour_manual("",
         values = c(
@@ -433,14 +458,23 @@ g <- ggplot(d_energy_avgs, mapping = aes(x = fraction)) +
             "Minimum Spectral Gap"
         )
     ) +
+    facet_wrap(qubit_range ~ .,
+        labeller = labeller(
+            qubit_range = qubit_labeller
+        ),
+    ) +
     theme(legend.position = "right")
 
 save_name <- str_c("gap_stat")
-create_plot(g, save_name, 1, 1, tikz)
+create_plot(g, save_name, 1, 0.22, tikz)
 
 g <- ggplot(d_energy_avgs, mapping = aes(x = fraction)) +
     geom_line(
         linewidth = LINE.SIZE,
+        mapping = aes(y = fes_avg, colour = "First Excited State")
+    ) +
+    geom_point(
+        size = POINT.SIZE,
         mapping = aes(y = fes_avg, colour = "First Excited State")
     ) +
     geom_vline(
@@ -478,6 +512,10 @@ g <- ggplot(d_energy_avgs, mapping = aes(x = fraction)) +
         linewidth = LINE.SIZE,
         mapping = aes(y = gs_avg, colour = "Ground State")
     ) +
+    geom_point(
+        size = POINT.SIZE,
+        mapping = aes(y = gs_avg, colour = "Ground State")
+    ) +
     geom_ribbon(
         mapping = aes(
             ymin = gs_lower_bound,
@@ -486,7 +524,8 @@ g <- ggplot(d_energy_avgs, mapping = aes(x = fraction)) +
         alpha = 0.2,
     ) +
     theme_paper_base() +
-    scale_x_continuous("Anneal Fraction",
+    scale_x_continuous(
+        ifelse(tikz, "$s$", "s"),
         breaks = seq(0, 1, by = 0.2), limits = c(0, 1.1)
     ) +
     scale_y_continuous("Energy") +
@@ -514,13 +553,19 @@ g <- ggplot(d_energy_avgs, mapping = aes(x = fraction)) +
             "Minimum Spectral Gap"
         )
     ) +
+    facet_wrap(qubit_range ~ .,
+        labeller = labeller(
+            qubit_range = qubit_labeller
+        ),
+    ) +
     theme(legend.position = "right")
 
 save_name <- str_c("energy_stat")
-create_plot(g, save_name, 1, 1, tikz)
+create_plot(g, save_name, 1, 0.2, tikz)
 
 d_qaoa$q <- as.factor(d_qaoa$q)
 d_qaoa$appr_ratio <- d_qaoa$qaoa_energy / d_qaoa$min_energy
+d_qaoa$appr_ratio[d_qaoa$appr_ratio < 0] <- 0
 
 g <- ggplot(d_qaoa) +
     geom_point(aes(x = p, y = appr_ratio, colour = q),
@@ -529,22 +574,28 @@ g <- ggplot(d_qaoa) +
     geom_line(aes(x = p, y = appr_ratio, colour = q),
         linewidth = LINE.SIZE
     ) +
+    geom_hline(aes(yintercept = 1.0, colour = "Optimum"), linetype = "dashed") +
     theme_paper_base() +
-    scale_x_continuous("P") +
-    scale_y_continuous("Approximation Ratio", breaks = seq(-2, 1, by = 0.2), limits = c(-1.2, 1)) +
-    scale_color_manual(values = COLOURS.LIST) +
-    theme(legend.position = "right")
+    scale_x_continuous(ifelse(tikz, "$p$", "p"), limits=c(1, 50)) +
+    scale_y_continuous("Appr. Ratio", breaks = seq(-2, 1, by = 0.2)) +
+    scale_color_manual("", values = COLOURS.LIST, labels = q_labeller) +
+    theme(
+        legend.position = "right",
+        legend.text = element_text(margin = margin(l = 1, unit = "mm")),
+        legend.key.height = unit(4, "mm")
+    )
 
 save_name <- str_c("qaoa_energy")
 
-create_plot(g, save_name, 1, 1, tikz)
+create_plot(g, save_name, 0.5, 0.15, tikz)
 
 d_as <- d_as %>%
-    group_by(geometric_index) %>%
+    group_by(geometric_index, q, optimiser) %>%
     mutate(rel_anneal_time = anneal_time / max(anneal_time)) %>%
     ungroup() %>%
-    merge(d_energy)
-d_as$q <- as.factor(d_as$q)
+    merge(d_energy_selected, by = c("geometric_index"), all.x = TRUE)
+d_as$q <- as.factor(d_as$q.x)
+d_as$optimiser <- d_as$optimiser.x
 
 g <- ggplot(d_as) +
     geom_point(aes(x = rel_anneal_time, y = anneal_fraction, colour = "Anneal Fraction"),
@@ -554,16 +605,14 @@ g <- ggplot(d_as) +
         linewidth = LINE.SIZE
     ) +
     geom_hline(aes(yintercept = min_gap_frac, colour = "Minimum Spectral Gap")) +
-    facet_wrap(q ~ .,
+    facet_wrap(. ~ q,
         labeller = labeller(
             q = q_labeller
         ),
-        ncol = 4
     ) +
     theme_paper_base() +
-    scale_x_continuous("Anneal Time Fraction", breaks = seq(0, 1, by = 0.2)) +
-    scale_y_continuous("Anneal Fraction") +
-    theme(legend.position = "right") +
+    scale_x_continuous("Anneal Time Fraction", breaks = seq(0, 1, by = 0.5)) +
+    scale_y_continuous(ifelse(tikz, "$s$", "s")) +
     scale_colour_manual("",
         values = c(
             "Minimum Spectral Gap" = COLOURS.LIST[[1]],
@@ -576,59 +625,40 @@ g <- ggplot(d_as) +
     )
 
 save_name <- str_c("anneal_schedule")
-create_plot(g, save_name, 1, 1, tikz)
+create_plot(g, save_name, 0.5, 0.25, tikz)
 
-d_qaoa_reshaped <- d_qaoa %>%
+# only use last p
+d_qaoa_reshaped <- d_qaoa %>% filter(p == max_p)
+
+d_qaoa_reshaped <- d_qaoa_reshaped %>%
     # First, pivot the beta columns to long format
     pivot_longer(
-        cols = starts_with("beta"),
-        names_to = "b_paramindex",
-        names_prefix = "beta",
-        values_to = "beta"
+        cols = matches("beta|gamma"),
+        names_to = c(".value", "index"),
+        names_pattern = "(beta|gamma)(\\d+)",
     ) %>%
-    # Now pivot the gamma columns to long format
-    pivot_longer(
-        cols = starts_with("gamma"),
-        names_to = "g_paramindex",
-        names_prefix = "gamma",
-        values_to = "gamma",
-        values_drop_na = TRUE
-    ) %>%
-    # Convert the index column to numeric if necessary
-    mutate(
-        g_paramindex = as.numeric(g_paramindex),
-        b_paramindex = as.numeric(b_paramindex),
-    )
-
+    mutate(index = as.numeric(index))
 
 d_qaoa_reshaped$beta <- abs(d_qaoa_reshaped$beta)
 d_qaoa_reshaped$gamma <- abs(d_qaoa_reshaped$gamma)
 
-d_qaoa_reshaped <- d_qaoa_reshaped %>% filter(p == max_p)
-
 g <- ggplot(d_qaoa_reshaped) +
     geom_point(aes(
-        x = g_paramindex, y = gamma,
+        x = index, y = gamma,
         colour = "gamma"
     ), size = POINT.SIZE) +
     geom_line(aes(
-        x = g_paramindex, y = gamma,
+        x = index, y = gamma,
         colour = "gamma"
     ), linewidth = LINE.SIZE) +
     geom_point(aes(
-        x = b_paramindex, y = beta,
+        x = index, y = beta,
         colour = "beta"
     ), size = POINT.SIZE) +
     geom_line(aes(
-        x = b_paramindex, y = beta,
+        x = index, y = beta,
         colour = "beta"
     ), linewidth = LINE.SIZE) +
-    facet_wrap(geometric_index ~ num_qubits,
-        labeller = labeller(
-            geometric_index = index_labeller,
-            num_qubits = qubit_labeller
-        )
-    ) +
     theme_paper_base() +
     scale_colour_manual(
         "",
@@ -641,18 +671,15 @@ g <- ggplot(d_qaoa_reshaped) +
             ifelse(tikz, "$\\gamma$", "gamma")
         )
     ) +
-    facet_wrap(q ~ .,
-        scales = "free_y",
+    facet_wrap(. ~ q,
         labeller = labeller(q = q_labeller)
     ) +
     scale_x_continuous(
         ifelse(tikz, "$p$", "p"),
         breaks = seq(0, 50, by = 10)
     ) +
-    scale_y_continuous("Parameter value") +
-    theme(legend.position = "right")
+    scale_y_continuous("Absolute Parameter Value")
 
 
 save_name <- str_c("qaoa_params")
-create_plot(g, save_name, 1, 1, tikz)
-
+create_plot(g, save_name, 0.5, 0.25, tikz)
