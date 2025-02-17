@@ -74,7 +74,7 @@ def run_track_reconstruction_qaoa(
     else:
         qubo = dict_QUBO_to_matrix(qubos["0"])  # FIXME
 
-    if qubo is None or qubo.size == 0:
+    if qubo is None or qubo.size == 0 or qubo.size > 23:
         log.warning("Skipping qubo")
         return {"results": pd.DataFrame()}
 

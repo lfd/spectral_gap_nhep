@@ -42,7 +42,7 @@ def run_track_reconstruction_annealing(
     fractions = np.linspace(0, 1, num=num_anneal_fractions, endpoint=True)
 
     results = []
-    if qubo.size == 0:
+    if qubo is None or qubo.size == 0 or qubo.size > 23:
         log.warning("Skipping QUBO")
         return {"results": pd.DataFrame()}
     log.info("Computing spectral gaps")
