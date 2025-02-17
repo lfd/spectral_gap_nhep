@@ -21,8 +21,7 @@ When cloning, make sure to get the submodule:
 ```
 git clone --recurse-submodules git@github.com:lfd/spectral_gap_nhep.git
 ```
-This will clone [our fork of hepqr-qallse](https://github.com/lfd/hepqpr-qallse) and [our fork of trackml](https://github.com/lfd/trackml) recursively.
-The latter is needed by hepqr-qallse but is not shipped via pip.
+This will clone [our fork of hepqr-qallse](https://github.com/lfd/hepqpr-qallse) recursively.
 
 If you have poetry installed, run `poetry install`.
 With pip, make sure to include the dependencies in the submodule `hepqpr-qallse` (pandas, numpy, plotly) and `trackml` (pandas, numpy).
@@ -65,9 +64,6 @@ It also calculates the annealing schedules for this problem.
 
 Solving the track reconstruction problem using quantum annealing.
 
-#### Visualization
-
-Visualization of all results.
 
 ## Project Structure
 
@@ -96,6 +92,46 @@ Supposing everything goes well, you can take a look at the experiments by runnin
 optuna-dashboard sqlite:///studies/fhth.db
 ```
 supposing that the path to the sqlite database where Optuna stores its results is `studies/fhth.db`.
+
+
+## Reproduction
+
+The numerical results in our study can be reproduced using the `reproduction.sh` script.
+The script executes all runs sequentially. Feel free to change the script for parallelisation, depending on your system size.
+
+### Numerical data
+All results are stored in the `data/` folder. The subfolders `04_adiabatic`, `05_qaoa` and `06_schedules` can contain results in CSV format, with the corresponding run configuration in `00_parameters`, stored as JSON.
+
+### Proceedings results
+We copied the results obtained by us to `analysis/proceedings_results/`.
+
+### Data visualisation
+The data for the proceedings article in `analysis/proceedings_results/` can be plotted using R with GGplot.
+The following R libraries are required:
+- tidyverse
+- ggh4x
+- stringr
+- tikzDevice
+- patchwork
+- rjson
+
+If you have R installed on your system, the libraries can be installed via:
+```
+R -e "install.packages('<library>', dependencies=TRUE, repos='http://cran.rstudio.com/')"
+```
+
+### To tikz or not to tikz
+For the plots in the article, we used the tikzDevice export, which can be used by setting the variable`tikz` in the plot script `analysis/plot.r` to `TRUE`.
+If you are fine with plain PDF, keep it as it is.
+
+### Plotting
+Once everything is set up, we can run the following to obtain the plots:
+```
+cd analysis
+Rscript plot.r
+```
+Output plots can then be found in either `analysis/img-tikz`, or `analysis/img-pdf`.
+
 
 ## 🚧 Contributing
 
