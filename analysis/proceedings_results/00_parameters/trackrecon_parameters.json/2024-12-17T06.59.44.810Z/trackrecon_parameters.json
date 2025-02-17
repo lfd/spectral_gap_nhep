@@ -1,0 +1,13 @@
+{
+  "data_fraction": 0.1,
+  "num_angle_parts": 32,
+  "seed": 1000,
+  "max_p": 50,
+  "q": -1,
+  "num_random_perturbations": 0,
+  "optimiser": "COBYLA",
+  "num_anneal_fractions": 51,
+  "geometric_index": 18,
+  "apply_bounds": true,
+  "initialisation": "first_random"
+}
