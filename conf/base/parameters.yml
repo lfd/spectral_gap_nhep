@@ -1,7 +1,7 @@
 data_fraction: 0.1
 num_angle_parts: 64
 
-seed: 1000 #TODO: consider different seeds
+seed: 1000
 
 max_p: 10
 q: -1
@@ -12,11 +12,8 @@ maxiter: 1000
 apply_bounds: false
 initialisation: "first_random" # "random", "first_random", "all_zeros", "all_random"
 options: {}
-  #    alpha: 0.722
-  #    gamma: 0.722
-  #    c: 0.08
 
-num_anneal_fractions: 11
+num_anneal_fractions: 51
 
 maxcut_n_qubits: 10
 maxcut_graph_density: 0.7
