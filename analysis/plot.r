@@ -401,10 +401,6 @@ g <- ggplot(d_energy_avgs, mapping = aes(x = fraction)) +
         linewidth = LINE.SIZE,
         mapping = aes(y = gap_avg, colour = "Spectral Gap")
     ) +
-    geom_point(
-        size = POINT.SIZE,
-        mapping = aes(y = gap_avg, colour = "Spectral Gap")
-    ) +
     geom_vline(aes(
         xintercept = frac_avg,
         colour = "Minimum Spectral Gap"
@@ -435,7 +431,7 @@ g <- ggplot(d_energy_avgs, mapping = aes(x = fraction)) +
     theme_paper_base() +
     scale_x_continuous(
         ifelse(tikz, "$s$", "s"),
-        breaks = seq(0, 1, by = 0.2), limits = c(0, 1.1)
+        breaks = seq(0, 1, by = 0.5), limits = c(0, 1.1)
     ) +
     scale_y_continuous("Spectral Gap") +
     scale_colour_manual("",
@@ -458,7 +454,7 @@ g <- ggplot(d_energy_avgs, mapping = aes(x = fraction)) +
             "Minimum Spectral Gap"
         )
     ) +
-    facet_wrap(qubit_range ~ .,
+    facet_grid(. ~ qubit_range,
         labeller = labeller(
             qubit_range = qubit_labeller
         ),
@@ -466,7 +462,7 @@ g <- ggplot(d_energy_avgs, mapping = aes(x = fraction)) +
     theme(legend.position = "right")
 
 save_name <- str_c("gap_stat")
-create_plot(g, save_name, 1, 0.22, tikz)
+create_plot(g, save_name, 1, 0.1, tikz)
 
 g <- ggplot(d_energy_avgs, mapping = aes(x = fraction)) +
     geom_line(
